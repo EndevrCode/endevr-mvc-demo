@@ -25,7 +25,7 @@
     </div>
 
     <!-- Refined Today Section -->
-    <div class="mb-4 card p-3 shadow-sm text-center">
+    <div class="mb-4 glass-card p-3 text-center">
         <h5 class="text-center mb-3">@Model.Today.ToString("dddd, dd MMMM")</h5>
 
         @if (Model.IsTodayComplete)
@@ -41,6 +41,7 @@
             </span>
 
             <form asp-action="MarkComplete" asp-controller="RuleOfThree" method="post" class="mb-3 d-grid">
+                @Html.AntiForgeryToken()
                 <input type="hidden" name="id" value="@Model.ThisWeekEntries.FirstOrDefault(e => e.Date == Model.Today)?.Id" />
                 <input type="hidden" name="familyId" value="@ViewData["FamilyId"]" />
                 <button type="submit" class="btn btn-success">
@@ -138,7 +139,7 @@
         <div class="modal-content shadow-lg">
             <div class="modal-header border-bottom-0">
                 <h5 class="modal-title fw-bold text-center w-100" id="ruleOfThreeHelpModalLabel">
-                    💡 How This Section Works
+                    <i class="fa-light fa-circle-info me-2 text-primary"></i>How This Section Works
                 </h5>
                 <button type="button" class="btn-close position-absolute end-0 me-3" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>

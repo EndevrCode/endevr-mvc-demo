@@ -5,7 +5,7 @@
     ViewData["Title"] = "Today's Rule of 3";
     var hasEntry = Model != null && Model.Id != Guid.Empty;
     Layout = "_Layout";
-    var familyId = ViewData["FamilyId"]; // ✅ Ensure familyId is available
+    var familyId = ViewData["FamilyId"];
 }
 
 <h2 class="mb-4 text-center" style="padding-top: 1.5rem;">
@@ -27,8 +27,9 @@
         if (allTasksDone)
         {
             <form asp-action="MarkComplete" asp-controller="RuleOfThree" method="post" class="text-center mt-3">
+                @Html.AntiForgeryToken()
                 <input type="hidden" name="id" value="@Model.Id" />
-                <input type="hidden" name="familyId" value="@familyId" /> @* ✅ Include familyId for marking complete *@
+                <input type="hidden" name="familyId" value="@familyId" />
                 <button type="submit" class="btn btn-success btn-lg rounded-pill px-4">
                     <i class="bi bi-check-circle-fill me-1"></i> Mark Today as Done
                 </button>
@@ -45,14 +46,15 @@
 </h2>
 
 <form asp-action="Submit" method="post">
+    @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Date" />
     <input type="hidden" asp-for="UserId" />
     <input type="hidden" asp-for="Id" />
-    <input type="hidden" name="familyId" value="@familyId" /> @* ✅ Include familyId in the main submit form *@
+    <input type="hidden" name="familyId" value="@familyId" />
     <div asp-validation-summary="All" class="alert alert-danger"></div>
 
     <div class="mb-4">
-        <label asp-for="MainProject" class="form-label fw-bold">🧠 3-Hour Main Project</label>
+        <label asp-for="MainProject" class="form-label fw-bold"><i class="fa-light fa-brain me-1"></i> 3-Hour Main Project</label>
         @if (readOnly)
         {
             <input asp-for="MainProject" class="form-control" readonly />
@@ -64,14 +66,14 @@
 
         <div class="mt-2">
             <button type="button" class="btn btn-outline-secondary w-100" id="startTimerBtn" disabled="@readOnly">
-                ⏱ Start 3-Hour Timer (Coming Soon)
+                <i class="fa-light fa-timer me-1"></i> Start 3-Hour Timer (Coming Soon)
             </button>
         </div>
     </div>
 
     <!-- Short Tasks -->
     <div class="mb-3">
-        <label class="form-label fw-bold">✅ 3 Short Tasks</label>
+        <label class="form-label fw-bold"><i class="bi bi-check-circle me-1"></i> 3 Short Tasks</label>
         @for (int i = 0; i < 3; i++)
         {
             var task = Model.Tasks.ElementAtOrDefault(i);
@@ -98,7 +100,7 @@
 
     <!-- Maintenance Tasks -->
     <div class="mb-3">
-        <label class="form-label fw-bold">🔧 3 Maintenance Tasks</label>
+        <label class="form-label fw-bold"><i class="fa-light fa-wrench me-1"></i> 3 Maintenance Tasks</label>
         @for (int i = 0; i < 3; i++)
         {
             var index = i + 3;
@@ -133,7 +135,7 @@
         {
             <input asp-for="IsPowerDay" class="form-check-input" />
         }
-        <label asp-for="IsPowerDay" class="form-check-label">Power Day 💥</label>
+        <label asp-for="IsPowerDay" class="form-check-label">Power Day <i class="fa-light fa-bolt ms-1 text-warning"></i></label>
     </div>
 
     @if (!readOnly)
