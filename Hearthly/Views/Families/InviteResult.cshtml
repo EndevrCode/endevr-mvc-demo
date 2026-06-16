@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Invite Generated";
 
     var scheme = Context.Request.Scheme;
@@ -14,23 +14,25 @@
     );
 }
 
-<h1>@ViewData["Title"]</h1>
+<div class="mb-4">
+    <h2 class="mb-0"><i class="bi bi-envelope-paper me-2"></i>@ViewData["Title"]</h2>
+</div>
 
-<div class="card p-3 mb-3">
-    <dl class="row">
+<div class="glass-card p-3 mb-3">
+    <dl class="row mb-0">
         <dt class="col-sm-3">Invite Email</dt>
         <dd class="col-sm-9"><strong>@ViewData["InviteEmail"]</strong></dd>
 
         <dt class="col-sm-3">Token</dt>
-        <dd class="col-sm-9"><strong>@token</strong></dd>
+        <dd class="col-sm-9 text-muted small">@token</dd>
 
-        <dt class="col-sm-3">Expires At (UTC)</dt>
-        <dd class="col-sm-9"><strong>@expires.ToString("yyyy-MM-dd HH:mm")</strong></dd>
+        <dt class="col-sm-3">Expires</dt>
+        <dd class="col-sm-9">@expires.ToLocalTime().ToString("dd MMM yyyy HH:mm")</dd>
     </dl>
 </div>
 
-<div class="mb-3">
-    <p>Share this token directly, or send your family member this link:</p>
+<div class="mb-4">
+    <p class="text-muted">Share this link with your family member:</p>
     <div class="input-group">
         <input type="text"
                class="form-control"
@@ -40,27 +42,25 @@
         <button class="btn btn-outline-secondary"
                 type="button"
                 id="btnCopyInvite">
-            Copy Link
+            <i class="bi bi-clipboard me-1"></i> Copy
         </button>
     </div>
 </div>
 
 <a asp-action="Index" class="btn btn-secondary">
-    ← Back to Families
+    <i class="bi bi-arrow-left me-1"></i> Back to Families
 </a>
 
 @section Scripts {
     <script>
         document.getElementById('btnCopyInvite').addEventListener('click', async () => {
-          const link = document.getElementById('inviteLink').value;
-          try {
-            await navigator.clipboard.writeText(link);
-            // you might swap this for a nicer toast/snackbar
-            alert('Invite link copied to clipboard!');
-          } catch (err) {
-            console.error('Copy failed', err);
-            alert('Could not copy link – please select and copy manually.');
-          }
+            const link = document.getElementById('inviteLink').value;
+            try {
+                await navigator.clipboard.writeText(link);
+                Swal.fire({ title: 'Copied!', text: 'Invite link copied to clipboard.', icon: 'success', timer: 1500, showConfirmButton: false });
+            } catch {
+                Swal.fire({ title: 'Could not copy', text: 'Please select and copy the link manually.', icon: 'warning' });
+            }
         });
     </script>
 }
