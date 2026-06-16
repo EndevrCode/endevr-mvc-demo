@@ -8,7 +8,6 @@
 }
 
 <section class="cards-wrapper">
-    <br />
     <h2 class="greeting">Hello @preferredName!</h2>
 
     <div class="cards">
@@ -17,7 +16,7 @@
            class="card glass-card ruleOfThree @(isInFamily ? "" : "disabled-rule-card")"
            onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
             <div class="card-content">
-                <i class="fas fa-bullseye card-icon"></i>
+                <i class="fa-light fa-bullseye card-icon"></i>
                 <h3 class="theme-heading">Rule of 3’s</h3>
                 <p>Track your daily focus and stay on streak!</p>
             </div>
@@ -26,7 +25,7 @@
         <!-- Profile (always enabled) -->
         <a class="card glass-card profile" asp-controller="Profile" asp-action="Details">
             <div class="card-content">
-                <i class="fas fa-user card-icon"></i>
+                <i class="fa-light fa-user card-icon"></i>
                 <h3 class="theme-heading">My Profile</h3>
                 <p>View and edit your personal details.</p>
             </div>
@@ -35,7 +34,7 @@
         <!-- Dashboard (always enabled) -->
         <a class="card glass-card dashboard" asp-controller="Dashboard" asp-action="Index">
             <div class="card-content">
-                <i class="fas fa-chart-line card-icon"></i>
+                <i class="fa-light fa-chart-line card-icon"></i>
                 <h3 class="theme-heading">Dashboard</h3>
                 <p>See upcoming birthdays and recent invites.</p>
             </div>
@@ -44,7 +43,7 @@
         <!-- Families (always enabled) -->
         <a class="card glass-card families" asp-controller="Families" asp-action="Index">
             <div class="card-content">
-                <i class="fas fa-users card-icon"></i>
+                <i class="fa-light fa-users card-icon"></i>
                 <h3 class="theme-heading">Families</h3>
                 <p>Manage your families and members.</p>
             </div>
@@ -55,7 +54,7 @@
            class="card glass-card pets @(isInFamily ? "" : "disabled-rule-card")"
            onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
             <div class="card-content">
-                <i class="fas fa-paw card-icon"></i>
+                <i class="fa-light fa-paw card-icon"></i>
                 <h3 class="theme-heading">Pets</h3>
                 <p>View and manage your pets.</p>
             </div>
@@ -66,7 +65,7 @@
            class="card glass-card staff @(isInFamily ? "" : "disabled-rule-card")"
            onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
             <div class="card-content">
-                <i class="fas fa-user-tie card-icon"></i>
+                <i class="fa-light fa-user-tie card-icon"></i>
                 <h3 class="theme-heading">Staff</h3>
                 <p>Manage your staff members.</p>
             </div>
@@ -77,7 +76,7 @@
            class="card glass-card utilities @(isInFamily ? "" : "disabled-rule-card")"
            onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
             <div class="card-content">
-                <i class="fas fa-bolt card-icon"></i>
+                <i class="fa-light fa-bolt card-icon"></i>
                 <h3 class="theme-heading">Utilities</h3>
                 <p>Log your gas &amp; electricity purchases.</p>
             </div>
@@ -138,10 +137,7 @@
     </div>
 </section>
 
-<!-- SweetAlert Script -->
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
         function showJoinFamilyAlert() {
             Swal.fire({

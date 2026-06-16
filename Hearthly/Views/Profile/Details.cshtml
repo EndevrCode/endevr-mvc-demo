@@ -39,7 +39,7 @@
     <div class="alert alert-success">@msg</div>
 }
 
-<div class="card glass-card p-4 rounded shadow-sm mb-4">
+<div class="glass-card p-4 mb-4">
     <div class="d-flex flex-column flex-md-row align-items-center gap-4">
         <!-- Profile photo -->
         <div class="text-center">
@@ -70,7 +70,7 @@
 </div>
 
 <!-- Profile Info Section -->
-<div class="card glass-card p-4 rounded shadow-sm mb-4">
+<div class="glass-card p-4 mb-4">
     <div class="row gy-3">
         <div class="col-md-6"><strong>User Name:</strong> @user.UserName</div>
         <div class="col-md-6"><strong>Email:</strong> @user.Email</div>
@@ -82,27 +82,25 @@
         {
             <div class="col-md-6"><strong>Age:</strong> @age years</div>
             <div class="col-md-6"><strong>Next Birthday:</strong> @monthsUntil months and @daysUntil days</div>
-            @if (profile.BirthDate.HasValue)
-{
-    var bd = profile.BirthDate.Value.Date;
-    var nextBd = bd.AddYears(today.Year - bd.Year);
-    if (nextBd < today) nextBd = nextBd.AddYears(1);
+            @{
+                var bd = profile.BirthDate!.Value.Date;
+                var nextBd = bd.AddYears(today.Year - bd.Year);
+                if (nextBd < today) nextBd = nextBd.AddYears(1);
 
-    var lastBd = nextBd.AddYears(-1);
-    var totalDays = (nextBd - lastBd).TotalDays;
-    var daysRemaining = (nextBd - today).TotalDays;
-    var progress = 100 * ((totalDays - daysRemaining) / totalDays);
-
-    <div class="col-md-12 mt-3">
-        <div class="birthday-progress text-center">
-            <i class="fa-solid fa-cake-candles fa-2x mb-2" style="color: #ffc107;"></i>
-            <div class="progress-container">
-                <div class="progress-fill" style="width: @($"{progress:0.#}%")"></div>
+                var lastBd = nextBd.AddYears(-1);
+                var totalDays = (nextBd - lastBd).TotalDays;
+                var daysRemaining = (nextBd - today).TotalDays;
+                var bdProgress = 100 * ((totalDays - daysRemaining) / totalDays);
+            }
+            <div class="col-md-12 mt-3">
+                <div class="birthday-progress text-center">
+                    <i class="fa-light fa-cake-candles fa-2x mb-2" style="color: #ffc107;"></i>
+                    <div class="progress-container">
+                        <div class="progress-fill" style="width: @($"{bdProgress:0.#}%")"></div>
+                    </div>
+                    <small class="text-muted d-block mt-1">@($"{bdProgress:0.#}%") to your next birthday</small>
+                </div>
             </div>
-            <small class="text-muted d-block mt-1">@($"{progress:0.#}%") to your next birthday</small>
-        </div>
-    </div>
-}
         }
         <div class="col-md-6"><strong>ID Number:</strong> @profile.IdNumber</div>
         <div class="col-md-6"><strong>Phone Number:</strong> @profile.PhoneNumber</div>
