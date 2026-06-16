@@ -104,6 +104,37 @@
                 <p>View Emergency personnel.</p>
             </div>
         </a>
+
+        <!-- Bills -->
+        <a href="@((isInFamily) ? Url.Action("Index", "Bills", new { familyId = firstFamilyId }) : "#")"
+           class="card glass-card @(isInFamily ? "" : "disabled-rule-card")"
+           onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
+            <div class="card-content">
+                <i class="fa-light fa-file-invoice-dollar card-icon"></i>
+                <h3 class="theme-heading">Bills</h3>
+                <p>Track and manage your household bills.</p>
+            </div>
+        </a>
+
+        <!-- Shopping -->
+        <a href="@((isInFamily) ? Url.Action("Index", "Shopping", new { familyId = firstFamilyId }) : "#")"
+           class="card glass-card @(isInFamily ? "" : "disabled-rule-card")"
+           onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
+            <div class="card-content">
+                <i class="fa-light fa-cart-shopping card-icon"></i>
+                <h3 class="theme-heading">Shopping</h3>
+                <p>Shared shopping lists for the whole family.</p>
+            </div>
+        </a>
+
+        <!-- Vault -->
+        <a class="card glass-card" asp-controller="Vault" asp-action="Index">
+            <div class="card-content">
+                <i class="fa-light fa-vault card-icon"></i>
+                <h3 class="theme-heading">Vault</h3>
+                <p>Securely store passwords, banking &amp; documents.</p>
+            </div>
+        </a>
     </div>
 </section>
 

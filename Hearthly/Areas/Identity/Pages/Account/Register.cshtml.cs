@@ -142,7 +142,7 @@ namespace Hearthly.Areas.Identity.Pages.Account
                     else
                     {
                         await _signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(Url.Content("~/Onboarding/Step1"));
+                        return LocalRedirect(Url.Content("~/Profile/Edit"));
                     }
                 }
                 foreach (var error in result.Errors)
