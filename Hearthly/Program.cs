@@ -62,7 +62,6 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// ✅ Correct session middleware position
 app.UseSession();
 
 app.UseAuthentication();
@@ -89,7 +88,7 @@ using (var scope = app.Services.CreateScope())
         }
     }
 
-    var adminEmail = "sean@endevr.co.za";
+    var adminEmail = builder.Configuration["AdminEmail"] ?? "sean@endevr.co.za";
     var adminUser = userManager.FindByEmailAsync(adminEmail).GetAwaiter().GetResult();
     if (adminUser != null &&
         !userManager.IsInRoleAsync(adminUser, IdentityRoles.Admin).GetAwaiter().GetResult())

@@ -2,11 +2,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using Hearthly.Data;
 
 namespace Hearthly.Controllers
@@ -133,13 +133,26 @@ namespace Hearthly.Controllers
                 });
             }
 
+            // 4) Bills summary
+            var unpaidBills = await _context.Bills
+                .Where(b => myFamilyIds.Contains(b.FamilyId) && !b.IsPaid)
+                .ToListAsync();
+
+            var overdueBills = unpaidBills
+                .Where(b => b.DueDate.Date < DateTime.Today)
+                .OrderBy(b => b.DueDate)
+                .ToList();
+
             // Assemble the view‑model
             var vm = new DashboardViewModel
             {
                 Families = familyInfos,
                 RecentInvites = recentInvites,
                 PendingInvites = pendingInvites,
-                EventsJson = JsonConvert.SerializeObject(events)
+                UnpaidBillsCount = unpaidBills.Count,
+                UnpaidBillsTotal = unpaidBills.Sum(b => b.Amount),
+                OverdueBills = overdueBills,
+                EventsJson = JsonSerializer.Serialize(events)
             };
 
             return View(vm);

@@ -11,6 +11,11 @@ namespace Hearthly.Data
         // Pending invites for the current user
         public List<FamilyInvite> PendingInvites { get; set; } = new();
 
+        // Bills summary
+        public int UnpaidBillsCount { get; set; }
+        public decimal UnpaidBillsTotal { get; set; }
+        public List<Bill> OverdueBills { get; set; } = new();
+
         // FullCalendar JSON blob of events (birthdays, invites, etc.)
         public string EventsJson { get; set; } = "[]";
     }
