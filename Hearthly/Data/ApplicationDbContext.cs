@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Hearthly.Data.RuleOfThree;
+using Hearthly.Data.Shopping;
 using Hearthly.Data.Vault;
 
 
@@ -28,6 +29,9 @@ namespace Hearthly.Data
         public DbSet<Hearthly.Data.Vault.VaultFile> VaultFiles { get; set; } = default!;
         public DbSet<VaultPassword> VaultPasswords { get; set; }
         public DbSet<VaultBankAccount> VaultBankAccounts { get; set; }
+        public DbSet<Bill> Bills { get; set; } = default!;
+        public DbSet<ShoppingList> ShoppingLists { get; set; } = default!;
+        public DbSet<ShoppingItem> ShoppingItems { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

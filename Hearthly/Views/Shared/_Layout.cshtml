@@ -3,6 +3,7 @@
 @using Hearthly.Data
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 
 <!DOCTYPE html>
 <html lang="en">
@@ -169,9 +170,9 @@
                 <a href="javascript:void(0);" id="mobileMoreBtn" class="glass-card" role="button" aria-label="More"><i class="fa-light fa-ellipsis"></i></a>
                 <div id="moreChildren" class="more-children">
                     <a href="/Pets/Remembrance"><i class="fa-light fa-hands-holding-heart"></i><span>Remembrance</span></a>
-                    <a href="/Shared/ComingSoon"><i class="fa-light fa-piggy-bank"></i><span>Banking</span></a>
-                    <a href="/Shared/ComingSoon"><i class="fa-light fa-file-invoice-dollar"></i><span>Bills</span></a>
-                    <a href="/Shared/ComingSoon"><i class="fa-light fa-cart-shopping"></i><span>Shopping</span></a>
+                    <a href="/VaultBankAccounts/Index"><i class="fa-light fa-piggy-bank"></i><span>Banking</span></a>
+                    <a href="/Bills/Index"><i class="fa-light fa-file-invoice-dollar"></i><span>Bills</span></a>
+                    <a href="/Shopping/Index"><i class="fa-light fa-cart-shopping"></i><span>Shopping</span></a>
                     <a href="/Vault/Index"><i class="fa-light fa-vault"></i><span>Vault</span></a>
                     <a href="/Shared/ComingSoon"><i class="fa-light fa-map-location-dot"></i><span>Where’s My Family?</span></a>
                 </div>
@@ -193,7 +194,7 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC42dsbwkjmBO-GSrsm1viyekgARnzx-0Y&libraries=places&callback=initAutocomplete" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=@Configuration["GoogleMaps:ApiKey"]&libraries=places&callback=initAutocomplete" async defer></script>
     @await RenderSectionAsync("Scripts", required: false)
 
     <script>
@@ -272,9 +273,7 @@
 
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(() => console.log('✅ Service Worker registered'))
-                .catch(err => console.error('❌ Service Worker registration failed:', err));
+            navigator.serviceWorker.register('/service-worker.js').catch(() => {});
         }
 
         const hasShownStartup = sessionStorage.getItem('startupShown');
@@ -290,13 +289,5 @@
         }, 4000);
     </script>
 
-    <script>
-        document.querySelector('form').addEventListener('submit', function () {
-            console.log("🚀 Form is being submitted!");
-        });
-    </script>
-    <script>
-        console.log("vaultPinModal:", document.getElementById('vaultPinModal'));
-    </script>
 </body>
 </html>

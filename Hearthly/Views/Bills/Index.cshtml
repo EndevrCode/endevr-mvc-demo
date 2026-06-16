@@ -1,0 +1,125 @@
+@model IEnumerable<Hearthly.Data.Bill>
+
+@{
+    ViewData["Title"] = "Bills";
+    var familyId = ViewData["FamilyId"] as Guid? ?? Guid.Empty;
+    var unpaid = Model.Where(b => !b.IsPaid).ToList();
+    var paid   = Model.Where(b =>  b.IsPaid).ToList();
+
+    string DueBadge(Hearthly.Data.Bill b)
+    {
+        if (b.IsPaid) return "bg-success";
+        var days = (b.DueDate.Date - DateTime.Today).TotalDays;
+        return days < 0 ? "bg-danger" : days <= 7 ? "bg-warning text-dark" : "bg-secondary";
+    }
+
+    string DueLabel(Hearthly.Data.Bill b)
+    {
+        if (b.IsPaid) return $"Paid {b.PaidDate?.ToString("dd MMM yyyy")}";
+        var days = (b.DueDate.Date - DateTime.Today).TotalDays;
+        return days < 0  ? $"Overdue by {(int)-days}d"
+             : days == 0 ? "Due today"
+             : days <= 7 ? $"Due in {(int)days}d"
+             : b.DueDate.ToString("dd MMM yyyy");
+    }
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0"><i class="fa-light fa-file-invoice-dollar me-2"></i>Bills</h2>
+    <a asp-action="Create" asp-route-familyId="@familyId" class="btn btn-primary btn-sm">
+        <i class="bi bi-plus-lg"></i> Add Bill
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="glass-card text-center py-5">
+        <i class="fa-light fa-file-invoice-dollar fa-3x text-muted mb-3 d-block"></i>
+        <p class="text-muted mb-0">No bills yet. Add your first bill to get started.</p>
+    </div>
+}
+else
+{
+    @if (unpaid.Any())
+    {
+        <h5 class="text-muted mb-2 mt-3">Outstanding <span class="badge bg-danger ms-1">@unpaid.Count</span></h5>
+        <div class="d-flex flex-column gap-3 mb-4">
+            @foreach (var bill in unpaid)
+            {
+                <div class="glass-card p-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="fw-semibold fs-6">@bill.Name</div>
+                            @if (!string.IsNullOrWhiteSpace(bill.Category))
+                            {
+                                <small class="text-muted">@bill.Category</small>
+                            }
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold fs-5">R @bill.Amount.ToString("N2")</div>
+                            <span class="badge @DueBadge(bill)">@DueLabel(bill)</span>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(bill.Notes))
+                    {
+                        <p class="text-muted small mt-2 mb-2">@bill.Notes</p>
+                    }
+                    <div class="d-flex gap-2 mt-2 justify-content-end">
+                        <form asp-action="MarkPaid" asp-route-id="@bill.Id" asp-route-familyId="@familyId" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="bi bi-check-circle"></i> Mark Paid
+                            </button>
+                        </form>
+                        <a asp-action="Edit" asp-route-id="@bill.Id" asp-route-familyId="@familyId" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@bill.Id" asp-route-familyId="@familyId" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
+                    @if (bill.IsRecurring)
+                    {
+                        <div class="mt-1"><span class="badge bg-info text-dark"><i class="bi bi-arrow-repeat"></i> Monthly</span></div>
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    @if (paid.Any())
+    {
+        <h5 class="text-muted mb-2 mt-3">Paid <span class="badge bg-success ms-1">@paid.Count</span></h5>
+        <div class="d-flex flex-column gap-3">
+            @foreach (var bill in paid)
+            {
+                <div class="glass-card p-3 opacity-75">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="fw-semibold fs-6 text-decoration-line-through text-muted">@bill.Name</div>
+                            @if (!string.IsNullOrWhiteSpace(bill.Category))
+                            {
+                                <small class="text-muted">@bill.Category</small>
+                            }
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-bold fs-5 text-muted">R @bill.Amount.ToString("N2")</div>
+                            <span class="badge bg-success">@DueLabel(bill)</span>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mt-2 justify-content-end">
+                        <form asp-action="MarkPaid" asp-route-id="@bill.Id" asp-route-familyId="@familyId" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                <i class="bi bi-arrow-counterclockwise"></i> Mark Unpaid
+                            </button>
+                        </form>
+                        <a asp-action="Delete" asp-route-id="@bill.Id" asp-route-familyId="@familyId" class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+}

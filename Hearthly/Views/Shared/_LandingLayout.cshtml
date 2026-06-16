@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using Hearthly.Data
 @inject SignInManager<ApplicationUser> SignInManager
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 
 <!DOCTYPE html>
 <html lang="en">
@@ -135,7 +136,7 @@
             <div class="emergency-children" id="mobileEmergencyChildrenAlt"></div>
         </div>
     }
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC42dsbwkjmBO-GSrsm1viyekgARnzx-0Y&libraries=places&callback=initAutocomplete" async defer></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=@Configuration["GoogleMaps:ApiKey"]&libraries=places&callback=initAutocomplete" async defer></script>
     <!-- Emergency & More Button Scripts -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
