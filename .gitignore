@@ -69,3 +69,9 @@ Thumbs.db
 
 # Rider
 .idea/
+
+# Claude Code internal files
+.claude/
+
+# EF Core Data Protection Keys
+Hearthly/Keys/
