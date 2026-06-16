@@ -1,5 +1,24 @@
 @model IEnumerable<Hearthly.Data.Shopping.ShoppingList>
 
+@section Scripts {
+    <script>
+        function confirmDeleteList(id) {
+            Swal.fire({
+                title: 'Delete this list?',
+                text: "All items in this list will be permanently removed.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete',
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then(result => {
+                if (result.isConfirmed) document.getElementById('deleteList-' + id).submit();
+            });
+        }
+    </script>
+}
+
 @{
     ViewData["Title"] = "Shopping";
     var familyId = ViewData["FamilyId"] as Guid? ?? Guid.Empty;
@@ -56,12 +75,12 @@
                         <i class="bi bi-archive"></i>
                     </button>
                 </form>
-                <form asp-action="DeleteList" method="post">
+                <form id="deleteList-@list.Id" asp-action="DeleteList" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="listId" value="@list.Id" />
                     <input type="hidden" name="familyId" value="@familyId" />
-                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete list"
-                            onclick="return confirm('Delete this entire list?')">
+                    <button type="button" class="btn btn-outline-danger btn-sm" title="Delete list"
+                            onclick="confirmDeleteList('@list.Id')">
                         <i class="bi bi-trash"></i>
                     </button>
                 </form>

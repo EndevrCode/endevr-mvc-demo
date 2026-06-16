@@ -61,21 +61,40 @@
                    class="btn btn-sm btn-outline-primary me-2">
                     <i class="bi bi-pencil-square"></i> Edit
                 </a>
-                <form asp-action="Delete"
+                <form id="deleteForm-@u.Id" asp-action="Delete"
                       asp-route-familyId="@familyId"
                       asp-route-id="@u.Id"
                       method="post"
                       class="d-inline">
                     @Html.AntiForgeryToken()
-                    <button type="submit"
+                    <button type="button"
                             class="btn btn-sm btn-outline-danger"
-                            onclick="return confirm('Remove this record?');">
+                            onclick="confirmDelete('@u.Id')">
                         <i class="bi bi-trash3"></i> Delete
                     </button>
                 </form>
             </div>
         </div>
     </div>
+}
+
+@section Scripts {
+    <script>
+        function confirmDelete(id) {
+            Swal.fire({
+                title: 'Remove this record?',
+                text: "This action cannot be undone.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete',
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then(result => {
+                if (result.isConfirmed) document.getElementById('deleteForm-' + id).submit();
+            });
+        }
+    </script>
 }
 
 <div class="mt-5 d-flex flex-column gap-3">

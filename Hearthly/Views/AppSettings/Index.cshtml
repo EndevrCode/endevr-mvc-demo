@@ -1,24 +1,25 @@
-﻿@model Hearthly.ViewModels.AppSettingsViewModel
+@model Hearthly.ViewModels.AppSettingsViewModel
 @{
     ViewData["Title"] = "App Settings";
 }
 
-<h2 class="mb-4">@ViewData["Title"]</h2>
+<div class="mb-4">
+    <h2 class="mb-0"><i class="fa-light fa-sliders me-2"></i>App Settings</h2>
+</div>
 
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success">@TempData["Success"]</div>
 }
 
-<div class="card p-4 shadow-sm rounded">
+<div class="glass-card p-4">
     <form asp-action="Index" method="post">
         @Html.AntiForgeryToken()
 
-        <h4 class="mb-3">Appearance</h4>
+        <h5 class="mb-3">Appearance</h5>
 
-        <!-- Theme Mode -->
         <div class="mb-3">
-            <label asp-for="ThemeMode" class="form-label">Theme Mode</label>
+            <label asp-for="ThemeMode" class="form-label fw-semibold">Theme</label>
             <select asp-for="ThemeMode" class="form-select">
                 <option value="system">System Default</option>
                 <option value="light">Light</option>
@@ -26,9 +27,8 @@
             </select>
         </div>
 
-        <!-- Font Size -->
-        <div class="mb-3">
-            <label asp-for="FontSize" class="form-label">Font Size</label>
+        <div class="mb-4">
+            <label asp-for="FontSize" class="form-label fw-semibold">Font Size</label>
             <select asp-for="FontSize" class="form-select">
                 <option value="small">Small</option>
                 <option value="medium">Medium</option>
@@ -36,6 +36,8 @@
             </select>
         </div>
 
-        <button type="submit" class="btn btn-success mt-3">Save Settings</button>
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-save me-1"></i> Save Settings
+        </button>
     </form>
 </div>
