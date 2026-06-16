@@ -230,7 +230,7 @@
             const reg = await navigator.serviceWorker.ready;
             await reg.sync.register('sync-pets');
 
-            alert('Pet saved locally. It will sync when you’re online.');
+            Swal.fire({ title: ‘Saved Offline’, text: "Pet will sync when you’re back online.", icon: ‘info’, timer: 2500, showConfirmButton: false });
             window.location.href = '@Url.Action("Index", "Pets")';
         });
 

@@ -156,7 +156,7 @@
     <script>
         // Future enhancement: Hook this up to an actual timer
         document.getElementById("startTimerBtn")?.addEventListener("click", function () {
-            alert("Timer starting soon!");
+            Swal.fire({ title: "Timer Starting", text: "Your timer is about to begin!", icon: "info", timer: 2000, showConfirmButton: false });
         });
     </script>
     @{

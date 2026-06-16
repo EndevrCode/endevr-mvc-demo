@@ -75,7 +75,7 @@
             const reg = await navigator.serviceWorker.ready;
             await reg.sync.register('sync-emergency-contacts');
 
-            alert('Saved offline and will sync automatically.');
+            Swal.fire({ title: 'Saved Offline', text: 'Will sync automatically when back online.', icon: 'info', timer: 2500, showConfirmButton: false });
 
             window.location.href = '@Url.Action("Index", new { familyId = Model.FamilyId })';
         });

@@ -128,7 +128,7 @@
                     await reg.sync.register('sync-utility');
                 }
 
-                alert("Offline! Your utility record will be saved and synced later.");
+                Swal.fire({ title: "Saved Offline", text: "Your utility record will sync when back online.", icon: "info", timer: 2500, showConfirmButton: false });
                 form.reset();
                 toggleExtras();
             }

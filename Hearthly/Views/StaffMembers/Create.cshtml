@@ -179,7 +179,7 @@
                     await reg.sync.register('sync-staff');
                 }
 
-                alert("Offline! Your submission will be saved and synced when online.");
+                Swal.fire({ title: "Saved Offline", text: "Will sync when back online.", icon: "info", timer: 2500, showConfirmButton: false });
                 form.reset();
             }
         });
