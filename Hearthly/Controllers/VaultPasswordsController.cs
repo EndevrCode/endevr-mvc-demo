@@ -136,19 +136,22 @@ namespace Hearthly.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpGet]
-        public async Task<IActionResult> VerifyPin(string pin)
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyPin([FromBody] PinVerifyRequest request)
         {
-            if (string.IsNullOrWhiteSpace(pin))
+            if (string.IsNullOrWhiteSpace(request?.Pin))
                 return Json(new { success = false });
 
             var user = await _userManager.GetUserAsync(User);
             if (user == null || string.IsNullOrEmpty(user.VaultPinHash))
                 return Json(new { success = false });
 
-            bool isValid = BCrypt.Net.BCrypt.Verify(pin, user.VaultPinHash);
-            return Json(new { success = isValid });
+            var hasher = new PasswordHasher<ApplicationUser>();
+            var result = hasher.VerifyHashedPassword(user, user.VaultPinHash, request.Pin);
+            return Json(new { success = result == PasswordVerificationResult.Success });
         }
+
+        public class PinVerifyRequest { public string? Pin { get; set; } }
 
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
@@ -216,8 +219,7 @@ namespace Hearthly.Controllers
             return lastConfirmed != null && DateTime.TryParse(lastConfirmed, out var confirmedTime) && confirmedTime > DateTime.UtcNow.AddMinutes(-5);
         }
 
-        [HttpPost]
-        //[ValidateAntiForgeryToken]
+        [HttpPost, ValidateAntiForgeryToken]
         public IActionResult MarkPinConfirmed()
         {
             try

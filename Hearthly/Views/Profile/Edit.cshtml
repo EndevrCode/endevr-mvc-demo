@@ -1,4 +1,5 @@
 ﻿@model Hearthly.Data.UserProfile
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @{
     ViewData["Title"] = "Edit Profile";
 }
@@ -131,14 +132,6 @@
     }, true);
 </script>
 
-    <script async defer src="https://maps.googleapis.com/maps/api/place/js/PlacesAutocompleteElement.js?key=AIzaSyC42dsbwkjmBO-GSrsm1viyekgARnzx-0Y"></script>
-
+    <script async defer src="https://maps.googleapis.com/maps/api/place/js/PlacesAutocompleteElement.js?key=@Configuration["GoogleMaps:ApiKey"]"></script>
     <script async defer src="https://unpkg.com/@@googlemaps/places-autocomplete-element/dist/index.min.js"></script>
-
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            const el = document.querySelector('gmpx-placeautocomplete');
-            console.log('Found place autocomplete element:', el);
-        });
-    </script>
 }
