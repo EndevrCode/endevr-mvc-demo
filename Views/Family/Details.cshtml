@@ -1,0 +1,83 @@
+@model Hearthly.Models.Family
+@{
+    ViewData["Title"] = Model.Name;
+    var myRole = ViewBag.MyRole as Hearthly.Models.FamilyRole?;
+    var isAdmin = myRole == Hearthly.Models.FamilyRole.Admin;
+    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">@Model.Name</h1>
+        @if (isAdmin)
+        {
+            <a href="/Family/Invite/@Model.Id" class="btn-primary-pill"><i class="fa-solid fa-user-plus"></i> Invite</a>
+        }
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Description))
+    {
+        <div class="glass-card mb-4" style="color:var(--text-secondary);">@Model.Description</div>
+    }
+
+    <div class="glass-card mb-4">
+        <div class="section-title"><i class="fa-solid fa-users"></i> Members (@Model.Members.Count)</div>
+        @foreach (var member in Model.Members.OrderBy(m => m.Role))
+        {
+            <div class="list-item">
+                <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-dark));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.1rem;flex-shrink:0;">
+                    @(member.User?.FirstName?.Substring(0,1)?.ToUpper() ?? "?")
+                </div>
+                <div class="list-item-content">
+                    <div class="list-item-title">@member.User?.FullName @(member.UserId == userId ? "(You)" : "")</div>
+                    <div class="list-item-subtitle">Joined @member.JoinedAt.ToString("MMM yyyy")</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    @if (member.Role == Hearthly.Models.FamilyRole.Admin)
+                    {
+                        <span class="badge-pill badge-primary">Admin</span>
+                    }
+                    else
+                    {
+                        <span class="badge-pill badge-info">Member</span>
+                    }
+                    @if (isAdmin && member.UserId != userId)
+                    {
+                        <form method="post" asp-action="RemoveMember" asp-controller="Family" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="familyId" value="@Model.Id" />
+                            <input type="hidden" name="memberId" value="@member.UserId" />
+                            <button type="submit" class="btn-ghost" style="padding:6px 10px;color:var(--danger);border-color:rgba(239,68,68,0.3);" onclick="return confirm('Remove this member?')">
+                                <i class="fa-solid fa-user-minus"></i>
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (Model.Invitations.Any(i => i.Status == Hearthly.Models.InvitationStatus.Pending))
+    {
+        <div class="glass-card mb-4">
+            <div class="section-title"><i class="fa-solid fa-envelope"></i> Pending Invitations</div>
+            @foreach (var inv in Model.Invitations.Where(i => i.Status == Hearthly.Models.InvitationStatus.Pending))
+            {
+                <div class="list-item">
+                    <div class="list-item-icon" style="background:rgba(108,99,255,0.1);color:var(--primary);"><i class="fa-solid fa-envelope"></i></div>
+                    <div class="list-item-content">
+                        <div class="list-item-title">@inv.InvitedEmail</div>
+                        <div class="list-item-subtitle">Expires @inv.ExpiresAt.ToString("MMM d")</div>
+                    </div>
+                    @if (isAdmin)
+                    {
+                        <form method="post" asp-action="RevokeInvite" asp-controller="Family">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="invitationId" value="@inv.Id" />
+                            <button type="submit" class="btn-ghost" style="padding:6px 10px;color:var(--danger);">Revoke</button>
+                        </form>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>

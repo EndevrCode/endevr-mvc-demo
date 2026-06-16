@@ -1,0 +1,57 @@
+@{
+    ViewData["Title"] = "Vault";
+    Layout = "_Layout";
+}
+<div class="page-section" style="max-width:360px; margin:0 auto; padding-top:40px;">
+    <div class="text-center mb-4">
+        <div style="width:80px;height:80px;border-radius:24px;background:linear-gradient(135deg,#8b5cf6,#5b21b6);display:flex;align-items:center;justify-content:center;color:white;font-size:2.5rem;margin:0 auto 16px;">
+            <i class="fa-solid fa-vault"></i>
+        </div>
+        <h1 style="font-size:1.6rem;font-weight:800;color:var(--text);">Vault</h1>
+        <p style="color:var(--text-secondary);font-size:0.9rem;">Enter your PIN to unlock</p>
+    </div>
+
+    @if (TempData["Error"] != null)
+    {
+        <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:12px;color:#ef4444;text-align:center;margin-bottom:16px;">
+            <i class="fa-solid fa-circle-xmark"></i> @TempData["Error"]
+        </div>
+    }
+
+    <div class="pin-display">
+        <div class="pin-dot" id="dot0"></div>
+        <div class="pin-dot" id="dot1"></div>
+        <div class="pin-dot" id="dot2"></div>
+        <div class="pin-dot" id="dot3"></div>
+        <div class="pin-dot" id="dot4"></div>
+        <div class="pin-dot" id="dot5"></div>
+    </div>
+
+    <form method="post" asp-action="Unlock" asp-controller="Vault" id="pinForm">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="pin" id="pinInput" />
+        <div class="pin-keypad" id="pinKeypad">
+            @foreach (var num in new[]{"1","2","3","4","5","6","7","8","9","","0","del"})
+            {
+                if (string.IsNullOrEmpty(num))
+                {
+                    <div class="pin-key empty"></div>
+                }
+                else if (num == "del")
+                {
+                    <button type="button" class="pin-key delete" data-value="del"><i class="fa-solid fa-delete-left"></i></button>
+                }
+                else
+                {
+                    <button type="button" class="pin-key" data-value="@num">@num</button>
+                }
+            }
+        </div>
+    </form>
+
+    <div class="text-center mt-4">
+        <a href="/Vault/SetPin" style="color:var(--text-muted);font-size:0.85rem;text-decoration:none;">
+            Forgot PIN? Set a new one
+        </a>
+    </div>
+</div>

@@ -1,0 +1,69 @@
+@{
+    ViewData["Title"] = "Add Staff";
+    var families = ViewBag.Families as List<Hearthly.Models.Family> ?? new();
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">Add Staff</h1>
+        <a href="/Staff" class="btn-ghost"><i class="fa-solid fa-xmark"></i></a>
+    </div>
+    <form method="post" asp-action="Create" asp-controller="Staff" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div class="glass-card mb-4">
+            <div class="text-center mb-4">
+                <div class="photo-upload-wrapper" onclick="document.getElementById('staffPhoto').click()">
+                    <img id="staffPhotoPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%2364748b'/%3E%3Ctext x='40' y='55' font-size='40' text-anchor='middle' fill='white'%3E👷%3C/text%3E%3C/svg%3E" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px dashed var(--primary);cursor:pointer;" />
+                    <div class="photo-upload-overlay"><i class="fa-solid fa-camera"></i></div>
+                </div>
+                <input type="file" id="staffPhoto" name="photo" accept="image/*" class="d-none" data-preview="staffPhotoPreview" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Family *</label>
+                <select name="FamilyId" class="form-control-glass" required>
+                    @foreach (var f in families) { <option value="@f.Id">@f.Name</option> }
+                </select>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                    <label class="form-label-glass">First Name *</label>
+                    <input type="text" name="FirstName" class="form-control-glass" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label-glass">Last Name *</label>
+                    <input type="text" name="LastName" class="form-control-glass" required />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Phone</label>
+                <input type="tel" name="PhoneNumber" class="form-control-glass" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Daily Wage (R)</label>
+                <input type="number" name="DailyWage" class="form-control-glass" step="0.01" min="0" value="0" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Nationality</label>
+                <input type="text" name="Nationality" class="form-control-glass" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">ID Number</label>
+                <input type="text" name="IdNumber" class="form-control-glass" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Bank Name</label>
+                <input type="text" name="BankName" class="form-control-glass" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Bank Account Number</label>
+                <input type="text" name="BankAccountNumber" class="form-control-glass" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Notes</label>
+                <textarea name="Notes" class="form-control-glass" rows="3"></textarea>
+            </div>
+        </div>
+        <button type="submit" class="btn-primary-pill w-100 justify-content-center">
+            <i class="fa-solid fa-user-plus"></i> Add Staff Member
+        </button>
+    </form>
+</div>

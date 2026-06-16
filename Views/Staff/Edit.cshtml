@@ -1,0 +1,61 @@
+@model Hearthly.Models.Staff
+@{
+    ViewData["Title"] = "Edit Staff";
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">Edit @Model.FullName</h1>
+        <a href="/Staff" class="btn-ghost"><i class="fa-solid fa-xmark"></i></a>
+    </div>
+    <form method="post" asp-action="Edit" asp-controller="Staff" asp-route-id="@Model.Id" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div class="glass-card mb-4">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                    <label class="form-label-glass">First Name *</label>
+                    <input type="text" name="FirstName" class="form-control-glass" value="@Model.FirstName" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label-glass">Last Name *</label>
+                    <input type="text" name="LastName" class="form-control-glass" value="@Model.LastName" required />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Phone</label>
+                <input type="tel" name="PhoneNumber" class="form-control-glass" value="@Model.PhoneNumber" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Daily Wage (R)</label>
+                <input type="number" name="DailyWage" class="form-control-glass" step="0.01" value="@Model.DailyWage" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Bank Name</label>
+                <input type="text" name="BankName" class="form-control-glass" value="@Model.BankName" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Bank Account Number</label>
+                <input type="text" name="BankAccountNumber" class="form-control-glass" value="@Model.BankAccountNumber" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Notes</label>
+                <textarea name="Notes" class="form-control-glass" rows="2">@Model.Notes</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Photo</label>
+                <input type="file" name="photo" class="form-control-glass" accept="image/*" />
+            </div>
+        </div>
+        <div style="display:flex;gap:12px;">
+            <form method="post" asp-action="Delete" asp-controller="Staff" style="flex:0.4;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" class="btn-danger-pill w-100 justify-content-center" onclick="return confirm('Delete staff member?')">
+                    <i class="fa-solid fa-trash"></i> Delete
+                </button>
+            </form>
+            <button type="submit" class="btn-primary-pill" style="flex:1;">
+                <i class="fa-solid fa-floppy-disk"></i> Save
+            </button>
+        </div>
+    </form>
+</div>

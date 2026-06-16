@@ -1,0 +1,51 @@
+@model List<Hearthly.Models.Family>
+@{
+    ViewData["Title"] = "Families";
+    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">Families</h1>
+        <a href="/Family/Create" class="btn-primary-pill"><i class="fa-solid fa-plus"></i> New</a>
+    </div>
+    @if (Model.Any())
+    {
+        @foreach (var family in Model)
+        {
+            var myRole = family.Members.FirstOrDefault(m => m.UserId == userId)?.Role;
+            <a href="/Family/Details/@family.Id" class="glass-card d-block text-decoration-none mb-3">
+                <div style="display:flex; align-items:center; gap:16px;">
+                    <div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));display:flex;align-items:center;justify-content:center;color:white;font-size:1.5rem;flex-shrink:0;">
+                        <i class="fa-solid fa-people-roof"></i>
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-weight:700;font-size:1.05rem;color:var(--text);">@family.Name</div>
+                        @if (!string.IsNullOrEmpty(family.Description))
+                        {
+                            <div style="color:var(--text-secondary);font-size:0.82rem;margin-top:2px;">@family.Description</div>
+                        }
+                        <div style="color:var(--text-muted);font-size:0.8rem;margin-top:4px;">
+                            <i class="fa-solid fa-users"></i> @family.Members.Count member@(family.Members.Count != 1 ? "s" : "")
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        @if (myRole == Hearthly.Models.FamilyRole.Admin)
+                        {
+                            <span class="badge-pill badge-primary">Admin</span>
+                        }
+                        <i class="fa-solid fa-chevron-right" style="color:var(--text-muted);"></i>
+                    </div>
+                </div>
+            </a>
+        }
+    }
+    else
+    {
+        <div class="glass-card text-center" style="padding:48px 20px;">
+            <i class="fa-solid fa-people-roof" style="font-size:3.5rem;color:var(--text-muted);margin-bottom:16px;display:block;"></i>
+            <div style="font-weight:700;font-size:1.1rem;color:var(--text);margin-bottom:8px;">No families yet</div>
+            <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:24px;">Create a family or accept an invitation to get started.</p>
+            <a href="/Family/Create" class="btn-primary-pill"><i class="fa-solid fa-plus"></i> Create Family</a>
+        </div>
+    }
+</div>

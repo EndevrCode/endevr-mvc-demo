@@ -1,0 +1,83 @@
+@model List<Hearthly.Models.Bill>
+@{
+    ViewData["Title"] = "Bills";
+    var families = ViewBag.Families as List<Hearthly.Models.Family> ?? new();
+    var unpaid = Model.Where(b => !b.IsPaid).ToList();
+    var paid = Model.Where(b => b.IsPaid).ToList();
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">Bills</h1>
+        <a href="/Bills/Create" class="btn-primary-pill"><i class="fa-solid fa-plus"></i> Add</a>
+    </div>
+
+    @if (unpaid.Any())
+    {
+        <div class="section-title">
+            <i class="fa-solid fa-clock" style="color:var(--warning);"></i> Unpaid (@unpaid.Count)
+        </div>
+        @foreach (var bill in unpaid.OrderBy(b => b.DueDate))
+        {
+            <div class="glass-card mb-3" style="@(bill.IsOverdue ? "border-color:rgba(239,68,68,0.4);" : bill.IsDueSoon ? "border-color:rgba(245,158,11,0.4);" : "")">
+                <div style="display:flex;align-items:flex-start;gap:12px;">
+                    <div style="flex:1;">
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <span style="font-weight:700;color:var(--text);">@bill.Name</span>
+                            @if (bill.IsOverdue) { <span class="badge-pill badge-danger">Overdue</span> }
+                            else if (bill.IsDueSoon) { <span class="badge-pill badge-warning">Due soon</span> }
+                            @if (bill.RecurringMonthly) { <span class="badge-pill badge-info">Monthly</span> }
+                        </div>
+                        <div style="color:var(--text-secondary);font-size:0.82rem;margin-top:4px;">
+                            @bill.Category · Due @bill.DueDate.ToString("MMM d, yyyy") · @bill.Family?.Name
+                        </div>
+                    </div>
+                    <div style="text-align:right;flex-shrink:0;">
+                        <div style="font-size:1.1rem;font-weight:800;color:var(--text);">R@bill.Amount.ToString("N2")</div>
+                        <form method="post" asp-action="MarkPaid" asp-controller="Bills" style="margin-top:6px;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@bill.Id" />
+                            <button type="submit" class="btn-ghost" style="padding:6px 10px;color:var(--success);border-color:rgba(76,175,80,0.4);font-size:0.8rem;">
+                                <i class="fa-solid fa-check"></i> Paid
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    @if (paid.Any())
+    {
+        <div class="section-title mt-4">
+            <i class="fa-solid fa-circle-check" style="color:var(--success);"></i> Paid (@paid.Count)
+        </div>
+        @foreach (var bill in paid.OrderByDescending(b => b.PaidDate).Take(10))
+        {
+            <div class="glass-card mb-3" style="opacity:0.6;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="flex:1;">
+                        <div style="font-weight:600;color:var(--text);">@bill.Name</div>
+                        <div style="color:var(--text-secondary);font-size:0.82rem;">Paid @bill.PaidDate?.ToString("MMM d, yyyy")</div>
+                    </div>
+                    <div style="font-weight:700;color:var(--text);">R@bill.Amount.ToString("N2")</div>
+                    <form method="post" asp-action="Delete" asp-controller="Bills">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@bill.Id" />
+                        <button type="submit" class="btn-ghost" style="padding:6px 10px;color:var(--danger);" onclick="return confirm('Delete?')">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="glass-card text-center" style="padding:48px 20px;">
+            <div style="font-size:3.5rem;margin-bottom:12px;">💸</div>
+            <div style="font-weight:700;color:var(--text);margin-bottom:8px;">No bills yet</div>
+            <a href="/Bills/Create" class="btn-primary-pill"><i class="fa-solid fa-plus"></i> Add Bill</a>
+        </div>
+    }
+</div>

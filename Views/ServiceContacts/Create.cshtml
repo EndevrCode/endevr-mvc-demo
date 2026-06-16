@@ -1,0 +1,48 @@
+@{
+    ViewData["Title"] = "Add Contact";
+    var families = ViewBag.Families as List<Hearthly.Models.Family> ?? new();
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">Add Contact</h1>
+        <a href="/ServiceContacts" class="btn-ghost"><i class="fa-solid fa-xmark"></i></a>
+    </div>
+    <form method="post" asp-action="Create" asp-controller="ServiceContacts">
+        @Html.AntiForgeryToken()
+        <div class="glass-card mb-4">
+            <div class="form-group">
+                <label class="form-label-glass">Family *</label>
+                <select name="FamilyId" class="form-control-glass" required>
+                    @foreach (var f in families) { <option value="@f.Id">@f.Name</option> }
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Category *</label>
+                <input type="text" name="Category" class="form-control-glass" placeholder="e.g. Plumber, Doctor, Electrician" required />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Name *</label>
+                <input type="text" name="Name" class="form-control-glass" required />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Phone</label>
+                <input type="tel" name="Phone" class="form-control-glass" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Email</label>
+                <input type="email" name="Email" class="form-control-glass" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Address</label>
+                <input type="text" name="Address" class="form-control-glass" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Notes</label>
+                <textarea name="Notes" class="form-control-glass" rows="2"></textarea>
+            </div>
+        </div>
+        <button type="submit" class="btn-primary-pill w-100 justify-content-center">
+            <i class="fa-solid fa-address-card"></i> Save Contact
+        </button>
+    </form>
+</div>

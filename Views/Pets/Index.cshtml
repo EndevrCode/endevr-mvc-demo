@@ -1,0 +1,58 @@
+@model List<Hearthly.Models.Pet>
+@{
+    ViewData["Title"] = "Pets";
+    var alive = Model.Where(p => !p.IsDeceased).ToList();
+    var deceased = Model.Where(p => p.IsDeceased).ToList();
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">Pets</h1>
+        <a href="/Pets/Create" class="btn-primary-pill"><i class="fa-solid fa-plus"></i> Add</a>
+    </div>
+
+    @if (alive.Any())
+    {
+        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:12px; margin-bottom:24px;">
+            @foreach (var pet in alive)
+            {
+                <a href="/Pets/Details/@pet.Id" class="glass-card text-decoration-none text-center" style="padding:20px 12px;">
+                    @if (!string.IsNullOrEmpty(pet.PhotoPath))
+                    {
+                        <img src="@pet.PhotoPath" class="pet-photo" alt="@pet.Name" style="margin:0 auto 12px;" />
+                    }
+                    else
+                    {
+                        <div class="pet-photo-placeholder" style="margin:0 auto 12px;">
+                            @(pet.Species?.ToLower() == "dog" ? "🐕" : pet.Species?.ToLower() == "cat" ? "🐈" : "🐾")
+                        </div>
+                    }
+                    <div style="font-weight:700;color:var(--text);font-size:0.95rem;">@pet.Name</div>
+                    <div style="color:var(--text-secondary);font-size:0.8rem;margin-top:2px;">@pet.Species @(!string.IsNullOrEmpty(pet.Breed) ? $"· {pet.Breed}" : "")</div>
+                    @if (pet.AgeYears.HasValue)
+                    {
+                        <div class="badge-pill badge-info mt-2" style="display:inline-flex;">@pet.AgeYears yr@(pet.AgeYears != 1 ? "s" : "")</div>
+                    }
+                </a>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="glass-card text-center" style="padding:48px 20px; margin-bottom:24px;">
+            <div style="font-size:4rem;margin-bottom:12px;">🐾</div>
+            <div style="font-weight:700;color:var(--text);margin-bottom:8px;">No pets yet</div>
+            <a href="/Pets/Create" class="btn-primary-pill"><i class="fa-solid fa-plus"></i> Add Pet</a>
+        </div>
+    }
+
+    @if (deceased.Any())
+    {
+        <div style="margin-bottom:8px;">
+            <a href="/Remembrance" style="color:var(--text-secondary);font-size:0.85rem;display:flex;align-items:center;gap:6px;text-decoration:none;">
+                <i class="fa-solid fa-heart" style="color:#ec4899;"></i>
+                @deceased.Count pet@(deceased.Count != 1 ? "s" : "") in Remembrance
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+    }
+</div>

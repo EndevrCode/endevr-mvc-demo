@@ -1,0 +1,66 @@
+@model List<Hearthly.Models.ServiceContact>
+@{
+    ViewData["Title"] = "Service Contacts";
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">Contacts</h1>
+        <a href="/ServiceContacts/Create" class="btn-primary-pill"><i class="fa-solid fa-plus"></i> Add</a>
+    </div>
+
+    @if (Model.Any())
+    {
+        @foreach (var group in Model.GroupBy(c => c.Category).OrderBy(g => g.Key))
+        {
+            <div class="section-title">@group.Key</div>
+            @foreach (var contact in group)
+            {
+                <div class="glass-card mb-3">
+                    <div style="display:flex;align-items:flex-start;gap:12px;">
+                        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#14b8a6,#134e4a);display:flex;align-items:center;justify-content:center;color:white;font-size:1.1rem;flex-shrink:0;">
+                            <i class="fa-solid fa-address-card"></i>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-weight:700;color:var(--text);">@contact.Name</div>
+                            @if (!string.IsNullOrEmpty(contact.Phone))
+                            {
+                                <a href="tel:@contact.Phone" style="display:block;color:var(--primary);font-size:0.85rem;margin-top:4px;text-decoration:none;">
+                                    <i class="fa-solid fa-phone"></i> @contact.Phone
+                                </a>
+                            }
+                            @if (!string.IsNullOrEmpty(contact.Email))
+                            {
+                                <a href="mailto:@contact.Email" style="display:block;color:var(--text-secondary);font-size:0.82rem;text-decoration:none;">
+                                    <i class="fa-solid fa-envelope"></i> @contact.Email
+                                </a>
+                            }
+                            @if (!string.IsNullOrEmpty(contact.Notes))
+                            {
+                                <div style="color:var(--text-muted);font-size:0.8rem;margin-top:6px;">@contact.Notes</div>
+                            }
+                        </div>
+                        <div style="display:flex;gap:6px;">
+                            <a href="/ServiceContacts/Edit/@contact.Id" class="btn-ghost" style="padding:6px 10px;"><i class="fa-solid fa-pen"></i></a>
+                            <form method="post" asp-action="Delete" asp-controller="ServiceContacts">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@contact.Id" />
+                                <button type="submit" class="btn-ghost" style="padding:6px 10px;color:var(--danger);" onclick="return confirm('Delete contact?')">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    }
+    else
+    {
+        <div class="glass-card text-center" style="padding:48px 20px;">
+            <div style="font-size:3.5rem;margin-bottom:12px;">📋</div>
+            <div style="font-weight:700;color:var(--text);margin-bottom:8px;">No service contacts</div>
+            <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:20px;">Add plumbers, electricians, doctors and more</p>
+            <a href="/ServiceContacts/Create" class="btn-primary-pill"><i class="fa-solid fa-plus"></i> Add Contact</a>
+        </div>
+    }
+</div>

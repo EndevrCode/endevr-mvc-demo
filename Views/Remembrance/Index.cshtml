@@ -1,0 +1,58 @@
+@model List<Hearthly.Models.Pet>
+@{
+    ViewData["Title"] = "Remembrance";
+}
+<div class="page-section">
+    <div class="text-center" style="padding:32px 0 24px;">
+        <div style="font-size:3rem;margin-bottom:8px;">💗</div>
+        <h1 style="font-size:1.6rem;font-weight:800;color:var(--text);">Remembrance</h1>
+        <p style="color:var(--text-secondary);font-size:0.9rem;">Forever in our hearts</p>
+    </div>
+
+    @if (Model.Any())
+    {
+        <div style="display:grid;gap:16px;">
+            @foreach (var pet in Model)
+            {
+                <div class="memorial-card">
+                    <div style="display:flex;align-items:center;gap:16px;">
+                        @if (!string.IsNullOrEmpty(pet.PhotoPath))
+                        {
+                            <img src="@pet.PhotoPath" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid rgba(236,72,153,0.4);" alt="@pet.Name" />
+                        }
+                        else
+                        {
+                            <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,rgba(236,72,153,0.3),rgba(190,24,93,0.3));display:flex;align-items:center;justify-content:center;font-size:2.5rem;flex-shrink:0;">🐾</div>
+                        }
+                        <div style="flex:1;">
+                            <div style="font-weight:800;font-size:1.1rem;color:white;">@pet.Name</div>
+                            <div style="color:rgba(255,255,255,0.6);font-size:0.85rem;margin-top:4px;">
+                                @pet.Species @(!string.IsNullOrEmpty(pet.Breed) ? $"· {pet.Breed}" : "")
+                            </div>
+                            @if (pet.BirthDate.HasValue || pet.DeceasedDate.HasValue)
+                            {
+                                <div style="color:rgba(255,255,255,0.5);font-size:0.8rem;margin-top:4px;">
+                                    @(pet.BirthDate?.ToString("yyyy") ?? "?") — @(pet.DeceasedDate?.ToString("yyyy") ?? "?")
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(pet.DeceasedNotes))
+                    {
+                        <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(236,72,153,0.2);color:rgba(255,255,255,0.7);font-size:0.88rem;font-style:italic;">
+                            "@pet.DeceasedNotes"
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="glass-card text-center" style="padding:48px 20px;">
+            <div style="font-size:4rem;margin-bottom:12px;">🕊️</div>
+            <div style="font-weight:700;color:var(--text);margin-bottom:8px;">A peaceful place</div>
+            <p style="color:var(--text-secondary);font-size:0.9rem;">Pets you've marked as passed away will appear here, remembered with love.</p>
+        </div>
+    }
+</div>

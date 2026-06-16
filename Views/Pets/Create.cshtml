@@ -1,0 +1,61 @@
+@{
+    ViewData["Title"] = "Add Pet";
+    var families = ViewBag.Families as List<Hearthly.Models.Family> ?? new();
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">Add Pet</h1>
+        <a href="/Pets" class="btn-ghost"><i class="fa-solid fa-xmark"></i></a>
+    </div>
+    <form method="post" asp-action="Create" asp-controller="Pets" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div class="glass-card mb-4">
+            <div class="text-center mb-4">
+                <div class="photo-upload-wrapper" onclick="document.getElementById('petPhoto').click()">
+                    <img id="petPhotoPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23f59e0b'/%3E%3Ctext x='40' y='55' font-size='40' text-anchor='middle'%3E🐾%3C/text%3E%3C/svg%3E" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px dashed var(--primary);cursor:pointer;" />
+                    <div class="photo-upload-overlay"><i class="fa-solid fa-camera"></i></div>
+                </div>
+                <input type="file" id="petPhoto" name="photo" accept="image/*" class="d-none" data-preview="petPhotoPreview" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Family *</label>
+                <select name="FamilyId" class="form-control-glass" required>
+                    <option value="">Select family...</option>
+                    @foreach (var f in families)
+                    {
+                        <option value="@f.Id">@f.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Pet Name *</label>
+                <input type="text" name="Name" class="form-control-glass" placeholder="e.g. Buddy" required />
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                    <label class="form-label-glass">Species *</label>
+                    <input type="text" name="Species" class="form-control-glass" placeholder="Dog, Cat..." required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label-glass">Breed</label>
+                    <input type="text" name="Breed" class="form-control-glass" placeholder="Optional" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Date of Birth</label>
+                <input type="date" name="BirthDate" class="form-control-glass" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Microchip Number</label>
+                <input type="text" name="MicrochipNumber" class="form-control-glass" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Insurance Provider</label>
+                <input type="text" name="InsuranceProvider" class="form-control-glass" />
+            </div>
+        </div>
+        <button type="submit" class="btn-primary-pill w-100 justify-content-center">
+            <i class="fa-solid fa-paw"></i> Add Pet
+        </button>
+    </form>
+</div>

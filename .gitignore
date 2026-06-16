@@ -1,27 +1,71 @@
-# Claude Code internal files
-.claude/
+## .NET / C# gitignore
 
-# .NET build outputs
-bin/
-obj/
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio
+.vs/
 *.user
 *.suo
-.vs/
+*.userosscache
+*.sln.docstates
 
-# Published output
-publish/
-out/
+# User-specific settings
+*.userprefs
 
-# EF Core Keys
-Hearthly/Keys/
+# Build results
+*.manifest
+*.cache
 
-# User secrets
-**/appsettings.Development.json
-**/secrets.json
+# NuGet
+*.nupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
 
-# Rider / JetBrains
-.idea/
-*.DotSettings.user
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Development settings
+appsettings.Development.json
+
+# SQLite database
+*.db
+*.db-shm
+*.db-wal
+
+# User uploads (don't commit user data)
+wwwroot/uploads/
+
+# Node modules
+node_modules/
+
+# Environment files
+.env
+.env.local
 
 # macOS
 .DS_Store
+Thumbs.db
+
+# Rider
+.idea/

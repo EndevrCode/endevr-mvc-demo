@@ -1,0 +1,68 @@
+@{
+    ViewData["Title"] = "Add Bank Account";
+    var families = ViewBag.Families as List<Hearthly.Models.Family> ?? new();
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">Add Bank Account</h1>
+        <a href="/Banking" class="btn-ghost"><i class="fa-solid fa-xmark"></i></a>
+    </div>
+    <form method="post" asp-action="Create" asp-controller="Banking" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div class="glass-card mb-4">
+            <div class="form-group">
+                <label class="form-label-glass">Family *</label>
+                <select name="FamilyId" class="form-control-glass" required>
+                    @foreach (var f in families) { <option value="@f.Id">@f.Name</option> }
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Account Holder *</label>
+                <input type="text" name="AccountHolder" class="form-control-glass" required />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Bank Name *</label>
+                <input type="text" name="BankName" class="form-control-glass" placeholder="e.g. FNB, Standard Bank" required />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Account Type *</label>
+                <input type="text" name="AccountType" class="form-control-glass" placeholder="Cheque, Savings, Credit" required />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Account Number *</label>
+                <input type="text" name="AccountNumber" class="form-control-glass" autocomplete="off" required />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Card Front Photo</label>
+                <input type="file" name="cardFront" class="form-control-glass" accept="image/*" data-preview="frontPreview" />
+                <img id="frontPreview" style="width:100%;border-radius:12px;margin-top:8px;display:none;" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Card Back Photo</label>
+                <input type="file" name="cardBack" class="form-control-glass" accept="image/*" data-preview="backPreview" />
+                <img id="backPreview" style="width:100%;border-radius:12px;margin-top:8px;display:none;" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Notes</label>
+                <textarea name="Notes" class="form-control-glass" rows="2"></textarea>
+            </div>
+        </div>
+        <button type="submit" class="btn-primary-pill w-100 justify-content-center">
+            <i class="fa-solid fa-credit-card"></i> Save Account
+        </button>
+    </form>
+</div>
+@section Scripts {
+<script>
+document.querySelectorAll('input[data-preview]').forEach(input => {
+    input.addEventListener('change', function() {
+        const preview = document.getElementById(this.dataset.preview);
+        if (preview && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+});
+</script>
+}
