@@ -1,0 +1,27 @@
+# Claude Code internal files
+.claude/
+
+# .NET build outputs
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Published output
+publish/
+out/
+
+# EF Core Keys
+Hearthly/Keys/
+
+# User secrets
+**/appsettings.Development.json
+**/secrets.json
+
+# Rider / JetBrains
+.idea/
+*.DotSettings.user
+
+# macOS
+.DS_Store
