@@ -10,9 +10,11 @@
     <div class="alert alert-danger text-center">@TempData["Error"]</div>
 }
 
-<div class="container mt-4">
-    <div class="card shadow-sm p-4 rounded-4 mx-auto" style="max-width: 600px;">
-        <h4 class="text-center mb-3">➕ Add New Password</h4>
+<div class="mb-4">
+    <h2 class="mb-0"><i class="fa-light fa-lock-keyhole me-2"></i>Add New Password</h2>
+</div>
+
+<div class="glass-card p-4 mx-auto" style="max-width: 600px;">
 
         <form asp-action="Create" method="post" class="needs-validation" novalidate>
             @Html.AntiForgeryToken()
@@ -54,9 +56,10 @@
 
             <input type="hidden" name="password.Section" value="@((int)VaultSection.Passwords)" />
 
-            <button type="submit" class="btn btn-primary w-100">💾 Save Password</button>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-save me-1"></i> Save Password
+            </button>
         </form>
-    </div>
 </div>
 
 @section Scripts {

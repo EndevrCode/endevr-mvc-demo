@@ -1,112 +1,98 @@
-﻿@{
+@{
     ViewData["Title"] = "Vault";
 }
 
-<br />
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <h2 class="mb-0"><i class="fa-light fa-vault me-2"></i>Vault</h2>
+    <a asp-action="SetPin" class="btn btn-outline-secondary btn-sm">
+        <i class="fa-light fa-key me-1"></i> Change PIN
+    </a>
+</div>
 
-<div class="container mt-4">
-    <h2 class="mb-3 fw-bold text-center">🔒 Vault</h2>
-    <p class="text-center mb-4">Your secure place for sensitive documents and information.</p>
+<p class="text-muted mb-4">Your secure place for sensitive documents and information.</p>
 
-    <div class="d-flex justify-content-center mb-4">
-        <a asp-action="SetPin" class="btn btn-outline-secondary rounded-pill px-4">
-            🔑 Set or Change PIN
+@* ── Vault category grid ─────────────────────────────── *@
+<div class="row g-3 mb-5">
+    <div class="col-6 col-md-4">
+        <a asp-controller="VaultPasswords" asp-action="Index" class="text-decoration-none">
+            <div class="glass-card text-center p-3 h-100">
+                <i class="fa-light fa-lock-keyhole fa-2x mb-2 d-block text-primary"></i>
+                <div class="fw-semibold">Passwords</div>
+            </div>
         </a>
     </div>
-
-    <div class="row g-4 justify-content-center mb-5">
-        <div class="col-6 col-sm-4 col-md-3">
-            <a asp-controller="VaultPasswords" asp-action="Index" class="text-decoration-none">
-                <div class="card shadow-sm text-center p-3 rounded-4 h-100">
-                    <div class="fs-1">🔐</div>
-                    <div class="fw-semibold mt-2">Passwords</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3">
-            <a asp-controller="VaultBankAccounts" asp-action="Index" class="text-decoration-none">
-                <div class="card shadow-sm text-center p-3 rounded-4 h-100">
-                    <div class="fs-1">💳</div>
-                    <div class="fw-semibold mt-2">Bank Accounts & Cards</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3">
-            <a asp-controller="VaultDocuments" asp-action="Index" class="text-decoration-none">
-                <div class="card shadow-sm text-center p-3 rounded-4 h-100">
-                    <div class="fs-1">🗂️</div>
-                    <div class="fw-semibold mt-2">Personal Documents</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3">
-            <a asp-controller="VaultHousePlans" asp-action="Index" class="text-decoration-none">
-                <div class="card shadow-sm text-center p-3 rounded-4 h-100">
-                    <div class="fs-1">🏠</div>
-                    <div class="fw-semibold mt-2">House Plans</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3">
-            <a asp-controller="VaultLegalDocs" asp-action="Index" class="text-decoration-none">
-                <div class="card shadow-sm text-center p-3 rounded-4 h-100">
-                    <div class="fs-1">📜</div>
-                    <div class="fw-semibold mt-2">Legal Documents</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-6 col-sm-4 col-md-3">
-            <a asp-controller="VaultUploads" asp-action="Index" class="text-decoration-none">
-                <div class="card shadow-sm text-center p-3 rounded-4 h-100">
-                    <div class="fs-1">📎</div>
-                    <div class="fw-semibold mt-2">Other Files</div>
-                </div>
-            </a>
+    <div class="col-6 col-md-4">
+        <a asp-controller="VaultBankAccounts" asp-action="Index" class="text-decoration-none">
+            <div class="glass-card text-center p-3 h-100">
+                <i class="fa-light fa-building-columns fa-2x mb-2 d-block text-success"></i>
+                <div class="fw-semibold">Bank Accounts</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-4">
+        <div class="glass-card text-center p-3 h-100 text-muted" style="opacity:.6; cursor:default;">
+            <i class="fa-light fa-file-user fa-2x mb-2 d-block"></i>
+            <div class="fw-semibold">Personal Documents</div>
+            <small>Coming soon</small>
         </div>
     </div>
+    <div class="col-6 col-md-4">
+        <div class="glass-card text-center p-3 h-100 text-muted" style="opacity:.6; cursor:default;">
+            <i class="fa-light fa-house-chimney fa-2x mb-2 d-block"></i>
+            <div class="fw-semibold">House Plans</div>
+            <small>Coming soon</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-4">
+        <div class="glass-card text-center p-3 h-100 text-muted" style="opacity:.6; cursor:default;">
+            <i class="fa-light fa-file-contract fa-2x mb-2 d-block"></i>
+            <div class="fw-semibold">Legal Documents</div>
+            <small>Coming soon</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-4">
+        <div class="glass-card text-center p-3 h-100 text-muted" style="opacity:.6; cursor:default;">
+            <i class="fa-light fa-file-circle-plus fa-2x mb-2 d-block"></i>
+            <div class="fw-semibold">Other Files</div>
+            <small>Coming soon</small>
+        </div>
+    </div>
+</div>
 
-    <hr class="my-4" />
-    <h5 class="mb-3">📁 Upload a Secure File</h5>
+@* ── Secure file upload ──────────────────────────────── *@
+<div class="glass-card p-4 mb-4">
+    <h5 class="mb-3"><i class="fa-light fa-folder-open me-2"></i>Upload a Secure File</h5>
 
-    <form asp-action="Upload" method="post" enctype="multipart/form-data" class="mb-5">
+    <form asp-action="Upload" method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
-        @if (ViewBag.Pin != null)
-        {
-            <input type="hidden" name="pin" value="@ViewBag.Pin" />
-        }
-
         <input type="hidden" name="pin" value="@ViewBag.Pin" />
 
         <div class="mb-3">
             <input type="file" class="form-control" name="file" required />
         </div>
         <button type="submit" class="btn btn-success">
-            🔐 Encrypt & Upload
+            <i class="fa-light fa-shield-check me-1"></i> Encrypt &amp; Upload
         </button>
     </form>
+</div>
 
-    @if (TempData["ShowVaultPinWarning"] != null)
-    {
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                Swal.fire({
-                    title: "Vault PIN Set",
-                    icon: "info",
-                    html: "Your Vault PIN has been successfully set.<br><br><strong>Please keep it safe.</strong><br>If lost, you will need to contact support and provide identifying documentation to reset it.",
-                    confirmButtonText: "Understood"
-                });
-            });
-        </script>
-    }
+@if (TempData["UploadSuccess"] != null)
+{
+    <div class="alert alert-success">@TempData["UploadSuccess"]</div>
+}
+@if (TempData["UploadError"] != null)
+{
+    <div class="alert alert-danger">@TempData["UploadError"]</div>
+}
 
-    @if (ViewData["UserFiles"] is List<Hearthly.Data.Vault.VaultFile> userFiles && userFiles.Any())
-    {
-        <hr class="my-4" />
-        <h5 class="mb-3">🗃️ Your Uploaded Files</h5>
-
+@* ── Uploaded files list ─────────────────────────────── *@
+@if (ViewData["UserFiles"] is List<Hearthly.Data.Vault.VaultFile> userFiles && userFiles.Any())
+{
+    <div class="glass-card p-4">
+        <h5 class="mb-3"><i class="fa-light fa-folder-closed me-2"></i>Your Uploaded Files</h5>
         <div class="table-responsive">
-            <table class="table table-sm table-bordered align-middle">
-                <thead class="table-light">
+            <table class="table table-sm align-middle">
+                <thead>
                     <tr>
                         <th>File</th>
                         <th>Uploaded</th>
@@ -118,10 +104,10 @@
                     {
                         <tr>
                             <td>@file.OriginalFileName</td>
-                            <td>@file.UploadedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                            <td class="text-muted small">@file.UploadedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
                             <td class="text-end">
                                 <a asp-action="Download" asp-route-id="@file.Id" class="btn btn-sm btn-outline-primary">
-                                    Download
+                                    <i class="bi bi-download"></i>
                                 </a>
                             </td>
                         </tr>
@@ -129,18 +115,23 @@
                 </tbody>
             </table>
         </div>
-    }
-    else
-    {
-        <div class="text-muted mt-4">You haven't uploaded any files yet.</div>
-    }
+    </div>
+}
+else
+{
+    <p class="text-muted small">No files uploaded yet.</p>
+}
 
-    @if (TempData["UploadSuccess"] != null)
-    {
-        <div class="alert alert-success mt-3">@TempData["UploadSuccess"]</div>
-    }
-    @if (TempData["UploadError"] != null)
-    {
-        <div class="alert alert-danger mt-3">@TempData["UploadError"]</div>
-    }
-</div>
+@if (TempData["ShowVaultPinWarning"] != null)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            Swal.fire({
+                title: "Vault PIN Set",
+                icon: "info",
+                html: "Your Vault PIN has been successfully set.<br><br><strong>Please keep it safe.</strong><br>If lost, you will need to contact support and provide identifying documentation to reset it.",
+                confirmButtonText: "Understood"
+            });
+        });
+    </script>
+}

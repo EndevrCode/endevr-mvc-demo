@@ -2,9 +2,9 @@
     ViewData["Title"] = "Set or Change Vault PIN";
 }
 
-<div class="container mt-5">
-    <div class="card shadow-sm p-4 rounded-4 mx-auto" style="max-width: 400px;">
-        <h4 class="text-center mb-3">🔑 Set or Change Vault PIN</h4>
+<div class="mt-5">
+    <div class="glass-card p-4 mx-auto" style="max-width: 400px;">
+        <h4 class="text-center mb-3"><i class="fa-light fa-key me-2"></i>Set or Change Vault PIN</h4>
 
         <p class="text-center mb-3">
             Your Vault PIN must be <strong>4 to 6 numeric digits</strong>. Please keep it safe – if lost, you will need to contact support and provide identifying documentation.
@@ -40,10 +40,11 @@
 
             <div id="pinError" class="text-danger text-center mb-3" style="display:none;"></div>
 
-            <button type="submit" class="btn btn-primary w-100">Save PIN</button>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-save me-1"></i> Save PIN
+            </button>
         </form>
     </div>
-</div>
 
 @section Scripts {
     <script>

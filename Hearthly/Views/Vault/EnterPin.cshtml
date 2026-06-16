@@ -4,9 +4,9 @@
     ViewData["Title"] = "Unlock Vault";
 }
 
-<div class="container mt-5">
-    <div class="card shadow-sm p-4 rounded-4 mx-auto" style="max-width: 400px;">
-        <h4 class="text-center mb-3">🔒 Enter Your Vault PIN</h4>
+<div class="mt-5">
+    <div class="glass-card p-4 mx-auto" style="max-width: 400px;">
+        <h4 class="text-center mb-3"><i class="fa-light fa-vault me-2"></i>Enter Your Vault PIN</h4>
 
         <form asp-action="ValidatePin" method="post">
             <div class="form-floating mb-3">
@@ -16,4 +16,4 @@
             <button type="submit" class="btn btn-primary w-100">Unlock</button>
         </form>
     </div>
-</div>
+
