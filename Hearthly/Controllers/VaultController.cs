@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -35,27 +35,18 @@ public class VaultController : BaseController
     {
         var user = await _userManager.GetUserAsync(User);
 
-        // 🛑 New users with no Vault PIN set
         if (string.IsNullOrEmpty(user.VaultPinHash))
-        {
             return RedirectToAction("SetPin");
-        }
 
-        // 🔒 Users with a PIN must enter it if not unlocked
-        var isUnlocked = HttpContext.Session.GetString("VaultUnlocked");
-        if (isUnlocked != "true")
-        {
+        if (HttpContext.Session.GetString("VaultUnlocked") != "true")
             return RedirectToAction("EnterPin");
-        }
 
-        // ✅ Carry over the PIN for file upload (TempData survives one request)
         if (TempData["Pin"] is string pin)
         {
             ViewBag.Pin = pin;
-            TempData.Keep("Pin"); // Optionally keep it for multiple requests
+            TempData.Keep("Pin");
         }
 
-        // Fetch this user's uploaded files
         var files = await _context.VaultFiles
             .Where(f => f.UserId == user.Id)
             .OrderByDescending(f => f.UploadedAt)
@@ -66,16 +57,12 @@ public class VaultController : BaseController
         return View();
     }
 
-
-    // Helper to retrieve decrypted vault key
     private byte[] GetDecryptedVaultKey(ApplicationUser user)
     {
         var protectedString = Encoding.UTF8.GetString(user.EncryptedVaultKey);
         var unprotected = _protector.Unprotect(protectedString);
         return Convert.FromBase64String(unprotected);
     }
-
-    //LOGIC TO ACCEPT AN ENTERED PIN
 
     [HttpGet]
     public async Task<IActionResult> EnterPin()
@@ -97,18 +84,13 @@ public class VaultController : BaseController
         if (result == PasswordVerificationResult.Success)
         {
             HttpContext.Session.SetString("VaultUnlocked", "true");
-
-            // ✅ Store the PIN temporarily for use in file uploads
             TempData["Pin"] = pin;
-
             return RedirectToAction("Index");
         }
 
         TempData["Error"] = "Invalid PIN.";
         return RedirectToAction("EnterPin");
     }
-
-    //LOGIC TO SET VAULT PIN MANUALLY
 
     [HttpGet]
     public async Task<IActionResult> SetPin()
@@ -166,64 +148,45 @@ public class VaultController : BaseController
         TempData["Success"] = "Vault PIN updated and encryption key saved.";
         TempData["ShowVaultPinWarning"] = true;
 
-        // 👇 Final redirect to Vault/Index
         return RedirectToAction("Index", "Vault");
     }
-
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Upload(string pin)
     {
         var file = Request.Form.Files["file"];
-        _logger.LogInformation("✅ UPLOAD ACTION REACHED");
 
-        if (file == null)
+        if (file == null || file.Length == 0)
         {
-            _logger.LogWarning("❌ No file was received in the request.");
-            TempData["UploadError"] = "Please select a file.";
+            TempData["UploadError"] = file == null ? "Please select a file." : "The file is empty.";
             return RedirectToAction("Index");
         }
-
-        if (file.Length == 0)
-        {
-            _logger.LogWarning("❌ Received file is empty.");
-            TempData["UploadError"] = "The file is empty.";
-            return RedirectToAction("Index");
-        }
-
-        _logger.LogInformation("📄 File received: {FileName}, {Size} bytes", file.FileName, file.Length);
 
         var user = await _userManager.GetUserAsync(User);
         if (user == null)
         {
-            _logger.LogError("🚫 Authenticated user not found.");
             TempData["UploadError"] = "User not found.";
             return RedirectToAction("Index");
         }
 
         if (user.EncryptedVaultKey == null || user.VaultKeySalt == null)
         {
-            _logger.LogWarning("🔐 Vault not initialized for user {UserId}", user.Id);
             TempData["UploadError"] = "Vault not initialized.";
             return RedirectToAction("Index");
         }
 
-        // ✅ Derive key from PIN using stored salt
-        _logger.LogInformation("🔑 Deriving key from PIN...");
         using var pbkdf2 = new Rfc2898DeriveBytes(pin, user.VaultKeySalt, 100_000, HashAlgorithmName.SHA256);
         var derivedKey = pbkdf2.GetBytes(32);
 
-        // 🔓 Decrypt the stored random key
         byte[] decryptedVaultKey;
         try
         {
-            _logger.LogInformation("🔓 Attempting to decrypt vault key...");
             decryptedVaultKey = EncryptionHelper.DecryptData(user.EncryptedVaultKey, derivedKey);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Failed to decrypt vault key. Possibly incorrect PIN.");
+            _logger.LogWarning(ex, "Vault key decryption failed for user {UserId} — likely incorrect PIN.", user.Id);
             TempData["UploadError"] = "Incorrect PIN or corrupted encryption key.";
             return RedirectToAction("Index");
         }
@@ -232,7 +195,6 @@ public class VaultController : BaseController
         await file.CopyToAsync(memoryStream);
         var fileBytes = memoryStream.ToArray();
 
-        _logger.LogInformation("🔐 Encrypting file data...");
         var encryptedData = EncryptionHelper.EncryptData(fileBytes, decryptedVaultKey);
 
         var vaultFile = new VaultFile
@@ -247,8 +209,6 @@ public class VaultController : BaseController
 
         _context.VaultFiles.Add(vaultFile);
         await _context.SaveChangesAsync();
-
-        _logger.LogInformation("✅ File saved successfully to the database.");
 
         TempData["UploadSuccess"] = "File uploaded securely.";
         return RedirectToAction("Index");
@@ -267,7 +227,7 @@ public class VaultController : BaseController
 
         if (result == PasswordVerificationResult.Success)
         {
-            HttpContext.Session.SetString("VaultPinConfirmed", DateTime.UtcNow.ToString()); // ✅ PIN confirmation stored
+            HttpContext.Session.SetString("VaultPinConfirmed", DateTime.UtcNow.ToString());
             return Json(new { success = true });
         }
 

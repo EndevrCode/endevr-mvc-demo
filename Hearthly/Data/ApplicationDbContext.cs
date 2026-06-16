@@ -54,10 +54,7 @@ namespace Hearthly.Data
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Seed emergency contacts
-            builder.Entity<EmergencyContact>().HasData(
-            // [contacts here...]
-            );
+            // Emergency contacts are seeded via EF migrations (InsertData)
         }
     }
 }

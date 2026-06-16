@@ -227,9 +227,8 @@ namespace Hearthly.Controllers
                 HttpContext.Session.SetString("VaultPinConfirmed", DateTime.UtcNow.ToString("o"));
                 return Ok();
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine("Vault PIN confirmation error: " + ex.Message);
                 return StatusCode(500);
             }
         }
