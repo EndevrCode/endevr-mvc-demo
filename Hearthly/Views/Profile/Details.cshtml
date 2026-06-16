@@ -136,13 +136,12 @@
         <a asp-action="Edit" class="btn btn-primary me-2">
             <i class="bi bi-pencil-square"></i> Edit Profile
         </a>
-        <form asp-controller="Profile"
+        <form id="deleteAccountForm" asp-controller="Profile"
               asp-action="DeleteAccount"
               method="post"
-              class="d-inline-block"
-              onsubmit="return confirm('This will permanently delete your account. Are you sure?');">
+              class="d-inline-block">
             @Html.AntiForgeryToken()
-            <button type="submit" class="btn btn-danger me-2">
+            <button type="button" class="btn btn-danger me-2" onclick="confirmDeleteAccount()">
                 <i class="bi bi-trash3"></i> Delete My Account
             </button>
         </form>
@@ -152,6 +151,26 @@
         <i class="bi bi-arrow-left-circle"></i> Back
     </a>
 </div>
+
+@section Scripts {
+    <script>
+        function confirmDeleteAccount() {
+            Swal.fire({
+                title: 'Delete Your Account?',
+                text: "This will permanently delete your account and all your data. This cannot be undone.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete my account',
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then(result => {
+                if (result.isConfirmed)
+                    document.getElementById('deleteAccountForm').submit();
+            });
+        }
+    </script>
+}
 
 <!-- Modal for Enlarged Profile Photo -->
 <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
