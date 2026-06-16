@@ -1,0 +1,340 @@
+@using Hearthly.Data
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+
+@{
+    ViewData["Title"] = "Where's My Family?";
+
+    var noFamily   = ViewBag.NoFamily as bool? == true;
+    var familyId   = noFamily ? Guid.Empty : (Guid)ViewBag.FamilyId;
+    var families   = noFamily ? null : (List<Family>)ViewBag.Families;
+    var members    = noFamily ? null : (List<FamilyMember>)ViewBag.Members;
+    var profiles   = noFamily ? null : (List<UserProfile>)ViewBag.Profiles;
+    var locations  = noFamily ? null : (List<FamilyLocation>)ViewBag.Locations;
+    var myLocation = noFamily ? null : ViewBag.MyLocation as FamilyLocation;
+    var myUserId   = noFamily ? "" : (string)ViewBag.CurrentUserId;
+}
+
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <h2 class="mb-0"><i class="fa-light fa-map-location-dot me-2"></i>Where's My Family?</h2>
+</div>
+
+@if (noFamily)
+{
+    <div class="glass-card text-center py-5">
+        <i class="fa-light fa-people-roof fa-3x text-muted mb-3 d-block"></i>
+        <p class="text-muted mb-2">You need to be in a family to use this feature.</p>
+        <a asp-controller="Families" asp-action="Create" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg me-1"></i> Create a Family
+        </a>
+    </div>
+    return;
+}
+
+@* Family selector *@
+@if (families!.Count > 1)
+{
+    <div class="mb-3 d-flex gap-2 flex-wrap">
+        @foreach (var f in families)
+        {
+            <a asp-action="Index" asp-route-familyId="@f.Id"
+               class="btn btn-sm @(f.Id == familyId ? "btn-primary" : "btn-outline-primary") rounded-pill">
+                @f.Name
+            </a>
+        }
+    </div>
+}
+
+@* My status card *@
+<div class="glass-card p-3 mb-3">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+        <span class="fw-semibold"><i class="fa-light fa-location-dot me-1 text-primary"></i>My Location</span>
+        <form asp-action="ToggleVisibility" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="familyId" value="@familyId" />
+            <button type="submit" class="btn btn-sm @(myLocation?.IsVisible == false ? "btn-outline-secondary" : "btn-outline-success") rounded-pill">
+                <i class="fa-light fa-@(myLocation?.IsVisible == false ? "eye-slash" : "eye") me-1"></i>
+                @(myLocation?.IsVisible == false ? "Hidden" : "Visible")
+            </button>
+        </form>
+    </div>
+
+    <div id="myLocationStatus" class="text-muted small mb-2">
+        @if (myLocation?.Latitude != null)
+        {
+            <span><i class="fa-light fa-clock me-1"></i>Last updated @TimeSince(myLocation.UpdatedAt)</span>
+            if (!string.IsNullOrWhiteSpace(myLocation.Address))
+            {
+                <span class="ms-2"><i class="fa-light fa-map-pin me-1"></i>@myLocation.Address</span>
+            }
+        }
+        else
+        {
+            <span>No location shared yet.</span>
+        }
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+        <button class="btn btn-primary btn-sm rounded-pill" id="shareLocationBtn" onclick="shareMyLocation()">
+            <i class="fa-light fa-location-crosshairs me-1"></i> Share My Location
+        </button>
+
+        <form asp-action="UpdateNote" method="post" class="d-flex gap-2 flex-grow-1">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="familyId" value="@familyId" />
+            <input type="text" name="note" class="form-control form-control-sm"
+                   placeholder="Set a status (e.g. At the office)"
+                   maxlength="100"
+                   value="@(myLocation?.Note ?? "")" />
+            <button type="submit" class="btn btn-outline-secondary btn-sm rounded-pill">Update</button>
+        </form>
+    </div>
+</div>
+
+@* Map *@
+<div class="glass-card p-0 mb-3 overflow-hidden" style="border-radius: 16px;">
+    <div id="familyMap" style="height: 380px; width: 100%;"></div>
+</div>
+
+@* Member cards *@
+<h5 class="mb-3 fw-semibold"><i class="fa-light fa-people-group me-2"></i>Family Members</h5>
+<div class="row g-3">
+    @foreach (var member in members!)
+    {
+        var prof = profiles!.FirstOrDefault(p => p.UserId == member.UserId);
+        var loc  = locations!.FirstOrDefault(l => l.UserId == member.UserId);
+        var name = prof?.PreferredName ?? prof?.FirstName ?? member.User?.UserName ?? "Member";
+        var isMe = member.UserId == myUserId;
+
+        <div class="col-md-6">
+            <div class="glass-card p-3 d-flex align-items-center gap-3">
+                @if (!string.IsNullOrEmpty(prof?.PhotoPath))
+                {
+                    <img src="@prof.PhotoPath" class="rounded-circle flex-shrink-0"
+                         width="48" height="48" style="object-fit:cover;" alt="@name" />
+                }
+                else
+                {
+                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center flex-shrink-0"
+                         style="width:48px;height:48px;font-size:18px;">
+                        @name.Substring(0, 1).ToUpper()
+                    </div>
+                }
+                <div class="flex-grow-1 min-width-0">
+                    <div class="fw-semibold">@name @(isMe ? "(You)" : "")</div>
+                    @if (loc?.IsVisible == false && !isMe)
+                    {
+                        <small class="text-muted"><i class="fa-light fa-eye-slash me-1"></i>Location hidden</small>
+                    }
+                    else if (loc?.Latitude != null && loc.IsVisible)
+                    {
+                        <small class="text-success d-block">
+                            <i class="fa-light fa-location-dot me-1"></i>
+                            @(string.IsNullOrWhiteSpace(loc.Address) ? $"{loc.Latitude:0.####}, {loc.Longitude:0.####}" : loc.Address)
+                        </small>
+                        <small class="text-muted"><i class="fa-light fa-clock me-1"></i>@TimeSince(loc.UpdatedAt)</small>
+                        @if (!string.IsNullOrWhiteSpace(loc.Note))
+                        {
+                            <small class="text-muted d-block fst-italic">@loc.Note</small>
+                        }
+                    }
+                    else
+                    {
+                        <small class="text-muted">No location shared yet.</small>
+                        @if (!string.IsNullOrWhiteSpace(loc?.Note))
+                        {
+                            <small class="text-muted d-block fst-italic">@loc.Note</small>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@* Hidden form for AJAX check-in *@
+<form id="checkInForm" asp-action="CheckIn" method="post" class="d-none">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="familyId" value="@familyId" />
+    <input type="hidden" name="latitude"  id="ciLat" />
+    <input type="hidden" name="longitude" id="ciLon" />
+    <input type="hidden" name="address"   id="ciAddr" />
+</form>
+
+@functions {
+    static string TimeSince(DateTime dt)
+    {
+        var diff = DateTime.UtcNow - dt;
+        if (diff.TotalMinutes < 1)  return "just now";
+        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes} min ago";
+        if (diff.TotalHours < 24)   return $"{(int)diff.TotalHours} hr ago";
+        return dt.ToLocalTime().ToString("dd MMM HH:mm");
+    }
+}
+
+@section Scripts {
+    <script>
+        // Build markers data from server
+        const memberMarkers = [
+            @foreach (var member in members!)
+            {
+                var prof = profiles!.FirstOrDefault(p => p.UserId == member.UserId);
+                var loc  = locations!.FirstOrDefault(l => l.UserId == member.UserId);
+                var name = prof?.PreferredName ?? prof?.FirstName ?? member.User?.UserName ?? "Member";
+
+                if (loc?.Latitude != null && loc.IsVisible)
+                {
+                    @:{ lat: @loc.Latitude.Value.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
+                    @:  lng: @loc.Longitude!.Value.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
+                    @:  name: "@Html.Raw(name.Replace("\"", "\\\""))",
+                    @:  note: "@Html.Raw((loc.Note ?? "").Replace("\"", "\\\""))",
+                    @:  isMe: @((member.UserId == myUserId).ToString().ToLower()) },
+                }
+            }
+        ];
+
+        let map, geocoder;
+
+        function initMap() {
+            const defaultCenter = { lat: -28.4793, lng: 24.6727 }; // South Africa center
+
+            const bounds = new google.maps.LatLngBounds();
+            let hasPoints = false;
+
+            map = new google.maps.Map(document.getElementById('familyMap'), {
+                zoom: 6,
+                center: defaultCenter,
+                mapTypeControl: false,
+                streetViewControl: false,
+                fullscreenControl: false,
+                styles: [{ featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] }]
+            });
+
+            geocoder = new google.maps.Geocoder();
+
+            memberMarkers.forEach(m => {
+                const pos = { lat: m.lat, lng: m.lng };
+                const marker = new google.maps.Marker({
+                    position: pos,
+                    map: map,
+                    title: m.name,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 10,
+                        fillColor: m.isMe ? '#0d6efd' : '#6c757d',
+                        fillOpacity: 1,
+                        strokeColor: '#fff',
+                        strokeWeight: 2
+                    }
+                });
+
+                const infoContent = `
+                    <div style="font-family:sans-serif;min-width:120px;">
+                        <strong>${m.name}</strong>
+                        ${m.note ? `<br><em style="color:#666;font-size:12px;">${m.note}</em>` : ''}
+                    </div>`;
+
+                const infoWindow = new google.maps.InfoWindow({ content: infoContent });
+                marker.addListener('click', () => infoWindow.open(map, marker));
+
+                bounds.extend(pos);
+                hasPoints = true;
+            });
+
+            if (hasPoints) {
+                map.fitBounds(bounds);
+                if (memberMarkers.length === 1) map.setZoom(14);
+            }
+        }
+
+        function shareMyLocation() {
+            const btn = document.getElementById('shareLocationBtn');
+            if (!navigator.geolocation) {
+                Swal.fire({ title: 'Not supported', text: 'Your browser does not support geolocation.', icon: 'warning' });
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-light fa-spinner fa-spin me-1"></i> Getting location...';
+
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+
+                    document.getElementById('ciLat').value = lat;
+                    document.getElementById('ciLon').value = lng;
+
+                    // Try to reverse geocode
+                    if (geocoder) {
+                        geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+                            const addr = status === 'OK' && results[0]
+                                ? results[0].formatted_address
+                                : '';
+                            document.getElementById('ciAddr').value = addr;
+                            submitCheckIn(btn);
+                        });
+                    } else {
+                        submitCheckIn(btn);
+                    }
+                },
+                (err) => {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-light fa-location-crosshairs me-1"></i> Share My Location';
+                    const msg = err.code === 1
+                        ? 'Location access was denied. Please enable it in your browser settings.'
+                        : 'Unable to get your location. Please try again.';
+                    Swal.fire({ title: 'Location error', text: msg, icon: 'error' });
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
+
+        function submitCheckIn(btn) {
+            const token = document.querySelector('#checkInForm input[name="__RequestVerificationToken"]')?.value;
+            const familyId = document.querySelector('#checkInForm input[name="familyId"]')?.value;
+
+            fetch('@Url.Action("CheckIn", "Location")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': token
+                },
+                body: new URLSearchParams({
+                    familyId,
+                    latitude:  document.getElementById('ciLat').value,
+                    longitude: document.getElementById('ciLon').value,
+                    address:   document.getElementById('ciAddr').value,
+                    __RequestVerificationToken: token
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Location shared!',
+                        text: 'Your location has been updated.',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => window.location.reload());
+                } else {
+                    Swal.fire({ title: 'Error', text: data.error || 'Could not share location.', icon: 'error' });
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-light fa-location-crosshairs me-1"></i> Share My Location';
+                }
+            })
+            .catch(() => {
+                Swal.fire({ title: 'Error', text: 'Something went wrong.', icon: 'error' });
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-light fa-location-crosshairs me-1"></i> Share My Location';
+            });
+        }
+
+        // Override the Google Maps callback from _LandingLayout
+        window.initAutocomplete = function () {
+            initMap();
+        };
+    </script>
+}

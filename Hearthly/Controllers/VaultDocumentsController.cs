@@ -26,7 +26,7 @@ namespace Hearthly.Controllers
             _logger = logger;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(DocumentCategory? filter = null)
         {
             var user = await _userManager.GetUserAsync(User);
             if (string.IsNullOrEmpty(user?.VaultPinHash))
@@ -35,16 +35,25 @@ namespace Hearthly.Controllers
             if (HttpContext.Session.GetString("VaultUnlocked") != "true")
                 return RedirectToAction("EnterPin", "Vault");
 
-            var documents = await _context.VaultDocuments
-                .Where(d => d.UserId == user.Id)
-                .OrderByDescending(d => d.UploadedAt)
-                .ToListAsync();
+            var query = _context.VaultDocuments.Where(d => d.UserId == user.Id);
 
+            if (filter.HasValue)
+            {
+                // For Legal, also include Contract docs
+                if (filter == DocumentCategory.Legal)
+                    query = query.Where(d => d.Category == DocumentCategory.Legal || d.Category == DocumentCategory.Contract);
+                else
+                    query = query.Where(d => d.Category == filter.Value);
+            }
+
+            var documents = await query.OrderByDescending(d => d.UploadedAt).ToListAsync();
+
+            ViewBag.Filter = filter;
             return View(documents);
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Upload(string title, DocumentCategory category, string? notes, string pin)
+        public async Task<IActionResult> Upload(string title, DocumentCategory category, string? notes, string pin, DocumentCategory? filter = null)
         {
             var file = Request.Form.Files["file"];
 
@@ -100,11 +109,13 @@ namespace Hearthly.Controllers
             await _context.SaveChangesAsync();
 
             TempData["UploadSuccess"] = $"\"{title}\" stored securely in the Vault.";
-            return RedirectToAction(nameof(Index));
+            return filter.HasValue
+                ? RedirectToAction(nameof(Index), new { filter })
+                : RedirectToAction(nameof(Index));
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Download(Guid id, string pin)
+        public async Task<IActionResult> Download(Guid id, string pin, DocumentCategory? filter = null)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user?.EncryptedVaultKey == null || user.VaultKeySalt == null)
@@ -127,12 +138,14 @@ namespace Hearthly.Controllers
             catch
             {
                 TempData["Error"] = "Incorrect PIN — could not decrypt document.";
-                return RedirectToAction(nameof(Index));
+                return filter.HasValue
+                    ? RedirectToAction(nameof(Index), new { filter })
+                    : RedirectToAction(nameof(Index));
             }
         }
 
         [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(Guid id, string pin)
+        public async Task<IActionResult> Delete(Guid id, string pin, DocumentCategory? filter = null)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user?.EncryptedVaultKey == null || user.VaultKeySalt == null)
@@ -160,7 +173,9 @@ namespace Hearthly.Controllers
             await _context.SaveChangesAsync();
 
             TempData["Success"] = $"\"{doc.Title}\" has been deleted.";
-            return RedirectToAction(nameof(Index));
+            return filter.HasValue
+                ? RedirectToAction(nameof(Index), new { filter })
+                : RedirectToAction(nameof(Index));
         }
     }
 }

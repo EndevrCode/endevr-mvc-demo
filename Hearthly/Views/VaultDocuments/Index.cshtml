@@ -2,7 +2,19 @@
 @using Hearthly.Data.Vault
 
 @{
-    ViewData["Title"] = "Personal Documents";
+    var filter = ViewBag.Filter as DocumentCategory?;
+
+    string pageTitle = filter switch {
+        DocumentCategory.Property => "House Plans & Property",
+        DocumentCategory.Legal    => "Legal Documents",
+        _                         => "Personal Documents"
+    };
+    string pageIcon = filter switch {
+        DocumentCategory.Property => "fa-house-chimney",
+        DocumentCategory.Legal    => "fa-file-contract",
+        _                         => "fa-file-user"
+    };
+    ViewData["Title"] = pageTitle;
 
     string CategoryIcon(DocumentCategory cat) => cat switch {
         DocumentCategory.Identity  => "fa-id-card",
@@ -14,13 +26,20 @@
         DocumentCategory.Property  => "fa-house-chimney",
         _                          => "fa-file"
     };
+
+    // Which categories to show in the upload dropdown (restrict when filtered)
+    IEnumerable<DocumentCategory> uploadCategories = filter switch {
+        DocumentCategory.Property => new[] { DocumentCategory.Property },
+        DocumentCategory.Legal    => new[] { DocumentCategory.Legal, DocumentCategory.Contract },
+        _                         => Enum.GetValues<DocumentCategory>()
+    };
 }
 
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
 <input type="hidden" id="__RequestVerificationToken" value="@Xsrf.GetAndStoreTokens(Context).RequestToken" />
 
 <div class="mb-4 d-flex justify-content-between align-items-center">
-    <h2 class="mb-0"><i class="fa-light fa-file-user me-2"></i>Personal Documents</h2>
+    <h2 class="mb-0"><i class="fa-light @pageIcon me-2"></i>@pageTitle</h2>
     <a asp-controller="Vault" asp-action="Index" class="btn btn-outline-secondary btn-sm">
         <i class="bi bi-arrow-left me-1"></i> Vault
     </a>
@@ -62,6 +81,10 @@
     </h5>
     <form asp-action="Upload" method="post" enctype="multipart/form-data" id="uploadForm">
         @Html.AntiForgeryToken()
+        @if (filter.HasValue)
+        {
+            <input type="hidden" name="filter" value="@((int)filter.Value)" />
+        }
 
         <div class="row g-3">
             <div class="col-md-6">
@@ -71,7 +94,7 @@
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Category</label>
                 <select name="category" class="form-select">
-                    @foreach (var cat in Enum.GetValues<DocumentCategory>())
+                    @foreach (var cat in uploadCategories)
                     {
                         <option value="@((int)cat)">@cat</option>
                     }
@@ -145,16 +168,22 @@ else
                                 </button>
                             </div>
 
-                            <!-- Hidden download form -->
                             <form id="dl-@doc.Id" asp-action="Download" asp-route-id="@doc.Id" method="post" class="d-none">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="pin" id="pin-dl-@doc.Id" />
+                                @if (filter.HasValue)
+                                {
+                                    <input type="hidden" name="filter" value="@((int)filter.Value)" />
+                                }
                             </form>
 
-                            <!-- Hidden delete form -->
                             <form id="del-@doc.Id" asp-action="Delete" asp-route-id="@doc.Id" method="post" class="d-none">
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="pin" id="pin-del-@doc.Id" />
+                                @if (filter.HasValue)
+                                {
+                                    <input type="hidden" name="filter" value="@((int)filter.Value)" />
+                                }
                             </form>
                         </div>
                     </div>
