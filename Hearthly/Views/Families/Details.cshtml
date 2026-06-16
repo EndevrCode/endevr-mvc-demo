@@ -26,7 +26,7 @@
     </a>
 </div>
 
-<h4 class="mt-5 mb-3">👨‍👩‍👧‍👦 Members</h4>
+<h4 class="mt-5 mb-3"><i class="bi bi-people me-2"></i>Members</h4>
 <div class="row mb-5">
     @if (Model.Members.Any())
     {
@@ -37,7 +37,7 @@
             : Url.Content("~/images/placeholder-user.png");
 
             <div class="col-12 col-md-6 col-lg-4 mb-4 d-flex justify-content-center">
-                <div class="card shadow-sm rounded-4 text-center p-3 w-100" style="max-width: 320px;">
+                <div class="glass-card text-center p-3 w-100" style="max-width: 320px;">
                     <a asp-controller="Profile" asp-action="Details" asp-route-id="@m.UserId" class="text-decoration-none">
                         <img src="@photoUrl" alt="@m.PreferredName" class="rounded-circle mb-3" style="width:80px; height:80px; object-fit:cover;" />
                         <h5 class="mb-1">@m.PreferredName</h5>
@@ -79,7 +79,7 @@
     }
 </div>
 
-<h4 class="mb-3">🐾 Pets</h4>
+<h4 class="mb-3"><i class="fa-light fa-paw me-2"></i>Pets</h4>
 <div class="row">
     @if (Model.Pets.Any(p => !p.IsDeceased))
     {
@@ -90,7 +90,7 @@
             : Url.Content("~/images/placeholder-pet.png");
 
             <div class="col-12 col-md-6 col-lg-4 mb-4 d-flex justify-content-center">
-                <div class="card shadow-sm rounded-4 text-center p-3 w-100" style="max-width: 320px;">
+                <div class="glass-card text-center p-3 w-100" style="max-width: 320px;">
                     <img src="@petPhoto" class="rounded mb-3" alt="@pet.Name" style="height: 180px; object-fit: cover;" />
                     <h5 class="mb-2">@pet.Name</h5>
                     <a asp-controller="Pets"
@@ -112,8 +112,6 @@
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             @if (TempData["ErrorMessage"] is string error)
