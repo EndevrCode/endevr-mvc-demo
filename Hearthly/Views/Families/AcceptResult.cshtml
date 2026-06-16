@@ -1,0 +1,34 @@
+﻿@model string
+
+@{
+    ViewData["Title"] = "Invite Acceptance";
+
+    // Safely grab the token from the query string
+    var tokenString = Context.Request.Query["token"].FirstOrDefault();
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="alert alert-info">
+    @Model
+</div>
+
+@if (User.Identity.IsAuthenticated)
+{
+    <a asp-action="Index" class="btn btn-primary">
+        Back to My Families
+    </a>
+}
+else
+{
+    <a asp-area="Identity"
+       asp-page="/Account/Login"
+       asp-route-returnUrl="@Url.Action(
+                   "Accept",
+                   "Families",
+                   new { token = tokenString }
+              )"
+   class="btn btn-primary">
+    Log in to Accept
+</a>
+}

@@ -1,0 +1,96 @@
+﻿@page
+@model RegisterModel
+@{
+    ViewData["BodyClass"] = "login-page";
+}
+
+<div class="d-flex align-items-center justify-content-center vh-100">
+    <div id="loginContainer">
+        <div id="loginCard" class="glass-card shadow-lg p-4 fade-card" style="max-width: 360px; width: 100%;">
+            <h2 class="text-center mb-1 login-fade fade-1">Welcome!</h2>
+            <p class="text-center text-muted mb-4 login-fade fade-2">Create your account to get started</p>
+
+            <form asp-route-returnUrl="@Model.ReturnUrl"
+                  method="post"
+                  id="registerForm"
+                  class="login-fade fade-3">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <input asp-for="Input.Email"
+                           class="form-control form-control-lg"
+                           placeholder="Email" />
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3 input-group">
+                    <input asp-for="Input.Password"
+                           id="passwordInput"
+                           type="password"
+                           class="form-control form-control-lg"
+                           placeholder="Password" />
+                    <span class="input-group-text" onclick="togglePassword('passwordInput','toggleIcon1')">
+                        <i id="toggleIcon1" class="bi bi-eye-slash"></i>
+                    </span>
+                    <span asp-validation-for="Input.Password" class="text-danger d-block"></span>
+                </div>
+
+                <div class="mb-3 input-group">
+                    <input asp-for="Input.ConfirmPassword"
+                           id="confirmInput"
+                           type="password"
+                           class="form-control form-control-lg"
+                           placeholder="Confirm Password" />
+                    <span class="input-group-text" onclick="togglePassword('confirmInput','toggleIcon2')">
+                        <i id="toggleIcon2" class="bi bi-eye-slash"></i>
+                    </span>
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger d-block"></span>
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary btn-lg w-100 mb-3 login-fade fade-4"
+                        id="registerBtn">
+                    Register
+                </button>
+            </form>
+
+            <p class="text-center text-muted mb-2 login-fade fade-5">
+                Already have an account?
+                <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="ms-1 fw-semibold text-decoration-none">Log in</a>
+            </p>
+        </div>
+    </div>
+
+    <div id="bgOverlay"></div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function togglePassword(inputId, iconId) {
+            var input = document.getElementById(inputId);
+            var icon  = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'bi bi-eye';
+            } else {
+                input.type = 'password';
+                icon.className = 'bi bi-eye-slash';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var btn  = document.getElementById('registerBtn');
+            var form = document.getElementById('registerForm');
+
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.body.classList.add('logged-in');
+                setTimeout(function() {
+                    form.submit();
+                }, 4000);
+            });
+        });
+    </script>
+}

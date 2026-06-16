@@ -1,0 +1,37 @@
+﻿@model Hearthly.Data.ServiceContact
+
+@{
+    ViewData["Title"] = "Delete Service Contact";
+    var familyId = Model.FamilyId;
+}
+
+<h2>@ViewData["Title"]</h2>
+<h3>Are you sure you want to delete this?</h3>
+
+<dl class="row">
+    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.ServiceType)</dt>
+    <dd class="col-sm-10">@Html.DisplayFor(m => m.ServiceType)</dd>
+
+    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Company)</dt>
+    <dd class="col-sm-10">@Html.DisplayFor(m => m.Company)</dd>
+
+    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.ContactPerson)</dt>
+    <dd class="col-sm-10">@Html.DisplayFor(m => m.ContactPerson)</dd>
+
+    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.ContactNumber)</dt>
+    <dd class="col-sm-10">@Html.DisplayFor(m => m.ContactNumber)</dd>
+
+    <dt class="col-sm-2">@Html.DisplayNameFor(m => m.Notes)</dt>
+    <dd class="col-sm-10">@Html.DisplayFor(m => m.Notes)</dd>
+</dl>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="FamilyId" />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index"
+       asp-route-familyId="@familyId"
+       class="btn btn-secondary ms-2">
+        Cancel
+    </a>
+</form>

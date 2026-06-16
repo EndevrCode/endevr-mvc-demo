@@ -1,0 +1,64 @@
+﻿@model Hearthly.Data.Vault.VaultPassword
+@using Hearthly.Data.Vault
+
+@{
+    ViewData["Title"] = "Create Password";
+    var passwordTypes = Enum.GetValues(typeof(PasswordType)).Cast<PasswordType>();
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger text-center">@TempData["Error"]</div>
+}
+
+<div class="container mt-4">
+    <div class="card shadow-sm p-4 rounded-4 mx-auto" style="max-width: 600px;">
+        <h4 class="text-center mb-3">➕ Add New Password</h4>
+
+        <form asp-action="Create" method="post" class="needs-validation" novalidate>
+            @Html.AntiForgeryToken()
+
+            <div class="form-floating mb-3">
+                <select name="password.PasswordType" class="form-select" required>
+                    <option value="">-- Select Password Type --</option>
+                    @foreach (var type in passwordTypes)
+                    {
+                        <option value="@((int)type)">@type</option>
+                    }
+                </select>
+                <label>Password Type</label>
+                <span asp-validation-for="PasswordType" class="text-danger small"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input name="password.Title" class="form-control" placeholder="Title" required />
+                <label>Title</label>
+                <span asp-validation-for="Title" class="text-danger small"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input name="password.Username" class="form-control" placeholder="Username" required />
+                <label>Username</label>
+                <span asp-validation-for="Username" class="text-danger small"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input name="password.Password" type="password" class="form-control" placeholder="Password" required />
+                <label>Password</label>
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <textarea name="password.Notes" class="form-control" style="height: 100px;" placeholder="Optional Notes"></textarea>
+                <label>Notes</label>
+            </div>
+
+            <input type="hidden" name="password.Section" value="@((int)VaultSection.Passwords)" />
+
+            <button type="submit" class="btn btn-primary w-100">💾 Save Password</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

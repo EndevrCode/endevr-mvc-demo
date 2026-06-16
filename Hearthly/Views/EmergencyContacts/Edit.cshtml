@@ -1,0 +1,55 @@
+﻿@using Hearthly.Data
+@model EmergencyContact
+
+@{
+    ViewData["Title"] = "Edit Emergency Contact";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Edit">
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <input asp-for="Id" type="hidden" />
+    <input asp-for="FamilyId" type="hidden" />
+
+    <div class="mb-3">
+        <label asp-for="ContactType" class="form-label"></label>
+        <select asp-for="ContactType" class="form-select">
+            @foreach (var t in Enum.GetValues<EmergencyContactType>())
+            {
+                <option value="@t" selected="@(Model.ContactType == t ? "selected" : "")">
+                    @t
+                </option>
+            }
+        </select>
+        <span asp-validation-for="ContactType" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PhoneNumber" class="form-label"></label>
+        <input asp-for="PhoneNumber" type="tel" class="form-control" />
+        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Notes" class="form-label"></label>
+        <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Notes" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-danger">Save</button>
+    <a asp-action="Index" asp-route-familyId="@(Model.FamilyId)" class="btn btn-secondary ms-2">
+        Cancel
+    </a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

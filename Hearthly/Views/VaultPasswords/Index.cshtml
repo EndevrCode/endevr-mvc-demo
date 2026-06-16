@@ -1,0 +1,278 @@
+﻿@model IEnumerable<Hearthly.Data.Vault.VaultPassword>
+@using Hearthly.Data.Vault
+
+@{
+    ViewData["Title"] = "My Saved Passwords";
+}
+
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+<input type="hidden" name="__RequestVerificationToken" value="@Xsrf.GetAndStoreTokens(Context).RequestToken" />
+
+<div class="container mt-4">
+    <div class="glass-card p-4 rounded-4 shadow-lg">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">🔐 My Saved Passwords</h4>
+            <a asp-action="Create" class="btn btn-primary rounded-pill px-3">
+                <i class="bi bi-plus-lg me-1"></i> Add New
+            </a>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center text-muted py-5">
+                <p class="mb-3">No passwords saved yet.</p>
+                <a asp-action="Create" class="btn btn-outline-primary rounded-pill">Add your first one</a>
+            </div>
+        }
+        else
+        {
+            <div class="d-grid gap-3">
+                @foreach (var item in Model.OrderByDescending(p => p.CreatedAt))
+                {
+                    <div class="glass-card p-3 rounded-4 shadow-sm d-flex flex-column align-items-center">
+                        <h6 class="fw-semibold text-white text-center mb-2 h1">@item.Title</h6>
+
+                        <div class="d-flex align-items-center w-100 justify-content-between">
+                            <div class="d-flex align-items-center justify-content-center" style="width: 70px;">
+                                <span class="badge bg-light text-dark small">@item.PasswordType</span>
+                            </div>
+
+                            <div class="btn-group flex-grow-1 ms-2" role="group">
+                                <button type="button"
+                                        class="btn btn-outline-light border"
+                                        title="View"
+                                        onclick="promptVaultPin('@item.Username', '@item.Password')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button type="button"
+                                        class="btn btn-outline-primary border-start-0 border-end-0"
+                                        title="Edit"
+                                        onclick="promptEditPin('@item.Id')">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button type="button"
+                                        class="btn btn-outline-danger border-end-0"
+                                        title="Delete"
+                                        onclick="promptDeletePin('@item.Id')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                                @if (!string.IsNullOrEmpty(item.FilePath))
+                                {
+                                    <a class="btn btn-outline-success" title="Download"
+                                       href="@Url.Action("Download", "VaultPasswords", new { id = item.Id })">
+                                        <i class="bi bi-download"></i>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Password Reveal Modal -->
+<div class="modal fade" id="passwordDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h5 class="modal-title mx-auto fw-bold">🔐 Password Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p><strong>Username:</strong> <span id="modalUsername" class="text-info"></span></p>
+                <p>
+                    <strong>Password:</strong>
+                    <span id="modalPassword">••••••••</span>
+                    <button id="togglePasswordBtn" type="button" class="btn btn-sm btn-outline-secondary ms-2">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vault PIN Prompt Modal -->
+<div class="modal fade" id="vaultPinModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h5 class="modal-title mx-auto fw-bold">Enter your Vault PIN</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <input id="vaultPinInput" type="password" class="form-control mb-3 text-center" maxlength="6" />
+                <button class="btn btn-primary w-100 mb-2" onclick="confirmPin()">Unlock</button>
+                <button class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        window.passwordToReveal = '';
+        window.usernameToReveal = '';
+        window.passwordShown = false;
+        window.editIdToOpen = null;
+        window.deleteIdToConfirm = null;
+
+        function waitForModalElements(callback) {
+            const checkExist = setInterval(() => {
+                const input = document.getElementById('vaultPinInput');
+                const modal = document.getElementById('vaultPinModal');
+                const passwordSpan = document.getElementById('modalPassword');
+                const toggleBtn = document.getElementById('togglePasswordBtn');
+
+                if (input && modal && passwordSpan && toggleBtn) {
+                    clearInterval(checkExist);
+                    callback();
+                } else {
+                    console.warn("PIN modal elements not found.");
+                }
+            }, 100); // retry every 100ms
+        }
+
+        window.promptVaultPin = function (username, password) {
+            window.usernameToReveal = username;
+            window.passwordToReveal = password;
+            window.passwordShown = false;
+            window.editIdToOpen = null;
+            window.deleteIdToConfirm = null;
+
+            waitForModalElements(() => {
+                document.getElementById('vaultPinInput').value = '';
+                document.getElementById('modalPassword').textContent = '••••••••';
+                document.getElementById('togglePasswordBtn').innerHTML = '<i class="bi bi-eye"></i>';
+                new bootstrap.Modal(document.getElementById('vaultPinModal')).show();
+            });
+        };
+
+        window.promptEditPin = function (id) {
+            window.editIdToOpen = id;
+            window.usernameToReveal = '';
+            window.passwordToReveal = '';
+            window.passwordShown = false;
+            window.deleteIdToConfirm = null;
+
+            waitForModalElements(() => {
+                document.getElementById('vaultPinInput').value = '';
+                document.getElementById('modalPassword').textContent = '••••••••';
+                document.getElementById('togglePasswordBtn').innerHTML = '<i class="bi bi-eye"></i>';
+                new bootstrap.Modal(document.getElementById('vaultPinModal')).show();
+            });
+        };
+
+        window.promptDeletePin = function (id) {
+            window.deleteIdToConfirm = id;
+            window.editIdToOpen = null;
+            window.usernameToReveal = '';
+            window.passwordToReveal = '';
+            window.passwordShown = false;
+
+            waitForModalElements(() => {
+                document.getElementById('vaultPinInput').value = '';
+                document.getElementById('modalPassword').textContent = '••••••••';
+                document.getElementById('togglePasswordBtn').innerHTML = '<i class="bi bi-eye"></i>';
+                new bootstrap.Modal(document.getElementById('vaultPinModal')).show();
+            });
+        };
+
+        window.confirmPin = async function () {
+            const pin = document.getElementById('vaultPinInput').value;
+            if (!pin) {
+                alert("Please enter your vault PIN.");
+                return;
+            }
+
+            const tokenElem = document.querySelector('input[name="__RequestVerificationToken"]');
+            const token = tokenElem ? tokenElem.value : "";
+
+            try {
+                const response = await fetch('/Vault/ValidatePinAjax', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify({ pin })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('vaultPinModal')).hide();
+
+                    if (window.editIdToOpen) {
+                        const markPinConfirmed = await fetch('/VaultPasswords/MarkPinConfirmed', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': token
+                            },
+                            body: JSON.stringify({})
+                        });
+
+                        if (markPinConfirmed.ok) {
+                            window.location.href = `/VaultPasswords/Edit/${window.editIdToOpen}`;
+                        } else {
+                            alert("PIN confirmation could not be saved.");
+                        }
+                        return;
+                    }
+
+                    if (window.deleteIdToConfirm) {
+                        const markPinConfirmed = await fetch('/VaultPasswords/MarkPinConfirmed', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': token
+                            },
+                            body: JSON.stringify({})
+                        });
+
+                        if (markPinConfirmed.ok) {
+                            window.location.href = `/VaultPasswords/Delete/${window.deleteIdToConfirm}`;
+                        } else {
+                            alert("PIN confirmation could not be saved.");
+                        }
+                        return;
+                    }
+
+                    // Default reveal password flow
+                    document.getElementById('modalUsername').textContent = window.usernameToReveal;
+                    document.getElementById('modalPassword').textContent = window.passwordToReveal;
+                    new bootstrap.Modal(document.getElementById('passwordDetailsModal')).show();
+                } else {
+                    alert("Incorrect PIN.");
+                }
+            } catch (err) {
+                console.error("Error validating PIN:", err);
+                alert("Something went wrong.");
+            }
+        };
+
+        window.togglePassword = function () {
+            window.passwordShown = !window.passwordShown;
+            const pwElem = document.getElementById('modalPassword');
+            const toggleBtn = document.getElementById('togglePasswordBtn');
+
+            if (pwElem && toggleBtn) {
+                pwElem.textContent = window.passwordShown ? window.passwordToReveal : '••••••••';
+                toggleBtn.innerHTML = window.passwordShown
+                    ? '<i class="bi bi-eye-slash"></i>'
+                    : '<i class="bi bi-eye"></i>';
+            }
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            waitForModalElements(() => {
+                document.getElementById('togglePasswordBtn').addEventListener('click', window.togglePassword);
+            });
+        });
+    </script>
+}
+

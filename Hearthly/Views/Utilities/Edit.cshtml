@@ -1,0 +1,111 @@
+﻿@model Hearthly.Data.Utility
+
+@{
+    ViewData["Title"] = "Edit Utility";
+    var familyId = ViewData["FamilyId"] as Guid? ?? Model.FamilyId;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="Edit"
+      asp-route-familyId="@familyId"
+      asp-route-id="@Model.Id"
+      method="post"
+      novalidate>
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="FamilyId" />
+
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Type" class="form-label"></label>
+        <select asp-for="Type" class="form-select" id="utilityTypeSelect">
+            <option value="">-- Select Type --</option>
+            <option value="Gas" selected="(Model.Type == UtilityType.Gas)">Gas</option>
+            <option value="Electricity" selected="(Model.Type == UtilityType.Electricity)">Electricity</option>
+        </select>
+        <span asp-validation-for="Type" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="AmountPaid" class="form-label"></label>
+        <input asp-for="AmountPaid" class="form-control" />
+        <span asp-validation-for="AmountPaid" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PurchasedFrom" class="form-label"></label>
+        <input asp-for="PurchasedFrom" class="form-control" />
+        <span asp-validation-for="PurchasedFrom" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="AccountUsed" class="form-label"></label>
+        <input asp-for="AccountUsed" class="form-control" />
+        <span asp-validation-for="AccountUsed" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PurchaseDate" class="form-label"></label>
+        <input asp-for="PurchaseDate" type="date" class="form-control" />
+        <span asp-validation-for="PurchaseDate" class="text-danger"></span>
+    </div>
+
+    <div id="electricityFields" style="display:none;">
+        <div class="mb-3">
+            <label asp-for="TokenNumber" class="form-label"></label>
+            <input asp-for="TokenNumber" class="form-control" />
+            <span asp-validation-for="TokenNumber" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="TotalUnits" class="form-label">Total Units (kWh)</label>
+            <input asp-for="TotalUnits" class="form-control" />
+            <span asp-validation-for="TotalUnits" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div id="gasFields" style="display:none;">
+        <div class="mb-3">
+            <label asp-for="TotalUnits" class="form-label">Liters Received</label>
+            <input asp-for="TotalUnits" class="form-control" />
+            <span asp-validation-for="TotalUnits" class="text-danger"></span>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save Changes</button>
+    <a asp-action="Index"
+       asp-route-familyId="@familyId"
+       class="btn btn-secondary">
+        Cancel
+    </a>
+</form>
+
+@section Scripts {
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js"></script>
+    <script>
+        const select = document.getElementById('utilityTypeSelect');
+        const elec   = document.getElementById('electricityFields');
+        const gas    = document.getElementById('gasFields');
+
+        function toggleExtras() {
+            if (select.value === 'Electricity') {
+                elec.style.display = 'block';
+                gas.style.display  = 'none';
+            }
+            else if (select.value === 'Gas') {
+                gas.style.display  = 'block';
+                elec.style.display = 'none';
+            }
+            else {
+                elec.style.display = 'none';
+                gas.style.display  = 'none';
+            }
+        }
+
+        select.addEventListener('change', toggleExtras);
+        toggleExtras();
+    </script>
+}

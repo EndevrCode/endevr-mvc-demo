@@ -1,0 +1,137 @@
+﻿@model Hearthly.Data.Utility
+
+@{
+    ViewData["Title"] = "Add Utility";
+    var familyId = ViewData["FamilyId"] as Guid? ?? Model.FamilyId;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form id="utilityForm"
+      asp-controller="Utilities"
+      asp-action="Create"
+      asp-route-familyId="@familyId"
+      method="post"
+      novalidate>
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="FamilyId" />
+
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="Type" class="form-label"></label>
+        <select asp-for="Type" class="form-select" id="utilityTypeSelect">
+            <option value="">-- Select Type --</option>
+            <option value="Gas">Gas</option>
+            <option value="Electricity">Electricity</option>
+        </select>
+        <span asp-validation-for="Type" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="AmountPaid" class="form-label"></label>
+        <input asp-for="AmountPaid" class="form-control" />
+        <span asp-validation-for="AmountPaid" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PurchasedFrom" class="form-label"></label>
+        <input asp-for="PurchasedFrom" class="form-control" />
+        <span asp-validation-for="PurchasedFrom" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="AccountUsed" class="form-label"></label>
+        <input asp-for="AccountUsed" class="form-control" />
+        <span asp-validation-for="AccountUsed" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PurchaseDate" class="form-label"></label>
+        <input asp-for="PurchaseDate" type="date" class="form-control" />
+        <span asp-validation-for="PurchaseDate" class="text-danger"></span>
+    </div>
+
+    <!-- Electricity-only fields -->
+    <div id="electricityFields" style="display:none;">
+        <div class="mb-3">
+            <label asp-for="TokenNumber" class="form-label"></label>
+            <input asp-for="TokenNumber" class="form-control" />
+            <span asp-validation-for="TokenNumber" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="TotalUnits" class="form-label">Total Units (kWh)</label>
+            <input asp-for="TotalUnits" class="form-control" />
+            <span asp-validation-for="TotalUnits" class="text-danger"></span>
+        </div>
+    </div>
+
+    <!-- Gas-only fields -->
+    <div id="gasFields" style="display:none;">
+        <div class="mb-3">
+            <label asp-for="TotalUnits" class="form-label">Liters Received</label>
+            <input asp-for="TotalUnits" class="form-control" />
+            <span asp-validation-for="TotalUnits" class="text-danger"></span>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+    <a asp-action="Index"
+       asp-controller="Utilities"
+       asp-route-familyId="@familyId"
+       class="btn btn-secondary">
+        Cancel
+    </a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="/js/background-sync.js"></script>
+    <script>
+        const select = document.getElementById('utilityTypeSelect');
+        const elec   = document.getElementById('electricityFields');
+        const gas    = document.getElementById('gasFields');
+
+        function toggleExtras() {
+            elec.style.display = 'none';
+            gas.style.display  = 'none';
+            if (select.value === 'Electricity') elec.style.display = 'block';
+            if (select.value === 'Gas') gas.style.display = 'block';
+        }
+
+        select.addEventListener('change', toggleExtras);
+        toggleExtras();
+
+        document.getElementById("utilityForm").addEventListener("submit", async function (e) {
+            if (!navigator.onLine) {
+                e.preventDefault();
+
+                const form = e.target;
+                const formData = new FormData(form);
+                const plain = {};
+                formData.forEach((v, k) => {
+                    if (plain[k]) {
+                        if (!Array.isArray(plain[k])) plain[k] = [plain[k]];
+                        plain[k].push(v);
+                    } else {
+                        plain[k] = v;
+                    }
+                });
+
+                const db = await getDb();
+                const tx = db.transaction('utilityQueue', 'readwrite');
+                await tx.objectStore('utilityQueue').add(plain);
+                await tx.done;
+
+                if ('serviceWorker' in navigator && 'SyncManager' in window) {
+                    const reg = await navigator.serviceWorker.ready;
+                    await reg.sync.register('sync-utility');
+                }
+
+                alert("Offline! Your utility record will be saved and synced later.");
+                form.reset();
+                toggleExtras();
+            }
+        });
+    </script>
+}

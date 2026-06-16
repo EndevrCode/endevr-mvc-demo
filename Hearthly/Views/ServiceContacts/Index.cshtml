@@ -1,0 +1,117 @@
+﻿@model IEnumerable<Hearthly.Data.ServiceContact>
+@using System.ComponentModel.DataAnnotations
+@using System.Reflection
+
+@{
+    ViewData["Title"] = "Service Contacts";
+
+    // safely grab familyId
+    Guid familyId = Guid.Empty;
+    var fid = ViewContext.HttpContext.Request.Query["familyId"].ToString();
+    if (!string.IsNullOrWhiteSpace(fid))
+    {
+        Guid.TryParse(fid, out familyId);
+    }
+
+    // helper to get Display Name of enum
+    string GetDisplayName(Enum value)
+    {
+        return value.GetType()
+                    .GetMember(value.ToString())
+                    .First()
+                    .GetCustomAttribute<DisplayAttribute>()?.Name ?? value.ToString();
+    }
+
+    // helper lambdas for icon name & color
+    Func<Hearthly.Data.ServiceType, string> GetIcon = st => st switch
+    {
+        Hearthly.Data.ServiceType.Electrician => "lightning-charge-fill",
+        Hearthly.Data.ServiceType.Plumber => "moisture",
+        Hearthly.Data.ServiceType.Lawyer => "briefcase",
+        Hearthly.Data.ServiceType.Doctor => "lungs",
+        Hearthly.Data.ServiceType.Handyman => "wrench",
+        Hearthly.Data.ServiceType.MedicalAid => "hospital",
+        Hearthly.Data.ServiceType.Cellphone => "phone",
+        Hearthly.Data.ServiceType.Insurance => "shield-check",
+        Hearthly.Data.ServiceType.Cleaner => "universal-access",
+        Hearthly.Data.ServiceType.Dentist => "emoji-smile",
+        Hearthly.Data.ServiceType.Therapist => "person-hearts",
+        Hearthly.Data.ServiceType.Builder => "building",
+        Hearthly.Data.ServiceType.ISP => "router",
+        Hearthly.Data.ServiceType.Towing => "truck-flatbed",
+        Hearthly.Data.ServiceType.Mechanic => "gear",
+        Hearthly.Data.ServiceType.Painter => "paint-bucket",
+        Hearthly.Data.ServiceType.Solar => "sunrise",
+        _ => "tools"
+    };
+
+    Func<Hearthly.Data.ServiceType, string> GetColor = st => st switch
+    {
+        Hearthly.Data.ServiceType.Electrician => "text-primary",
+        Hearthly.Data.ServiceType.Plumber => "text-info",
+        Hearthly.Data.ServiceType.Lawyer => "text-danger",
+        Hearthly.Data.ServiceType.Doctor => "text-success",
+        Hearthly.Data.ServiceType.Handyman => "text-warning",
+        Hearthly.Data.ServiceType.MedicalAid => "text-secondary",
+        Hearthly.Data.ServiceType.Cellphone => "text-muted",
+        Hearthly.Data.ServiceType.Insurance => "text-dark",
+        Hearthly.Data.ServiceType.Cleaner => "text-primary",
+        Hearthly.Data.ServiceType.Dentist => "text-info",
+        Hearthly.Data.ServiceType.Therapist => "text-danger",
+        Hearthly.Data.ServiceType.Builder => "text-warning",
+        Hearthly.Data.ServiceType.ISP => "text-secondary",
+        Hearthly.Data.ServiceType.Towing => "text-success",
+        Hearthly.Data.ServiceType.Mechanic => "text-primary",
+        Hearthly.Data.ServiceType.Painter => "text-info",
+        _ => "text-secondary"
+    };
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="mb-3">
+    <a asp-action="Create"
+       asp-route-familyId="@familyId"
+       class="btn btn-primary">
+        <i class="bi bi-patch-plus"></i> Create New Service Contact
+    </a>
+</div>
+
+<div class="row">
+    @foreach (var contact in Model)
+    {
+        <div class="col-md-6 mb-4">
+            <div class="card glass-card h-100">
+                <div class="row g-0">
+                    <!-- Icon column -->
+                    <div class="col-3 d-flex justify-content-center justify-content-md-start align-items-center pe-0 py-4">
+                        <i class="bi bi-@GetIcon(contact.ServiceType) @GetColor(contact.ServiceType) service-icon"></i>
+                    </div>
+                    <!-- Details column -->
+                    <div class="col">
+                        <div class="card-body">
+                            <p class="card-text"><strong>Service:</strong> @GetDisplayName(contact.ServiceType)</p>
+                            <p class="card-text"><strong>Company:</strong> @contact.Company</p>
+                            <p class="card-text"><strong>Contact Person:</strong> @contact.ContactPerson</p>
+                            <p class="card-text"><strong>Contact Number:</strong> @contact.ContactNumber</p>
+                            @if (!string.IsNullOrWhiteSpace(contact.Notes))
+                            {
+                                <p class="card-text"><strong>Notes:</strong> @contact.Notes</p>
+                            }
+                            <a asp-action="Details"
+                               asp-route-id="@contact.Id"
+                               asp-route-familyId="@familyId"
+                               class="stretched-link"></a>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 text-center">
+                            <a href="tel:@contact.ContactNumber"
+                               class="btn btn-outline-primary">
+                                <i class="bi bi-telephone-outbound"></i> Call
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

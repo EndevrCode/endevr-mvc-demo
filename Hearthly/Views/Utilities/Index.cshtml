@@ -1,0 +1,92 @@
+﻿@model IEnumerable<Hearthly.Data.Utility>
+@{
+    ViewData["Title"] = "Utilities";
+    var familyId = (Guid)ViewData["FamilyId"]!;
+}
+
+<h2 class="mb-4">@ViewData["Title"]</h2>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <a asp-action="Create"
+       asp-route-familyId="@familyId"
+       class="btn btn-primary rounded-pill shadow-sm">
+        <i class="bi bi-patch-plus me-1"></i> Add Utility
+    </a>
+</div>
+
+@foreach (var u in Model)
+{
+    <div class="card mb-4 shadow-sm rounded-4">
+        <div class="card-body">
+            <h5 class="card-title text-capitalize mb-3">
+                <i class="bi bi-tools me-1"></i> @u.Type
+            </h5>
+
+            <div class="row gy-2">
+                <div class="col-6">
+                    <small>Purchase Date</small>
+                    <div>@u.PurchaseDate.ToString("dd MMMM yyyy")</div>
+                </div>
+                <div class="col-6">
+                    <small>Amount Paid</small>
+                    <div>@u.AmountPaid.ToString("C")</div>
+                </div>
+                <div class="col-6">
+                    <small>Purchased From</small>
+                    <div>@u.PurchasedFrom</div>
+                </div>
+                <div class="col-6">
+                    <small>Account Used</small>
+                    <div>@u.AccountUsed</div>
+                </div>
+
+                <div class="col-12 mt-2">
+                    <small>Details</small>
+                    @if (u.Type == Hearthly.Data.UtilityType.Electricity)
+                    {
+                        <div><strong>Token:</strong> @u.TokenNumber</div>
+                        <div><strong>Units:</strong> @u.TotalUnits</div>
+                    }
+                    else
+                    {
+                        <div><strong>Liters:</strong> @u.TotalUnits</div>
+                    }
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+                <a asp-action="Edit"
+                   asp-route-familyId="@familyId"
+                   asp-route-id="@u.Id"
+                   class="btn btn-sm btn-outline-primary me-2">
+                    <i class="bi bi-pencil-square"></i> Edit
+                </a>
+                <form asp-action="Delete"
+                      asp-route-familyId="@familyId"
+                      asp-route-id="@u.Id"
+                      method="post"
+                      class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit"
+                            class="btn btn-sm btn-outline-danger"
+                            onclick="return confirm('Remove this record?');">
+                        <i class="bi bi-trash3"></i> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="mt-5 d-flex flex-column gap-3">
+    <a asp-action="ElectricitySummary"
+       asp-route-familyId="@familyId"
+       class="btn btn-outline-secondary rounded-pill">
+        <i class="bi bi-lightning-charge me-1"></i> View Electricity Summary
+    </a>
+    <a asp-action="GasSummary"
+       asp-route-familyId="@familyId"
+       class="btn btn-outline-secondary rounded-pill">
+        <i class="bi bi-fire me-1"></i> View Gas Summary
+    </a>
+</div>

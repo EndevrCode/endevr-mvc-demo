@@ -1,0 +1,51 @@
+﻿@model Hearthly.Data.UserProfile
+
+@{
+    ViewData["Title"] = "View Profile";
+}
+
+<h2>@ViewData["Title"]</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-4 text-center">
+        <img src="@(Model.ProfilePictureUrl)"
+             alt="Profile photo"
+             class="rounded-circle mb-3"
+             style="width:150px;height:150px;object-fit:cover;" />
+    </div>
+
+    <div class="col-md-8">
+        <dl class="row">
+            <dt class="col-sm-4">First Name</dt>
+            <dd class="col-sm-8">@Model.FirstName</dd>
+
+            <dt class="col-sm-4">Last Name</dt>
+            <dd class="col-sm-8">@Model.LastName</dd>
+
+            <dt class="col-sm-4">Preferred Name</dt>
+            <dd class="col-sm-8">@Model.PreferredName</dd>
+
+            <dt class="col-sm-4">Birth Date</dt>
+            <dd class="col-sm-8">
+                @(Model.BirthDate.HasValue
+                                ? Model.BirthDate.Value.ToString("dd MMMM yyyy")
+                                : "-")
+            </dd>
+
+            <dt class="col-sm-4">ID Number</dt>
+            <dd class="col-sm-8">@Model.IdNumber</dd>
+
+            <dt class="col-sm-4">Phone Number</dt>
+            <dd class="col-sm-8">@Model.PhoneNumber</dd>
+
+            <dt class="col-sm-4">Address</dt>
+            <dd class="col-sm-8">@Model.Address</dd>
+        </dl>
+        <button type="button"
+                class="btn btn-secondary"
+                onclick="history.back();">
+            ← Back to Family Details
+        </button>
+    </div>
+</div>

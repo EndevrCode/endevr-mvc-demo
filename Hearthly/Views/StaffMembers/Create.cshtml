@@ -1,0 +1,187 @@
+﻿@model Hearthly.Data.StaffMember
+@{
+    ViewData["Title"] = "Add Staff Member";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form id="staffForm" asp-action="Create" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <input asp-for="FamilyId" type="hidden" />
+
+    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+    <!-- Photo preview & upload -->
+    <div class="mb-3">
+        <label class="form-label">Profile Photo</label><br />
+        <img id="photoPreview" src="/images/placeholder.png"
+             alt="Preview"
+             class="rounded-circle mb-2"
+             style="width:100px;height:100px;object-fit:cover;" />
+        <input type="file" name="photo" class="form-control" accept="image/*"
+               onchange="previewImage(event)" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="FirstName" class="form-label"></label>
+        <input asp-for="FirstName" class="form-control" />
+        <span asp-validation-for="FirstName" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="LastName" class="form-label"></label>
+        <input asp-for="LastName" class="form-control" />
+        <span asp-validation-for="LastName" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="PreferredName" class="form-label"></label>
+        <input asp-for="PreferredName" class="form-control" />
+        <span asp-validation-for="PreferredName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="ContactNumber" class="form-label"></label>
+        <input asp-for="ContactNumber" class="form-control" />
+        <span asp-validation-for="ContactNumber" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Nationality" class="form-label"></label>
+        <select asp-for="Nationality" class="form-select" id="nationality">
+            <option value="">Select Country</option>
+            <option value="South Africa">South Africa</option>
+            <option value="Zimbabwe">Zimbabwe</option>
+            <option value="Lesotho">Lesotho</option>
+            <option value="Malawi">Malawi</option>
+            <option value="Other">Other</option>
+        </select>
+        <span asp-validation-for="Nationality" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3" id="idField">
+        <label asp-for="IdNumber" class="form-label"></label>
+        <input asp-for="IdNumber" class="form-control" />
+        <span asp-validation-for="IdNumber" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3" id="passportField" style="display:none;">
+        <label asp-for="PassportNumber" class="form-label"></label>
+        <input asp-for="PassportNumber" class="form-control" />
+        <span asp-validation-for="PassportNumber" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="BirthDate" class="form-label"></label>
+        <input asp-for="BirthDate" type="date" class="form-control" />
+        <span asp-validation-for="BirthDate" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="WorkDays" class="form-label">Days Available</label><br />
+        @{
+            var days = new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+        }
+        @foreach (var day in days)
+        {
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="WorkDays" value="@day" id="day_@day" />
+                <label class="form-check-label" for="day_@day">@day</label>
+            </div>
+        }
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DailyWageZAR" class="form-label"></label>
+        <input asp-for="DailyWageZAR" type="number" step="0.01" class="form-control" />
+        <span asp-validation-for="DailyWageZAR" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="BankName" class="form-label"></label>
+        <input asp-for="BankName" class="form-control" />
+        <span asp-validation-for="BankName" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="AccountName" class="form-label"></label>
+        <input asp-for="AccountName" class="form-control" />
+        <span asp-validation-for="AccountName" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="AccountNumber" class="form-label"></label>
+        <input asp-for="AccountNumber" class="form-control" />
+        <span asp-validation-for="AccountNumber" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="BranchCode" class="form-label"></label>
+        <input asp-for="BranchCode" class="form-control" />
+        <span asp-validation-for="BranchCode" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Address" class="form-label"></label>
+        <input asp-for="Address" id="autocomplete" class="form-control" autocomplete="off" />
+        <span asp-validation-for="Address" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Add Staff</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="/js/background-sync.js"></script>
+    <script>
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function () {
+                document.getElementById('photoPreview').src = reader.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+
+        window.initAutocomplete = function () {
+            const input = document.getElementById('autocomplete');
+            if (!input) return;
+            new google.maps.places.Autocomplete(input, {
+                types: ['address'],
+                componentRestrictions: { country: 'za' }
+            });
+        };
+
+        document.getElementById("nationality").addEventListener("change", function () {
+            const isSA = this.value === "South Africa";
+            document.getElementById("idField").style.display = isSA ? "block" : "none";
+            document.getElementById("passportField").style.display = isSA ? "none" : "block";
+        });
+
+        document.getElementById("staffForm").addEventListener("submit", async function (e) {
+            if (!navigator.onLine) {
+                e.preventDefault();
+
+                const form = e.target;
+                const formData = new FormData(form);
+                const plain = {};
+                formData.forEach((v, k) => {
+                    if (plain[k]) {
+                        if (!Array.isArray(plain[k])) plain[k] = [plain[k]];
+                        plain[k].push(v);
+                    } else {
+                        plain[k] = v;
+                    }
+                });
+
+                const db = await getDb();
+                const tx = db.transaction('staffQueue', 'readwrite');
+                await tx.objectStore('staffQueue').add(plain);
+                await tx.done;
+
+                if ('serviceWorker' in navigator && 'SyncManager' in window) {
+                    const reg = await navigator.serviceWorker.ready;
+                    await reg.sync.register('sync-staff');
+                }
+
+                alert("Offline! Your submission will be saved and synced when online.");
+                form.reset();
+            }
+        });
+    </script>
+}

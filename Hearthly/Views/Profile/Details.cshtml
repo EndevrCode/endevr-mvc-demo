@@ -1,0 +1,169 @@
+﻿@using Hearthly.Models
+@model ProfileViewModel
+@using System
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = $"{Model.Profile.FirstName} {Model.Profile.LastName}";
+    var user = Model.User;
+    var profile = Model.Profile ?? new UserProfile();
+
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    bool isOwner = string.Equals(currentUserId, user.Id, StringComparison.OrdinalIgnoreCase);
+
+    var today = DateTime.UtcNow.Date;
+    int? age = null;
+    int monthsUntil = 0, daysUntil = 0;
+    if (profile.BirthDate.HasValue)
+    {
+        var bd = profile.BirthDate.Value.Date;
+        var yrs = today.Year - bd.Year;
+        if (today < bd.AddYears(yrs)) yrs--;
+        age = yrs;
+
+        var nextBd = bd.AddYears(yrs + 1);
+        monthsUntil = (nextBd.Year - today.Year) * 12 + (nextBd.Month - today.Month);
+        var intermediate = today.AddMonths(monthsUntil);
+        daysUntil = (nextBd - intermediate).Days;
+        if (daysUntil < 0)
+        {
+            monthsUntil--;
+            intermediate = today.AddMonths(monthsUntil);
+            daysUntil = (nextBd - intermediate).Days;
+        }
+    }
+}
+
+@if (TempData["StatusMessage"] is string msg)
+{
+    <div class="alert alert-success">@msg</div>
+}
+
+<div class="card glass-card p-4 rounded shadow-sm mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-center gap-4">
+        <!-- Profile photo -->
+        <div class="text-center">
+            @if (!string.IsNullOrEmpty(profile.PhotoPath))
+            {
+                <a href="#" data-bs-toggle="modal" data-bs-target="#photoModal">
+                    <img src="@Url.Content(profile.PhotoPath)"
+                         alt="Profile photo"
+                         class="rounded-circle shadow-sm"
+                         style="width: 140px; height: 140px; object-fit: cover; cursor: pointer;" />
+                </a>
+            }
+            else
+            {
+                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
+                     style="width: 140px; height: 140px;">
+                    <span>No Photo</span>
+                </div>
+            }
+        </div>
+
+        <!-- Name and Role -->
+        <div class="text-center text-md-start">
+            <h2 class="mb-1">@profile.FirstName @profile.LastName</h2>
+            <p class="text-muted mb-0">User Profile</p>
+        </div>
+    </div>
+</div>
+
+<!-- Profile Info Section -->
+<div class="card glass-card p-4 rounded shadow-sm mb-4">
+    <div class="row gy-3">
+        <div class="col-md-6"><strong>User Name:</strong> @user.UserName</div>
+        <div class="col-md-6"><strong>Email:</strong> @user.Email</div>
+        <div class="col-md-6"><strong>First Name:</strong> @profile.FirstName</div>
+        <div class="col-md-6"><strong>Last Name:</strong> @profile.LastName</div>
+        <div class="col-md-6"><strong>Preferred Name:</strong> @profile.PreferredName</div>
+        <div class="col-md-6"><strong>Birth Date:</strong> @(profile.BirthDate?.ToString("dd MMMM yyyy") ?? "-")</div>
+        @if (age.HasValue)
+        {
+            <div class="col-md-6"><strong>Age:</strong> @age years</div>
+            <div class="col-md-6"><strong>Next Birthday:</strong> @monthsUntil months and @daysUntil days</div>
+            @if (profile.BirthDate.HasValue)
+{
+    var bd = profile.BirthDate.Value.Date;
+    var nextBd = bd.AddYears(today.Year - bd.Year);
+    if (nextBd < today) nextBd = nextBd.AddYears(1);
+
+    var lastBd = nextBd.AddYears(-1);
+    var totalDays = (nextBd - lastBd).TotalDays;
+    var daysRemaining = (nextBd - today).TotalDays;
+    var progress = 100 * ((totalDays - daysRemaining) / totalDays);
+
+    <div class="col-md-12 mt-3">
+        <div class="birthday-progress text-center">
+            <i class="fa-solid fa-cake-candles fa-2x mb-2" style="color: #ffc107;"></i>
+            <div class="progress-container">
+                <div class="progress-fill" style="width: @($"{progress:0.#}%")"></div>
+            </div>
+            <small class="text-muted d-block mt-1">@($"{progress:0.#}%") to your next birthday</small>
+        </div>
+    </div>
+}
+        }
+        <div class="col-md-6"><strong>ID Number:</strong> @profile.IdNumber</div>
+        <div class="col-md-6"><strong>Phone Number:</strong> @profile.PhoneNumber</div>
+        <div class="col-12">
+            <strong>Address:</strong> @profile.Address
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(profile.Address))
+        {
+            <div class="col-12 text-center mt-3">
+                <div class="rounded-circle overflow-hidden mx-auto" style="width: 280px; height: 280px; border: 3px solid #ccc;">
+                    <iframe src="https://www.google.com/maps?q=@System.Net.WebUtility.UrlEncode(profile.Address)&output=embed"
+                            width="280"
+                            height="280"
+                            frameborder="0"
+                            style="border:0;"
+                            allowfullscreen
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="text-center mt-4">
+    @if (isOwner)
+    {
+        <a asp-action="Edit" class="btn btn-primary me-2">
+            <i class="bi bi-pencil-square"></i> Edit Profile
+        </a>
+        <form asp-controller="Profile"
+              asp-action="DeleteAccount"
+              method="post"
+              class="d-inline-block"
+              onsubmit="return confirm('This will permanently delete your account. Are you sure?');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-danger me-2">
+                <i class="bi bi-trash3"></i> Delete My Account
+            </button>
+        </form>
+    }
+
+    <a href="javascript:history.back()" class="btn btn-secondary">
+        <i class="bi bi-arrow-left-circle"></i> Back
+    </a>
+</div>
+
+<!-- Modal for Enlarged Profile Photo -->
+<div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body text-center p-0">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-2"
+                        data-bs-dismiss="modal" aria-label="Close"></button>
+                <img src="@Url.Content(profile.PhotoPath)"
+                     alt="Profile photo large"
+                     class="img-fluid rounded" />
+            </div>
+        </div>
+    </div>
+</div>

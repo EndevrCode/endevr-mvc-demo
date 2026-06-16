@@ -1,0 +1,71 @@
+﻿@model IEnumerable<Hearthly.Data.Pet>
+
+@{
+    ViewData["Title"] = "Pets";
+    var today = DateTime.Today;
+}
+
+<h2 class="mt-5 mb-4">@ViewData["Title"]</h2>
+
+<div class="d-flex justify-content-center mb-4">
+    <a asp-action="Create" class="btn btn-primary rounded-pill shadow-sm">
+        <i class="bi bi-patch-plus"></i> Add a Pet
+    </a>
+</div>
+
+<div class="row">
+    @foreach (var pet in Model)
+    {
+        DateTime? nextDate;
+        string label;
+        int? countYears;
+
+        if (!pet.IsDeceased)
+        {
+            if (pet.BirthDate.HasValue)
+            {
+                var bdThisYear = new DateTime(today.Year, pet.BirthDate.Value.Month, pet.BirthDate.Value.Day);
+                nextDate = bdThisYear < today ? bdThisYear.AddYears(1) : bdThisYear;
+                label = "birthday";
+                countYears = nextDate.Value.Year - pet.BirthDate.Value.Year;
+            }
+            else { nextDate = null; label = "birthday"; countYears = null; }
+        }
+        else
+        {
+            if (pet.DateOfDeath.HasValue)
+            {
+                var adThisYear = new DateTime(today.Year, pet.DateOfDeath.Value.Month, pet.DateOfDeath.Value.Day);
+                nextDate = adThisYear < today ? adThisYear.AddYears(1) : adThisYear;
+                label = "anniversary";
+                countYears = nextDate.Value.Year - pet.DateOfDeath.Value.Year;
+            }
+            else { nextDate = null; label = "anniversary"; countYears = null; }
+        }
+
+        var daysUntil = nextDate.HasValue ? (nextDate.Value - today).Days : (int?)null;
+        var cardClass = pet.IsDeceased ? "deceased-card" : "";
+        <div class="col-md-6 mb-5 d-flex justify-content-center">
+            <a asp-action="Details" asp-route-id="@pet.Id" class="text-decoration-none w-100" style="max-width: 320px;">
+                <div class="card shadow-sm border-0 bg-transparent text-center @cardClass">
+                    @if (!string.IsNullOrEmpty(pet.PhotoPath))
+                    {
+                        <img src="@pet.PhotoPath" alt="@pet.Name" class="pet-photo-lg rounded-circle mx-auto mt-3" style="width: 220px; height: 220px; object-fit: cover;" />
+                    }
+
+                    <div class="card-body text-light">
+                        <h5 class="card-title">@pet.Name</h5>
+
+                        @if (daysUntil.HasValue && countYears.HasValue)
+                        {
+                            <p class="card-text mb-0 small text-light">
+                                Next @label in <strong>@daysUntil</strong> day@(daysUntil == 1 ? "" : "s")<br />
+                                This will be <strong>@countYears</strong> year@(countYears == 1 ? "" : "s")
+                            </p>
+                        }
+                    </div>
+                </div>
+            </a>
+        </div>
+    }
+</div>

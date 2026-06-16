@@ -1,0 +1,150 @@
+﻿@model Hearthly.Data.Pet
+
+@{
+    ViewData["Title"] = $"{Model.Name}";
+    var pet = Model;
+    bool hasPhoto = !string.IsNullOrEmpty(pet.PhotoPath);
+}
+
+<!-- Header Card -->
+<div class="card glass-card p-4 rounded shadow-sm mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-center gap-4">
+        <!-- Profile Photo -->
+        <div class="text-center">
+            @if (hasPhoto)
+            {
+                <a href="#" data-bs-toggle="modal" data-bs-target="#photoModal">
+                    <img src="@Url.Content(pet.PhotoPath)"
+                         alt="@pet.Name"
+                         class="rounded-circle shadow-sm"
+                         style="width: 140px; height: 140px; object-fit: cover; cursor: pointer;" />
+                </a>
+            }
+            else
+            {
+                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
+                     style="width: 140px; height: 140px;">
+                    <span>No Photo</span>
+                </div>
+            }
+        </div>
+
+        <!-- Name and Tag -->
+        <div class="text-center text-md-start">
+            <h2 class="mb-1">@pet.Name</h2>
+            <p class="text-muted mb-0">Pet Profile</p>
+        </div>
+    </div>
+</div>
+
+<!-- Details Card -->
+<div class="card glass-card p-4 rounded shadow-sm mb-4">
+    <div class="row gy-3">
+        <div class="col-md-6"><strong>Species:</strong> @pet.Species</div>
+        <div class="col-md-6"><strong>Breed:</strong> @pet.Breed</div>
+        <div class="col-md-6"><strong>Family:</strong> @pet.Family?.Name</div>
+        <div class="col-md-6"><strong>Birth Date:</strong> @(pet.BirthDate?.ToString("dd MMMM yyyy") ?? "-")</div>
+        <div class="col-md-6">
+            <strong>Age:</strong>
+            @{
+                if (pet.IsDeceased)
+                {
+                    @pet.FinalAge
+                }
+                else if (pet.BirthDate.HasValue)
+                {
+                    var today = DateTime.Today;
+                    var birth = pet.BirthDate.Value;
+                    int years = today.Year - birth.Year;
+                    int months = today.Month - birth.Month;
+
+                    if (today.Day < birth.Day)
+                        months--;
+
+                    if (months < 0)
+                    {
+                        years--;
+                        months += 12;
+                    }
+
+                    var yearPart = years > 0 ? $"{years} year{(years > 1 ? "s" : "")}" : "";
+                    var monthPart = months > 0 ? $"{months} month{(months > 1 ? "s" : "")}" : "";
+
+                    var ageDisplay = string.Join(", ", new[] { yearPart, monthPart }.Where(s => !string.IsNullOrEmpty(s)));
+
+                    @ageDisplay
+                }
+                else
+                {
+                    @("-")
+                }
+            }
+        </div>
+        <div class="col-md-6"><strong>Last Weight:</strong> @(pet.LastWeightKg?.ToString("0.##") ?? "-") kg</div>
+        <div class="col-md-6"><strong>Last Weighed:</strong> @(pet.LastWeighedDate?.ToString("dd MMMM yyyy") ?? "-")</div>
+        <div class="col-md-6"><strong>Last Deworming:</strong> @(pet.LastDewormingDate?.ToString("dd MMMM yyyy") ?? "-")</div>
+        <div class="col-md-6"><strong>Last Tick/Flea:</strong> @(pet.LastTickFleaDate?.ToString("dd MMMM yyyy") ?? "-")</div>
+        <div class="col-md-6"><strong>Last Grooming:</strong> @(pet.LastGroomingDate?.ToString("dd MMMM yyyy") ?? "-")</div>
+        <div class="col-md-6"><strong>Last Checkup:</strong> @(pet.LastCheckupDate?.ToString("dd MMMM yyyy") ?? "-")</div>
+        <div class="col-md-6"><strong>Has Insurance:</strong> @(pet.HasInsurance ? "Yes" : "No")</div>
+
+        @if (pet.HasInsurance)
+        {
+            <div class="col-md-6"><strong>Insurance Number:</strong> @pet.InsuranceNumber</div>
+        }
+
+        <div class="col-md-6"><strong>Microchipped:</strong> @(pet.IsMicrochipped ? "Yes" : "No")</div>
+
+        @if (pet.IsMicrochipped)
+        {
+            <div class="col-md-6"><strong>Microchip Number:</strong> @pet.MicrochipNumber</div>
+        }
+
+        <div class="col-md-6"><strong>Deceased:</strong> @(pet.IsDeceased ? "Yes" : "No")</div>
+
+        @if (pet.IsDeceased)
+        {
+            <div class="col-md-6"><strong>Date of Death:</strong> @(pet.DateOfDeath?.ToString("dd MMMM yyyy") ?? "-")</div>
+            <div class="col-md-6"><strong>Final Age:</strong> @pet.FinalAge</div>
+        }
+    </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="text-center mt-4">
+    <a asp-action="Edit" asp-route-id="@pet.Id" class="btn btn-primary me-2">
+        <i class="bi bi-pencil-square"></i> Edit
+    </a>
+    <a asp-action="Index" class="btn btn-secondary me-2">
+        <i class="bi bi-arrow-left-circle"></i> Back
+    </a>
+    <form asp-action="Delete"
+          method="post"
+          class="d-inline-block"
+          onsubmit="return confirm('Are you sure you want to delete @pet.Name?');">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger">
+            <i class="bi bi-trash3"></i> Delete
+        </button>
+    </form>
+</div>
+
+@if (!string.IsNullOrEmpty(pet.PhotoPath))
+{
+    <!-- Modal for Enlarged Pet Photo -->
+    <div class="modal fade" id="photoModal" tabindex="-1" aria-labelledby="photoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-transparent border-0">
+                <div class="modal-body text-center p-0">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-2"
+                            data-bs-dismiss="modal" aria-label="Close"></button>
+                    <img src="@Url.Content(pet.PhotoPath)"
+                         alt="@pet.Name large"
+                         class="img-fluid rounded" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+

@@ -1,0 +1,67 @@
+﻿@model IEnumerable<Hearthly.Data.Pet>
+
+@{
+    ViewData["Title"] = "Wall of Remembrance";
+}
+
+<h1>Wall of Remembrance</h1>
+
+<div class="row">
+    @foreach (var pet in Model)
+    {
+        // calculate full years & months between BirthDate and DateOfDeath
+        int? fullYears = null;
+        int? fullMonths = null;
+        if (pet.BirthDate.HasValue && pet.DateOfDeath.HasValue)
+        {
+            var birth = pet.BirthDate.Value;
+            var death = pet.DateOfDeath.Value;
+
+            // start with year difference
+            int years = death.Year - birth.Year;
+            // adjust if death month/day is before birth month/day
+            if (death < birth.AddYears(years))
+                years--;
+
+            // calculate month difference
+            int months = death.Month - birth.Month;
+            if (death.Day < birth.Day)
+                months--;
+
+            if (months < 0)
+                months += 12;
+
+            fullYears = years;
+            fullMonths = months;
+        }
+
+        <div class="col-md-4 mb-4">
+            <div class="card glass-card h-100">
+                @if (!string.IsNullOrEmpty(pet.PhotoPath))
+                {
+                    <img class="card-img-top" src="@pet.PhotoPath" alt="@pet.Name" />
+                }
+                <div class="card-body text-center">
+                    <h5 class="card-title">@pet.Name</h5>
+
+                    <p class="card-text mb-1">
+                        <strong>Final Age:</strong>
+                        @if (fullYears.HasValue && fullMonths.HasValue)
+                        {
+                            @($"{fullYears} year{(fullYears == 1 ? "" : "s")}, {fullMonths} month{(fullMonths == 1 ? "" : "s")}")
+                        }
+                        else
+                        {
+                            <em>N/A</em>
+                        }
+                    </p>
+
+                    <p class="card-text">
+                        <strong>Date of Death:</strong>
+                        @(pet.DateOfDeath?.ToString("dd MMMM yyyy") ?? "")
+                    </p>
+                </div>
+            </div>
+        </div>
+    }
+</div>

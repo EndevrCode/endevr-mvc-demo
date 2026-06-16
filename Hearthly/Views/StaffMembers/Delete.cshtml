@@ -1,0 +1,41 @@
+﻿@model Hearthly.Data.StaffMember
+
+@{
+    ViewData["Title"] = "Delete Staff Member";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="d-flex flex-column flex-md-row align-items-center gap-4 mb-4">
+    <!-- Photo -->
+    <div class="flex-shrink-0 text-center text-md-start">
+        @if (!string.IsNullOrEmpty(Model.PhotoPath))
+        {
+            <img src="@Model.PhotoPath"
+                 alt="@Model.FirstName"
+                 class="rounded-circle"
+                 style="width:150px;height:150px;object-fit:cover;" />
+        }
+        else
+        {
+            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
+                 style="width:150px;height:150px; font-size:2rem;">
+                @Model.FirstName.Substring(0, 1).ToUpper()
+            </div>
+        }
+    </div>
+
+    <div>
+        <h1 class="mb-1">@Model.FirstName @Model.LastName</h1>
+        <small class="text-muted">Staff Member</small>
+    </div>
+</div>
+
+<form asp-action="Delete" asp-route-id="@Model.Id" method="post">
+    @Html.AntiForgeryToken()
+    <div class="alert alert-warning">
+        Are you sure you want to delete this staff member?
+    </div>
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+</form>

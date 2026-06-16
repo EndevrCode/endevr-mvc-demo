@@ -1,0 +1,221 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Hearthly.Data
+@inject SignInManager<ApplicationUser> SignInManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>@ViewData["Title"] - Hearthly</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <script src="https://kit.fontawesome.com/dfc8a51ea6.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="@($"{ViewData["ThemeMode"]} {ViewData["FontSize"]}")">
+
+    <!-- Startup Animation (Mobile Only) -->
+    <div id="startup-animation" class="startup-animation d-md-none">
+        <div class="startup-text">Welcome to</div>
+        <img src="~/icons/icon-192.png" alt="App Icon" class="startup-icon" />
+    </div>
+
+    <div class="mobile-settings d-md-none position-absolute top-0 start-0 p-3" style="z-index: 2000;">
+        <a href="javascript:void(0);" id="mobileSettingsBtn" class="glass-card" role="button" aria-label="Settings">
+            <i class="fa-light fa-gear settings-icon theme-icon"></i>
+        </a>
+        <div id="settingsChildren" class="settings-children">
+            <a href="/Profile/Details">
+                <i class="fa-light fa-user"></i>
+                <span>My Profile</span>
+            </a>
+            <a href="/AppSettings/Index">
+                <i class="fa-light fa-sliders"></i>
+                <span>App Settings</span>
+            </a>
+            <a href="/Help">
+                <i class="fa-light fa-circle-question"></i>
+                <span>Help</span>
+            </a>
+            <div>
+                <form asp-area="Identity" asp-page="/Account/Logout" method="post" style="margin: 0;">
+                    <button type="submit">
+                        <i class="fa-light fa-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+    @* <div class="position-absolute top-0 end-0 p-3" style="z-index: 2000;">
+        <form asp-area="Identity" asp-page="/Account/Logout" method="post">
+            <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
+        </form>
+    </div> *@
+
+    <div class="container py-5">
+        <main role="main">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Desktop Emergency Button -->
+    <!-- (unchanged) -->
+    <div id="emergencyContainer" class="d-none d-md-block" style="position:fixed; bottom:20px; right:20px; z-index:4000;">
+        <div id="emergencyMain"
+             class="glass-card emergency-btn"
+             style="width:56px; height:56px; display:flex; align-items:center; justify-content:center; cursor:grab;">
+            <i class="bi bi-heart-pulse fs-4 text-danger"></i>
+        </div>
+        <div id="emergencyChildren" class="emergency-children">
+            <a href="tel:10111" class="glass-card emergency-child" title="Police"
+               style="position:absolute; width:48px; height:48px; display:flex; align-items:center; justify-content:center; top:-80px; left:0;">
+                <i class="bi bi-shield-shaded text-danger"></i>
+            </a>
+            <a href="tel:102" class="glass-card emergency-child" title="Fire"
+               style="position:absolute; width:48px; height:48px; display:flex; align-items:center; justify-content:center; top:-60px; left:60px;">
+                <i class="bi bi-fire text-danger"></i>
+            </a>
+            <a href="tel:10177" class="glass-card emergency-child" title="Ambulance"
+               style="position:absolute; width:48px; height:48px; display:flex; align-items:center; justify-content:center; top:0; left:80px;">
+                <i class="bi bi-capsule text-danger"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Mobile Bottom Nav -->
+    <nav class="mobile-nav d-md-none">
+        <a asp-controller="Home" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
+            <i class="bi bi-house"></i><span>Home</span>
+        </a>
+        <a asp-controller="Dashboard" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
+            <i class="bi bi-grid"></i><span>Dashboard</span>
+        </a>
+
+        <div class="emergency-center">
+            <a href="javascript:void(0);" id="mobileEmergencyBtn" class="glass-card" role="button" aria-label="Emergency">
+                <i class="fa-light fa-star-of-life"></i>
+            </a>
+            <div class="emergency-children" id="mobileEmergencyChildren"></div>
+        </div>
+
+        <a asp-controller="Families" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Families" ? "active" : "")">
+            <i class="bi bi-people"></i><span>Family</span>
+        </a>
+        <div class="more-center">
+            <a href="javascript:void(0);" id="mobileMoreBtn" class="glass-card" role="button" aria-label="More">
+                <i class="fa-light fa-ellipsis"></i>
+            </a>
+            <div id="moreChildren" class="more-children">
+                <a href="/Pets/Remembrance"><i class="fa-light fa-hands-holding-heart"></i><span>Remembrance</span></a>
+                <a href="/Home/ComingSoon"><i class="fa-light fa-piggy-bank"></i><span>Banking</span></a>
+                <a href="/Home/ComingSoon"><i class="fa-light fa-file-invoice-dollar"></i><span>Bills</span></a>
+                <a href="/Home/ComingSoon"><i class="fa-light fa-cart-shopping"></i><span>Shopping</span></a>
+                <a href="/Vault/Index"><i class="fa-light fa-vault"></i><span>Vault</span></a>
+                <a href="/Home/ComingSoon"><i class="fa-light fa-map-location-dot"></i><span>Where’s My Family?</span></a>
+            </div>
+        </div>
+    </nav>
+    <!-- Emergency Button (when no mobile-nav) -->
+    @if (!ViewContext.RouteData.Values["action"]?.ToString()?.Equals("Index", StringComparison.OrdinalIgnoreCase) ?? true)
+    {
+        <div class="emergency-center-only d-md-none">
+            <a href="javascript:void(0);" id="mobileEmergencyBtnAlt" class="glass-card" role="button" aria-label="Emergency">
+                <i class="fa-light fa-star-of-life"></i>
+            </a>
+            <div class="emergency-children" id="mobileEmergencyChildrenAlt"></div>
+        </div>
+    }
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC42dsbwkjmBO-GSrsm1viyekgARnzx-0Y&libraries=places&callback=initAutocomplete" async defer></script>
+    <!-- Emergency & More Button Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mobileBtn = document.getElementById("mobileEmergencyBtn");
+            const mobileIcons = document.getElementById("mobileEmergencyChildren");
+            const moreBtn = document.getElementById("mobileMoreBtn");
+            const moreChildren = document.getElementById("moreChildren");
+            const settingsBtn = document.getElementById("mobileSettingsBtn");
+            const settingsChildren = document.getElementById("settingsChildren");
+
+            const arcIcons = [
+                { href: "tel:10111", icon: "fa-badge-sheriff", title: "Police", angle: -170 },
+                { href: "tel:102", icon: "fa-fire-flame-curved", title: "Fire", angle: -130 },
+                { href: "tel:10177", icon: "fa-light-emergency-on", title: "Ambulance", angle: -90 },
+                { href: "tel:112", icon: "fa-person-swimming-water", title: "NSRI", angle: -50 },
+                { href: "tel:0119433538", icon: "fa-truck-tow", title: "Towing", angle: -10 }
+            ];
+
+            function closeAllMenus() {
+                mobileIcons?.classList.remove("open");
+                moreChildren?.classList.remove("open");
+                settingsChildren?.classList.remove("open");
+
+                moreBtn?.classList.remove("active");
+                settingsBtn?.classList.remove("active");
+            }
+
+            if (mobileIcons && mobileBtn) {
+                arcIcons.forEach(btn => {
+                    const a = document.createElement("a");
+                    a.href = btn.href;
+                    a.title = btn.title;
+                    a.className = "arc-child";
+                    a.innerHTML = `<i class="fa-light ${btn.icon} text-danger"></i>`;
+                    a.style.transform = `rotate(${btn.angle}deg) translate(90px) rotate(${-btn.angle}deg)`;
+                    mobileIcons.appendChild(a);
+                });
+
+                mobileBtn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    closeAllMenus();
+                    mobileIcons.classList.toggle('open');
+                });
+            }
+
+            if (moreBtn && moreChildren) {
+                moreBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    closeAllMenus();
+                    moreChildren.classList.toggle('open');
+                    moreBtn.classList.toggle('active');
+                });
+            }
+
+            if (settingsBtn && settingsChildren) {
+                settingsBtn.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    closeAllMenus();
+                    const isOpen = settingsChildren.classList.toggle("open");
+                    settingsBtn.classList.toggle("active", isOpen);
+                });
+            }
+
+            document.addEventListener("click", function () {
+                closeAllMenus();
+            });
+        });
+    </script>
+
+    <!-- Startup Animation Script -->
+    <script>
+        const hasShownStartup = sessionStorage.getItem('startupShown');
+        const anim = document.getElementById('startup-animation');
+
+        if (!hasShownStartup && anim) {
+            sessionStorage.setItem('startupShown', 'true');
+            setTimeout(() => anim.remove(), 4000);
+        } else if (anim) {
+            anim.remove();
+        }
+    </script>
+</body>
+</html>

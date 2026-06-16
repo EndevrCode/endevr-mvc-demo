@@ -1,0 +1,146 @@
+﻿@{
+    ViewData["Title"] = "Vault";
+}
+
+<br />
+
+<div class="container mt-4">
+    <h2 class="mb-3 fw-bold text-center">🔒 Vault</h2>
+    <p class="text-center mb-4">Your secure place for sensitive documents and information.</p>
+
+    <div class="d-flex justify-content-center mb-4">
+        <a asp-action="SetPin" class="btn btn-outline-secondary rounded-pill px-4">
+            🔑 Set or Change PIN
+        </a>
+    </div>
+
+    <div class="row g-4 justify-content-center mb-5">
+        <div class="col-6 col-sm-4 col-md-3">
+            <a asp-controller="VaultPasswords" asp-action="Index" class="text-decoration-none">
+                <div class="card shadow-sm text-center p-3 rounded-4 h-100">
+                    <div class="fs-1">🔐</div>
+                    <div class="fw-semibold mt-2">Passwords</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3">
+            <a asp-controller="VaultBankAccounts" asp-action="Index" class="text-decoration-none">
+                <div class="card shadow-sm text-center p-3 rounded-4 h-100">
+                    <div class="fs-1">💳</div>
+                    <div class="fw-semibold mt-2">Bank Accounts & Cards</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3">
+            <a asp-controller="VaultDocuments" asp-action="Index" class="text-decoration-none">
+                <div class="card shadow-sm text-center p-3 rounded-4 h-100">
+                    <div class="fs-1">🗂️</div>
+                    <div class="fw-semibold mt-2">Personal Documents</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3">
+            <a asp-controller="VaultHousePlans" asp-action="Index" class="text-decoration-none">
+                <div class="card shadow-sm text-center p-3 rounded-4 h-100">
+                    <div class="fs-1">🏠</div>
+                    <div class="fw-semibold mt-2">House Plans</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3">
+            <a asp-controller="VaultLegalDocs" asp-action="Index" class="text-decoration-none">
+                <div class="card shadow-sm text-center p-3 rounded-4 h-100">
+                    <div class="fs-1">📜</div>
+                    <div class="fw-semibold mt-2">Legal Documents</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3">
+            <a asp-controller="VaultUploads" asp-action="Index" class="text-decoration-none">
+                <div class="card shadow-sm text-center p-3 rounded-4 h-100">
+                    <div class="fs-1">📎</div>
+                    <div class="fw-semibold mt-2">Other Files</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <hr class="my-4" />
+    <h5 class="mb-3">📁 Upload a Secure File</h5>
+
+    <form asp-action="Upload" method="post" enctype="multipart/form-data" class="mb-5">
+        @Html.AntiForgeryToken()
+        @if (ViewBag.Pin != null)
+        {
+            <input type="hidden" name="pin" value="@ViewBag.Pin" />
+        }
+
+        <input type="hidden" name="pin" value="@ViewBag.Pin" />
+
+        <div class="mb-3">
+            <input type="file" class="form-control" name="file" required />
+        </div>
+        <button type="submit" class="btn btn-success">
+            🔐 Encrypt & Upload
+        </button>
+    </form>
+
+    @if (TempData["ShowVaultPinWarning"] != null)
+    {
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                Swal.fire({
+                    title: "Vault PIN Set",
+                    icon: "info",
+                    html: "Your Vault PIN has been successfully set.<br><br><strong>Please keep it safe.</strong><br>If lost, you will need to contact support and provide identifying documentation to reset it.",
+                    confirmButtonText: "Understood"
+                });
+            });
+        </script>
+    }
+
+    @if (ViewData["UserFiles"] is List<Hearthly.Data.Vault.VaultFile> userFiles && userFiles.Any())
+    {
+        <hr class="my-4" />
+        <h5 class="mb-3">🗃️ Your Uploaded Files</h5>
+
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>File</th>
+                        <th>Uploaded</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var file in userFiles)
+                    {
+                        <tr>
+                            <td>@file.OriginalFileName</td>
+                            <td>@file.UploadedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
+                            <td class="text-end">
+                                <a asp-action="Download" asp-route-id="@file.Id" class="btn btn-sm btn-outline-primary">
+                                    Download
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-muted mt-4">You haven't uploaded any files yet.</div>
+    }
+
+    @if (TempData["UploadSuccess"] != null)
+    {
+        <div class="alert alert-success mt-3">@TempData["UploadSuccess"]</div>
+    }
+    @if (TempData["UploadError"] != null)
+    {
+        <div class="alert alert-danger mt-3">@TempData["UploadError"]</div>
+    }
+</div>

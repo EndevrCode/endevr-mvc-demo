@@ -1,0 +1,92 @@
+﻿@model EmergencyContact
+
+@{
+    ViewData["Title"] = "Add Emergency Contact";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form id="emergencyForm" asp-action="Create" method="post">
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <input asp-for="FamilyId" type="hidden" />
+
+    <div class="mb-3">
+        <label asp-for="ContactType" class="form-label"></label>
+        <select asp-for="ContactType" class="form-select">
+            <option value="">-- Select Type --</option>
+            @foreach (var t in Enum.GetValues<EmergencyContactType>())
+            {
+                <option value="@t">@t</option>
+            }
+        </select>
+        <span asp-validation-for="ContactType" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PhoneNumber" class="form-label"></label>
+        <input asp-for="PhoneNumber" type="tel" class="form-control" />
+        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Notes" class="form-label"></label>
+        <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Notes" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-danger">Save</button>
+    <a asp-action="Index" asp-route-familyId="@(Model.FamilyId)" class="btn btn-secondary ms-2">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('emergencyForm').addEventListener('submit', async function (e) {
+            if (!navigator.serviceWorker || !('SyncManager' in window)) return;
+
+            e.preventDefault();
+
+            const form = e.target;
+            const data = {
+                familyId: form.FamilyId.value,
+                contactType: form.ContactType.value,
+                name: form.Name.value,
+                phoneNumber: form.PhoneNumber.value,
+                notes: form.Notes.value
+            };
+
+            const db = await openDB('Hearthly', 1, {
+                upgrade(db) {
+                    if (!db.objectStoreNames.contains('emergency-contacts')) {
+                        db.createObjectStore('emergency-contacts', { autoIncrement: true });
+                    }
+                }
+            });
+
+            await db.add('emergency-contacts', data);
+
+            const reg = await navigator.serviceWorker.ready;
+            await reg.sync.register('sync-emergency-contacts');
+
+            alert('Saved offline and will sync automatically.');
+
+            window.location.href = '@Url.Action("Index", new { familyId = Model.FamilyId })';
+        });
+
+        async function openDB(name, version, { upgrade }) {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(name, version);
+                req.onerror = () => reject(req.error);
+                req.onupgradeneeded = () => upgrade(req.result);
+                req.onsuccess = () => resolve(req.result);
+            });
+        }
+    </script>
+}

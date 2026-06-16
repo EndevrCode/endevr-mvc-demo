@@ -1,0 +1,63 @@
+﻿@model Hearthly.Data.Family
+
+@{
+    ViewData["Title"] = "Create Family";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form id="familyForm" asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="form-group">
+        <label asp-for="Name" class="control-label"></label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('familyForm').addEventListener('submit', async function (e) {
+            if (!navigator.serviceWorker || !('SyncManager' in window)) return;
+
+            e.preventDefault();
+
+            const form = e.target;
+            const data = {
+                name: form.Name.value
+            };
+
+            const db = await openDB('Hearthly', 1, {
+                upgrade(db) {
+                    if (!db.objectStoreNames.contains('families')) {
+                        db.createObjectStore('families', { autoIncrement: true });
+                    }
+                }
+            });
+
+            await db.add('families', data);
+
+            const reg = await navigator.serviceWorker.ready;
+            await reg.sync.register('sync-families');
+
+            alert('Saved offline and will sync automatically.');
+            window.location.href = '@Url.Action("Index")';
+        });
+
+        async function openDB(name, version, { upgrade }) {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(name, version);
+                req.onerror = () => reject(req.error);
+                req.onupgradeneeded = () => upgrade(req.result);
+                req.onsuccess = () => resolve(req.result);
+            });
+        }
+    </script>
+}

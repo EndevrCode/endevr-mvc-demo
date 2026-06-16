@@ -1,0 +1,229 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Hearthly.Data;
+using System.Security.Claims;
+
+namespace Hearthly.Controllers
+{
+    [Authorize]
+    public class StaffMembersController : BaseController
+    {
+
+        public StaffMembersController(
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager)
+            : base(context, userManager)
+        {
+        }
+
+        private async Task<Guid?> GetUserFamilyIdAsync()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return await _context.FamilyMembers
+                .Where(fm => fm.UserId == userId && fm.IsAccepted)
+                .Select(fm => (Guid?)fm.FamilyId)
+                .FirstOrDefaultAsync();
+        }
+
+        // GET: StaffMembers?familyId={familyId}
+        public async Task<IActionResult> Index(Guid? familyId)
+        {
+            if (!familyId.HasValue)
+                familyId = await GetUserFamilyIdAsync();
+
+            if (!familyId.HasValue || !await IsUserInFamily(familyId.Value))
+                return Forbid();
+
+            ViewData["FamilyId"] = familyId.Value;
+
+            var staff = await _context.StaffMembers
+                                      .Where(s => s.FamilyId == familyId.Value)
+                                      .ToListAsync();
+            return View(staff);
+        }
+
+        // GET: StaffMembers/Details/5
+        public async Task<IActionResult> Details(Guid? id)
+        {
+            if (id == null) return NotFound();
+
+            var staffMember = await _context.StaffMembers
+                .Include(s => s.Family)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (staffMember == null) return NotFound();
+
+            if (!await IsUserInFamily(staffMember.FamilyId))
+                return Forbid();
+
+            return View(staffMember);
+        }
+
+        // GET: StaffMembers/Create
+        [HttpGet]
+        public async Task<IActionResult> Create()
+        {
+            var familyId = await GetUserFamilyIdAsync();
+            if (!familyId.HasValue)
+                return RedirectToAction("Index", "Families");
+
+            var model = new StaffMember { FamilyId = familyId.Value };
+            ViewData["FamilyId"] = familyId.Value;
+            return View(model);
+        }
+
+        // POST: StaffMembers/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(StaffMember staffMember, IFormFile? photo, string[] WorkDays)
+        {
+            var familyId = await GetUserFamilyIdAsync();
+            if (!familyId.HasValue)
+            {
+                ModelState.AddModelError("", "You must be part of a family to add staff.");
+                return View(staffMember);
+            }
+
+            staffMember.FamilyId = familyId.Value;
+            ModelState.Remove(nameof(StaffMember.FamilyId));
+
+            if (!ModelState.IsValid)
+                return View(staffMember);
+
+            staffMember.Id = Guid.NewGuid();
+
+            if (photo != null && photo.Length > 0)
+            {
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(photo.FileName)}";
+                var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "staff");
+                Directory.CreateDirectory(folder);
+                var filePath = Path.Combine(folder, fileName);
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await photo.CopyToAsync(stream);
+                staffMember.PhotoPath = $"/uploads/staff/{fileName}";
+            }
+
+            staffMember.WorkDays = string.Join(",", WorkDays);
+
+            // Check for existing (duplicate sync)
+            var exists = await _context.StaffMembers.AnyAsync(s =>
+                s.FamilyId == staffMember.FamilyId &&
+                s.PreferredName == staffMember.PreferredName &&
+                s.ContactNumber == staffMember.ContactNumber);
+
+            if (!exists)
+            {
+                _context.Add(staffMember);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index), new { familyId = staffMember.FamilyId });
+        }
+
+        // GET: StaffMembers/Edit/5
+        public async Task<IActionResult> Edit(Guid? id)
+        {
+            if (id == null) return NotFound();
+
+            var staffMember = await _context.StaffMembers.FindAsync(id);
+            if (staffMember == null) return NotFound();
+
+            if (!await IsUserInFamily(staffMember.FamilyId))
+                return Forbid();
+
+            return View(staffMember);
+        }
+
+        // POST: StaffMembers/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(Guid id, StaffMember staffMember, IFormFile? photo, string[] workDays)
+        {
+            if (id != staffMember.Id) return NotFound();
+
+            var existing = await _context.StaffMembers
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.Id == id);
+            if (existing == null) return NotFound();
+
+            if (!await IsUserInFamily(existing.FamilyId))
+                return Forbid();
+
+            staffMember.FamilyId = existing.FamilyId;
+            staffMember.WorkDays = (workDays?.Length > 0) ? string.Join(",", workDays) : null;
+
+            if (photo != null && photo.Length > 0)
+            {
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(photo.FileName)}";
+                var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "staff");
+                Directory.CreateDirectory(uploads);
+                var filePath = Path.Combine(uploads, fileName);
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await photo.CopyToAsync(stream);
+                staffMember.PhotoPath = $"/uploads/staff/{fileName}";
+            }
+
+            if (!ModelState.IsValid)
+                return View(staffMember);
+
+            try
+            {
+                _context.Update(staffMember);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!StaffMemberExists(staffMember.Id)) return NotFound();
+                throw;
+            }
+
+            return RedirectToAction(nameof(Index), new { familyId = staffMember.FamilyId });
+        }
+
+        // GET: StaffMembers/Delete/5
+        public async Task<IActionResult> Delete(Guid? id)
+        {
+            if (id == null) return NotFound();
+
+            var staffMember = await _context.StaffMembers
+                .Include(s => s.Family)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (staffMember == null) return NotFound();
+
+            if (!await IsUserInFamily(staffMember.FamilyId))
+                return Forbid();
+
+            return View(staffMember);
+        }
+
+        // POST: StaffMembers/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(Guid id)
+        {
+            var staffMember = await _context.StaffMembers.FindAsync(id);
+            if (staffMember == null) return NotFound();
+
+            if (!await IsUserInFamily(staffMember.FamilyId))
+                return Forbid();
+
+            _context.StaffMembers.Remove(staffMember);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index), new { familyId = staffMember.FamilyId });
+        }
+
+        private bool StaffMemberExists(Guid id)
+        {
+            return _context.StaffMembers.Any(e => e.Id == id);
+        }
+
+        private async Task<bool> IsUserInFamily(Guid familyId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return await _context.FamilyMembers
+                .AnyAsync(fm => fm.FamilyId == familyId && fm.UserId == userId && fm.IsAccepted);
+        }
+    }
+}

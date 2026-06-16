@@ -1,0 +1,59 @@
+﻿@model IEnumerable<Hearthly.Data.FamilyInvite>
+
+@{
+    ViewData["Title"] = "Pending Invites";
+    var familyId = (Guid)ViewData["FamilyId"];
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Token</th>
+            <th>Invited Email</th>
+            <th>Created At (UTC)</th>
+            <th>Expires At (UTC)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var invite in Model)
+        {
+            <tr>
+                <td>@invite.Token</td>
+                <td>@invite.InvitedEmail</td>
+                <td>@invite.CreatedAt.ToString("dd MMMM yyyy HH:mm")</td>
+                <td>@invite.ExpiresAt.ToString("dd MMMM yyyy HH:mm")</td>
+                <td>
+                    <!-- Resend form -->
+                    <form asp-action="Resend" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="token" value="@invite.Token" />
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            Resend
+                        </button>
+                    </form>
+
+                    <!-- Revoke form -->
+                    <form asp-action="Revoke" method="post" class="d-inline ms-1">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="token" value="@invite.Token" />
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            Revoke
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="mt-3">
+    <a asp-action="Details" asp-route-id="@familyId" class="btn btn-secondary">
+        ← Back to Family
+    </a>
+    <a asp-action="Invite" asp-route-id="@familyId" class="btn btn-primary ms-2">
+        New Invite
+    </a>
+</div>

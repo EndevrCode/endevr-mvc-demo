@@ -1,0 +1,302 @@
+﻿@using System
+@using Microsoft.AspNetCore.Identity
+@using Hearthly.Data
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>@ViewData["Title"] – Hearthly</title>
+
+    <link rel="manifest" href="~/manifest.json" />
+    <meta name="theme-color" content="#0078d4" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Hearthly" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="apple-touch-icon" sizes="180x180" href="~/icons/icon-192.png" />
+
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <script src="https://kit.fontawesome.com/dfc8a51ea6.js" crossorigin="anonymous" data-auto-replace-svg="nest"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fleur+De+Leah&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Hearthly.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" />
+</head>
+<body class="@($"{ViewData["ThemeMode"]} {ViewData["FontSize"]}")">
+    <div id="startup-animation" class="startup-animation d-md-none">
+        <div class="startup-text">Welcome to</div>
+        <img src="~/icons/icon-192.png" alt="App Icon" class="startup-icon" />
+    </div>
+
+    <div class="mobile-settings d-md-none">
+        <a href="javascript:void(0);" id="mobileSettingsBtn" class="glass-card" role="button" aria-label="Settings">
+            <i class="fa-light fa-gear settings-icon theme-icon"></i>
+        </a>
+        <div id="settingsChildren" class="settings-children">
+            <a href="/Profile/Details">
+                <i class="fa-light fa-user"></i>
+                <span>My Profile</span>
+            </a>
+            <a href="/AppSettings/Index">
+                <i class="fa-light fa-sliders"></i>
+                <span>App Settings</span>
+            </a>
+            <a href="/Help">
+                <i class="fa-light fa-circle-question"></i>
+                <span>Help</span>
+            </a>
+            <div>
+                <form asp-area="Identity" asp-page="/Account/Logout" method="post" style="margin: 0;">
+                    <button type="submit">
+                        <i class="fa-light fa-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+
+    <header class="d-none d-md-block">
+        <nav class="navbar navbar-expand-md navbar-light bg-white border-bottom box-shadow mb-3" style="position: relative; z-index: 3000;">
+            <div class="container-fluid">
+                <a class="navbar-brand d-none d-md-flex mx-auto" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/H-logo.png" alt="Home" style="height:180px;width:auto;" />
+                </a>
+                <button class="navbar-toggler d-flex d-md-none p-0 border-0 mx-auto"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#mainNav"
+                        aria-controls="mainNav"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation">
+                    <img src="~/images/H-logo.png" alt="Menu" style="height:64px;width:auto;" />
+                </button>
+
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        </li>
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="familiesDropdown" role="button"
+                                   data-bs-toggle="dropdown" aria-expanded="false">
+                                    Families
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="familiesDropdown">
+                                    <li><a class="dropdown-item" asp-controller="Families" asp-action="Index">Families</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Pets" asp-action="Index">Pets</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" asp-controller="Pets" asp-action="Remembrance">Wall of Remembrance</a></li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li><a class="dropdown-item" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+                                    <li><a class="dropdown-item" asp-controller="StaffMembers" asp-action="Index">Staff</a></li>
+                                    <li><a class="dropdown-item" asp-controller="ServiceContacts" asp-action="Index">Service Contacts</a></li>
+                                    <li><a class="dropdown-item" asp-controller="EmergencyContacts" asp-action="Index">Emergency Contacts</a></li>
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+                    @await Html.PartialAsync("_LoginPartial")
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <main role="main" class="pb-3">
+            @{
+                var ctrl = (string)ViewContext.RouteData.Values["controller"];
+                var area = (string?)ViewContext.RouteData.Values["area"];
+            }
+            @if (SignInManager.IsSignedIn(User)
+                        && string.IsNullOrEmpty(area)
+                        && !new[] { "Profile", "Dashboard", "Families" }.Contains(ctrl))
+            {
+                @await Component.InvokeAsync("FamilySelector", new { selectedFamilyId = (Guid?)ViewData["FamilyId"] })
+            }
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <button id="installButton" class="btn glass-card" style="position:fixed; bottom:100px; left:20px; z-index:3000; display:none;">
+        <i class="bi bi-download"></i> Install Hearthly
+    </button>
+
+    <div id="emergencyContainer" class="d-none d-md-block">
+        <div id="emergencyMain" class="glass-card emergency-btn"
+             style="width:56px; height:56px; display:flex; align-items:center; justify-content:center; cursor:pointer; position:fixed; bottom:20px; right:20px; z-index:4000;"
+             role="button" aria-label="Emergency">
+            <i class="bi bi-heart-pulse fs-4 text-danger"></i>
+        </div>
+        <div id="emergencyChildren" class="emergency-children"></div>
+    </div>
+
+    @{
+        var isLoginOrRegister = ViewContext.RouteData.Values["page"]?.ToString()?.ToLower() == "/account/login"
+        || ViewContext.RouteData.Values["page"]?.ToString()?.ToLower() == "/account/register";
+    }
+
+    @if (!isLoginOrRegister)
+    {
+        <nav class="mobile-nav d-md-none">
+            <a asp-controller="Home" asp-action="Index" class="@(ctrl == "Home" ? "active" : "")"><i class="bi bi-house"></i><span>Home</span></a>
+            <a asp-controller="Dashboard" asp-action="Index" class="@(ctrl == "Dashboard" ? "active" : "")"><i class="bi bi-grid"></i><span>Dashboard</span></a>
+
+            <div class="emergency-center">
+                <a href="javascript:void(0);" id="mobileEmergencyBtn" class="glass-card" role="button" aria-label="Emergency">
+                    <i class="fa-light fa-star-of-life"></i>
+                </a>
+                <div class="emergency-children" id="mobileEmergencyChildren"></div>
+            </div>
+
+            <a asp-controller="Families" asp-action="Index" class="@(ctrl == "Families" ? "active" : "")"><i class="bi bi-people"></i><span>Family</span></a>
+
+            <div class="more-center">
+                <a href="javascript:void(0);" id="mobileMoreBtn" class="glass-card" role="button" aria-label="More"><i class="fa-light fa-ellipsis"></i></a>
+                <div id="moreChildren" class="more-children">
+                    <a href="/Pets/Remembrance"><i class="fa-light fa-hands-holding-heart"></i><span>Remembrance</span></a>
+                    <a href="/Shared/ComingSoon"><i class="fa-light fa-piggy-bank"></i><span>Banking</span></a>
+                    <a href="/Shared/ComingSoon"><i class="fa-light fa-file-invoice-dollar"></i><span>Bills</span></a>
+                    <a href="/Shared/ComingSoon"><i class="fa-light fa-cart-shopping"></i><span>Shopping</span></a>
+                    <a href="/Vault/Index"><i class="fa-light fa-vault"></i><span>Vault</span></a>
+                    <a href="/Shared/ComingSoon"><i class="fa-light fa-map-location-dot"></i><span>Where’s My Family?</span></a>
+                </div>
+            </div>
+        </nav>
+    }
+    else
+    {
+        <div class="emergency-center d-md-none">
+            <a href="javascript:void(0);" id="mobileEmergencyBtn" class="glass-card" role="button" aria-label="Emergency">
+                <i class="fa-light fa-star-of-life"></i>
+            </a>
+            <div class="emergency-children" id="mobileEmergencyChildren"></div>
+        </div>
+    }
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC42dsbwkjmBO-GSrsm1viyekgARnzx-0Y&libraries=places&callback=initAutocomplete" async defer></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+                window.onload = () => {
+            const arcIcons = [
+                { href: "tel:10111", icon: "fa-badge-sheriff", title: "Police", angle: -170 },
+                { href: "tel:102", icon: "fa-fire-flame-curved", title: "Fire", angle: -130 },
+                { href: "tel:10177", icon: "fa-light-emergency-on", title: "Ambulance", angle: -90 },
+                { href: "tel:112", icon: "fa-person-swimming-water", title: "NSRI", angle: -50 },
+                { href: "tel:0119433538", icon: "fa-truck-tow", title: "Towing", angle: -10 }
+            ];
+
+            const mobileIcons = document.getElementById("mobileEmergencyChildren");
+            const mobileBtn = document.getElementById("mobileEmergencyBtn");
+            const emergencyMain = document.getElementById("emergencyMain");
+            const emergencyContainer = document.getElementById("emergencyContainer");
+            const moreBtn = document.getElementById("mobileMoreBtn");
+            const moreChildren = document.getElementById("moreChildren");
+            const settingsBtn = document.getElementById("mobileSettingsBtn");
+            const settingsChildren = document.getElementById("settingsChildren");
+
+            function closeAllMenus() {
+                mobileIcons?.classList.remove("open");
+                moreChildren?.classList.remove("open");
+                emergencyContainer?.classList.remove("open");
+                settingsChildren?.classList.remove("open");
+
+                moreBtn?.classList.remove("active");
+                settingsBtn?.classList.remove("active");
+            }
+
+            if (mobileBtn && mobileIcons) {
+                arcIcons.forEach(btn => {
+                    const a = document.createElement("a");
+                    a.href = btn.href;
+                    a.title = btn.title;
+                    a.className = "arc-child";
+                    a.innerHTML = `<i class="fa-light ${btn.icon} text-danger"></i>`;
+                    a.style.transform = `rotate(${btn.angle}deg) translate(90px) rotate(${-btn.angle}deg)`;
+                    mobileIcons.appendChild(a);
+                });
+
+                mobileBtn.addEventListener('click', e => {
+                    e.stopPropagation();
+                    closeAllMenus();
+                    mobileIcons.classList.toggle('open');
+                });
+            }
+
+            emergencyMain?.addEventListener('click', e => {
+                e.stopPropagation();
+                closeAllMenus();
+                emergencyContainer?.classList.toggle('open');
+            });
+
+            if (moreBtn && moreChildren) {
+                moreBtn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    closeAllMenus();
+                    moreChildren.classList.toggle('open');
+                    moreBtn.classList.toggle('active');
+                });
+            }
+
+            if (settingsBtn && settingsChildren) {
+                settingsBtn.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    closeAllMenus();
+                    const isOpen = settingsChildren.classList.toggle("open");
+                    settingsBtn.classList.toggle("active", isOpen);
+                });
+            }
+
+            document.addEventListener('click', () => closeAllMenus());
+        };
+
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(() => console.log('✅ Service Worker registered'))
+                .catch(err => console.error('❌ Service Worker registration failed:', err));
+        }
+
+        const hasShownStartup = sessionStorage.getItem('startupShown');
+        if (!hasShownStartup) {
+            sessionStorage.setItem('startupShown', 'true');
+        } else {
+            const anim = document.getElementById('startup-animation');
+            if (anim) anim.remove();
+        }
+        setTimeout(() => {
+            const anim = document.getElementById('startup-animation');
+            if (anim) anim.remove();
+        }, 4000);
+    </script>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function () {
+            console.log("🚀 Form is being submitted!");
+        });
+    </script>
+    <script>
+        console.log("vaultPinModal:", document.getElementById('vaultPinModal'));
+    </script>
+</body>
+</html>

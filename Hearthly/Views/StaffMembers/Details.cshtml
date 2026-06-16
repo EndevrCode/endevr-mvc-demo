@@ -1,0 +1,159 @@
+﻿@model Hearthly.Data.StaffMember
+@using System
+@using System.Linq
+@using System.Security.Claims
+
+@{
+    ViewData["Title"] = $"{Model.FirstName} {Model.LastName}";
+
+    var today = DateTime.Today;
+    var daysInMonth = DateTime.DaysInMonth(today.Year, today.Month);
+    var workDays = (Model.WorkDays ?? "")
+                   .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                   .Select(d => d.Trim())
+                   .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+    int daysThisMonth = Enumerable
+        .Range(1, daysInMonth)
+        .Select(d => new DateTime(today.Year, today.Month, d).DayOfWeek.ToString())
+        .Count(dow => workDays.Contains(dow));
+
+    decimal daily = Model.DailyWageZAR ?? 0m;
+    decimal totalMonthly = daily * daysThisMonth;
+}
+
+@if (TempData["StatusMessage"] is string msg)
+{
+    <div class="alert alert-success">@msg</div>
+}
+
+<div class="text-center mt-5 mb-4">
+    @if (!string.IsNullOrEmpty(Model.PhotoPath))
+    {
+        <a href="#" data-bs-toggle="modal" data-bs-target="#photoModal">
+            <img src="@Url.Content(Model.PhotoPath)"
+                 alt="@Model.FirstName"
+                 class="rounded-circle shadow"
+                 style="width:130px; height:130px; object-fit:cover; cursor:pointer;" />
+        </a>
+    }
+    else
+    {
+        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto"
+             style="width:130px; height:130px; font-size:2rem;">
+            @Model.FirstName.Substring(0, 1).ToUpper()
+        </div>
+    }
+
+    <h2 class="mt-3">@Model.FirstName @Model.LastName</h2>
+    <small>Staff Member</small>
+</div>
+
+<div class="card shadow-sm rounded-4 p-4 mb-5">
+    <div class="row gy-3">
+        <div class="col-12 col-md-6">
+            <small>Preferred Name</small>
+            <div>@Model.PreferredName</div>
+        </div>
+        <div class="col-12 col-md-6">
+            <small>Contact Number</small>
+            <div>@Model.ContactNumber</div>
+        </div>
+        <div class="col-12 col-md-6">
+            <small>Nationality</small>
+            <div>@Model.Nationality</div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(Model.IdNumber))
+        {
+            <div class="col-12 col-md-6">
+                <small>ID Number</small>
+                <div>@Model.IdNumber</div>
+            </div>
+        }
+
+        <div class="col-12 col-md-6">
+            <small>Passport Number</small>
+            <div>@Model.PassportNumber</div>
+        </div>
+        <div class="col-12 col-md-6">
+            <small>Birth Date</small>
+            <div>@Model.BirthDate?.ToString("dd MMMM yyyy")</div>
+        </div>
+
+        <div class="col-12 col-md-6">
+            <small>Work Days</small>
+            <div>@Model.WorkDays</div>
+        </div>
+
+        <div class="col-12 col-md-6">
+            <small>Daily Wage (ZAR)</small>
+            <div>@daily.ToString("C")</div>
+        </div>
+
+        <div class="col-12 col-md-6">
+            <small>Days This Month</small>
+            <div>@daysThisMonth days</div>
+        </div>
+
+        <div class="col-12 col-md-6">
+            <small>Total Monthly Salary</small>
+            <div>@totalMonthly.ToString("C")</div>
+        </div>
+
+        <div class="col-12">
+            <small>Address</small>
+            <div>@Model.Address</div>
+
+            <div class="col-12 text-center mt-3">
+                <div class="rounded-circle overflow-hidden mx-auto"
+                     style="width: 280px; height: 280px; border: 3px solid #ccc;">
+                    <iframe src="https://www.google.com/maps?q=@System.Net.WebUtility.UrlEncode(Model.Address)&output=embed"
+                            width="280"
+                            height="280"
+                            frameborder="0"
+                            style="border:0;"
+                            allowfullscreen
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Action buttons -->
+<div class="d-flex justify-content-center flex-wrap gap-2 mb-5">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary rounded-pill">
+        <i class="bi bi-pencil-square me-1"></i> Edit
+    </a>
+    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">
+        <i class="bi bi-arrow-left me-1"></i> Back
+    </a>
+    <form asp-action="Delete"
+          asp-route-id="@Model.Id"
+          method="post"
+          onsubmit="return confirm('Are you sure you want to delete this staff member?');"
+          class="d-inline">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-outline-danger rounded-pill">
+            <i class="bi bi-trash3 me-1"></i> Delete
+        </button>
+    </form>
+</div>
+
+<!-- Photo Modal -->
+<div class="modal fade" id="photoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body text-center p-0">
+                <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-2"
+                        data-bs-dismiss="modal" aria-label="Close"></button>
+                <img src="@Url.Content(Model.PhotoPath)"
+                     alt="Photo large"
+                     class="img-fluid rounded" />
+            </div>
+        </div>
+    </div>
+</div>

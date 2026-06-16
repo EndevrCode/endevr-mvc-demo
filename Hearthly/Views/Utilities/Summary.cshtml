@@ -1,0 +1,68 @@
+﻿@model List<Hearthly.Models.UtilitySummaryRow>
+@{
+    var type = (Hearthly.Data.UtilityType)ViewData["UtilityType"]!;
+    ViewData["Title"] = $"{type} Summary";
+    var familyId = (Guid)ViewData["FamilyId"]!;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<!-- 🖥️ Desktop Table -->
+<div class="d-none d-md-block">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Purchase Date</th>
+                <th>
+                    @(type == Hearthly.Data.UtilityType.Electricity
+                                        ? "Units Received (kWh)"
+                                        : "Liters Received")
+                </th>
+                <th>Amount Paid</th>
+                <th>Purchased From</th>
+                <th>Previous Purchase</th>
+                <th>Days Between</th>
+                <th>Average Daily Usage</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in Model)
+            {
+                <tr>
+                    <td>@r.PurchaseDate.ToString("dd MMMM yyyy")</td>
+                    <td>@(r.UnitsReceived?.ToString("0.##") ?? "-")</td>
+                    <td>@r.AmountPaid.ToString("C")</td>
+                    <td>@r.PurchasedFrom</td>
+                    <td>@(r.PreviousPurchase?.ToString("dd MMMM yyyy") ?? "-")</td>
+                    <td>@(r.DaysBetween?.ToString() ?? "-")</td>
+                    <td>@(r.AverageDailyUsage?.ToString("0.##") ?? "-")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- 📱 Mobile Cards -->
+<div class="d-md-none">
+    @foreach (var r in Model)
+    {
+        <div class="card glass-card mb-3 shadow-sm p-3 rounded">
+            <h5 class="mb-2">@r.PurchaseDate.ToString("dd MMMM yyyy")</h5>
+            <ul class="list-unstyled mb-0">
+                <li><strong>@(type == Hearthly.Data.UtilityType.Electricity ? "Units Received (kWh)" : "Liters Received"):</strong> @(r.UnitsReceived?.ToString("0.##") ?? "-")</li>
+                <li><strong>Amount Paid:</strong> @r.AmountPaid.ToString("C")</li>
+                <li><strong>Purchased From:</strong> @r.PurchasedFrom</li>
+                <li><strong>Previous Purchase:</strong> @(r.PreviousPurchase?.ToString("dd MMMM yyyy") ?? "-")</li>
+                <li><strong>Days Between:</strong> @(r.DaysBetween?.ToString() ?? "-")</li>
+                <li><strong>Average Daily Usage:</strong> @(r.AverageDailyUsage?.ToString("0.##") ?? "-")</li>
+            </ul>
+        </div>
+    }
+</div>
+
+<!-- Back Button -->
+<p class="text-center mt-4">
+    <a asp-action="Index" asp-route-familyId="@familyId" class="btn btn-secondary">
+        ← Back to Utilities
+    </a>
+</p>

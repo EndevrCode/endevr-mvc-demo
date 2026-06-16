@@ -1,0 +1,66 @@
+﻿@{
+    ViewData["Title"] = "Invite Generated";
+
+    var scheme = Context.Request.Scheme;
+    var host = Context.Request.Host.Value;
+    var token = (Guid)ViewData["InviteToken"];
+    var expires = (DateTime)ViewData["InviteExpires"];
+    var acceptUrl = Url.Action(
+        "Accept",
+        "Families",
+        new { token },
+        scheme,
+        host
+    );
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="card p-3 mb-3">
+    <dl class="row">
+        <dt class="col-sm-3">Invite Email</dt>
+        <dd class="col-sm-9"><strong>@ViewData["InviteEmail"]</strong></dd>
+
+        <dt class="col-sm-3">Token</dt>
+        <dd class="col-sm-9"><strong>@token</strong></dd>
+
+        <dt class="col-sm-3">Expires At (UTC)</dt>
+        <dd class="col-sm-9"><strong>@expires.ToString("yyyy-MM-dd HH:mm")</strong></dd>
+    </dl>
+</div>
+
+<div class="mb-3">
+    <p>Share this token directly, or send your family member this link:</p>
+    <div class="input-group">
+        <input type="text"
+               class="form-control"
+               id="inviteLink"
+               readonly
+               value="@acceptUrl" />
+        <button class="btn btn-outline-secondary"
+                type="button"
+                id="btnCopyInvite">
+            Copy Link
+        </button>
+    </div>
+</div>
+
+<a asp-action="Index" class="btn btn-secondary">
+    ← Back to Families
+</a>
+
+@section Scripts {
+    <script>
+        document.getElementById('btnCopyInvite').addEventListener('click', async () => {
+          const link = document.getElementById('inviteLink').value;
+          try {
+            await navigator.clipboard.writeText(link);
+            // you might swap this for a nicer toast/snackbar
+            alert('Invite link copied to clipboard!');
+          } catch (err) {
+            console.error('Copy failed', err);
+            alert('Could not copy link – please select and copy manually.');
+          }
+        });
+    </script>
+}

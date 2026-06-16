@@ -1,0 +1,89 @@
+﻿@page
+@model LoginModel
+@{
+    ViewData["BodyClass"] = "login-page";
+}
+
+<div class="d-flex align-items-center justify-content-center vh-100">
+    <div id="loginContainer">
+        <div id="loginCard" class="glass-card shadow-lg p-4 fade-card" style="max-width: 360px; width: 100%;">
+            <h2 class="text-center mb-1 login-fade fade-1">Hello!</h2>
+            <p class="text-center text-muted mb-4 login-fade fade-2">We are really happy to see you again!</p>
+
+            <form asp-route-returnUrl="@Model.ReturnUrl"
+                  method="post"
+                  id="loginForm"
+                  class="login-fade fade-3">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <input asp-for="Input.Email"
+                           class="form-control form-control-lg"
+                           placeholder="Username" />
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3 input-group">
+                    <input asp-for="Input.Password"
+                           id="passwordInput"
+                           type="password"
+                           class="form-control form-control-lg"
+                           placeholder="Password" />
+                    <span class="input-group-text" onclick="togglePassword()">
+                        <i id="toggleIcon" class="bi bi-eye-slash"></i>
+                    </span>
+                    <span asp-validation-for="Input.Password" class="text-danger d-block"></span>
+                </div>
+
+                <button type="submit"
+                        class="btn btn-primary btn-lg w-100 mb-3 login-fade fade-4"
+                        id="signInBtn">
+                    Sign in
+                </button>
+
+                <div class="text-center mt-3 login-fade fade-5">
+                    <span class="text-muted">Don’t have an account?</span>
+                    <a asp-page="/Account/Register" class="ms-1 fw-semibold text-decoration-none">Create one</a>
+                </div>
+            </form>
+
+            <p class="text-center text-muted mb-2 login-fade fade-6">or sign in with</p>
+            <div class="text-center login-fade fade-6">
+                <button class="social-btn"><i class="bi bi-facebook"></i></button>
+                <button class="social-btn"><i class="bi bi-google"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="bgOverlay"></div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function togglePassword() {
+          var input = document.getElementById('passwordInput');
+          var icon = document.getElementById('toggleIcon');
+          if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'bi bi-eye';
+          } else {
+            input.type = 'password';
+            icon.className = 'bi bi-eye-slash';
+          }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+          var btn = document.getElementById('signInBtn');
+          var form = document.getElementById('loginForm');
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.body.classList.add('logged-in');
+            setTimeout(function() {
+              form.submit();
+            }, 4000);
+          });
+        });
+    </script>
+}

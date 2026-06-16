@@ -1,0 +1,49 @@
+﻿@using Hearthly.Data
+@model EmergencyContact
+
+@{
+    ViewData["Title"] = "Contact Details";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="glass-card p-4 mb-4">
+    <dl class="row">
+        <dt class="col-sm-3">Type</dt>
+        <dd class="col-sm-9">@Model.ContactType</dd>
+
+        <dt class="col-sm-3">Name</dt>
+        <dd class="col-sm-9">@Model.Name</dd>
+
+        <dt class="col-sm-3">Phone</dt>
+        <dd class="col-sm-9">
+            <a href="tel:@Model.PhoneNumber">@Model.PhoneNumber</a>
+        </dd>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Notes))
+        {
+            <dt class="col-sm-3">Notes</dt>
+            <dd class="col-sm-9">@Model.Notes</dd>
+        }
+    </dl>
+
+    <div class="text-end">
+        <a asp-action="Edit"
+           asp-route-id="@Model.Id"
+           asp-route-familyId="@(Model.FamilyId)"
+           class="btn btn-warning me-2">
+            Edit
+        </a>
+        <a asp-action="Delete"
+           asp-route-id="@Model.Id"
+           asp-route-familyId="@(Model.FamilyId)"
+           class="btn btn-danger">
+            Delete
+        </a>
+        <a asp-action="Index"
+           asp-route-familyId="@(Model.FamilyId)"
+           class="btn btn-secondary ms-2">
+            Back to list
+        </a>
+    </div>
+</div>

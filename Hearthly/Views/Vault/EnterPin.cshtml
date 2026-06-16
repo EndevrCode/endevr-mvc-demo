@@ -1,0 +1,19 @@
+﻿@model string
+
+@{
+    ViewData["Title"] = "Unlock Vault";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-sm p-4 rounded-4 mx-auto" style="max-width: 400px;">
+        <h4 class="text-center mb-3">🔒 Enter Your Vault PIN</h4>
+
+        <form asp-action="ValidatePin" method="post">
+            <div class="form-floating mb-3">
+                <input type="password" class="form-control" name="pin" id="pin" placeholder="PIN" maxlength="6" required>
+                <label for="pin">Vault PIN</label>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Unlock</button>
+        </form>
+    </div>
+</div>

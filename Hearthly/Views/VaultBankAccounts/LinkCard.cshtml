@@ -1,0 +1,53 @@
+﻿@model Hearthly.Models.Vault.LinkCardViewModel
+
+@{
+    ViewData["Title"] = "Link Card";
+}
+
+<div class="container mt-4">
+    <div class="card glass-card p-4 shadow-sm rounded-4 mx-auto" style="max-width: 500px;">
+        <h4 class="text-center fw-bold mb-3">💳 Link a Card</h4>
+
+        <form asp-action="LinkCard" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="AccountId" />
+
+            <div class="mb-3">
+                <label class="form-label">Account Holder</label>
+                <input type="text" class="form-control" value="@Model.AccountHolder" readonly />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Bank Name</label>
+                <input type="text" class="form-control" value="@Model.BankName" readonly />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Account Number (Last 4)</label>
+                <input type="text" class="form-control" value="••• ••• @Model.LastFourDigits" readonly />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CardFront" class="form-label"></label>
+                <input asp-for="CardFront" class="form-control" type="file" />
+                <span asp-validation-for="CardFront" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CardBack" class="form-label"></label>
+                <input asp-for="CardBack" class="form-control" type="file" />
+                <span asp-validation-for="CardBack" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">📎 Link Card</button>
+        </form>
+
+        <div class="text-center mt-3">
+            <a class="btn btn-outline-secondary" asp-action="Index">← Cancel</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

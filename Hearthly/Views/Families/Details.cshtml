@@ -1,0 +1,200 @@
+﻿@model Hearthly.Data.FamilyInfo
+
+@{
+    ViewData["Title"] = Model.Family.Name;
+    var isAdmin = (ViewData["IsAdmin"] as bool?) == true;
+}
+
+<h2 class="mt-5 mb-2 text-center">@Model.Family.Name</h2>
+<p class="text-center mb-4">
+    Created by <strong>@Model.Family.CreatedBy.Profile.FirstName @Model.Family.CreatedBy.Profile.LastName</strong>
+    on @Model.Family.CreatedAt.ToString("dd MMMM yyyy HH:mm")
+</p>
+
+<div class="d-flex justify-content-center gap-2 mb-4 flex-wrap">
+    <form onchange="handleFamilyAction(this.value)" class="d-inline">
+        <select class="form-select form-select-sm rounded-pill text-center" style="width: 160px;" onchange="handleFamilyAction(this)">
+            <option selected disabled>Actions</option>
+            <option data-url="@Url.Action("Invite", "Families", new { id = Model.Family.Id })">Add to Family</option>
+            <option data-url="@Url.Action("Edit", "Families", new { id = Model.Family.Id })">Edit Family</option>
+            <option data-url="@Url.Action("Delete", "Families", new { id = Model.Family.Id })" data-confirm="Are you sure you want to delete the entire family?">Delete Family</option>
+        </select>
+    </form>
+
+    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary rounded-pill">
+        <i class="bi bi-arrow-left me-1"></i> Back
+    </a>
+</div>
+
+<h4 class="mt-5 mb-3">👨‍👩‍👧‍👦 Members</h4>
+<div class="row mb-5">
+    @if (Model.Members.Any())
+    {
+        @foreach (var m in Model.Members)
+        {
+            var photoUrl = !string.IsNullOrEmpty(m.PhotoPath)
+            ? m.PhotoPath
+            : Url.Content("~/images/placeholder-user.png");
+
+            <div class="col-12 col-md-6 col-lg-4 mb-4 d-flex justify-content-center">
+                <div class="card shadow-sm rounded-4 text-center p-3 w-100" style="max-width: 320px;">
+                    <a asp-controller="Profile" asp-action="Details" asp-route-id="@m.UserId" class="text-decoration-none">
+                        <img src="@photoUrl" alt="@m.PreferredName" class="rounded-circle mb-3" style="width:80px; height:80px; object-fit:cover;" />
+                        <h5 class="mb-1">@m.PreferredName</h5>
+                    </a>
+
+                    @if (isAdmin)
+                    {
+                        <form asp-action="ChangeRole" method="post" class="d-flex align-items-center justify-content-center mb-2 mt-3 gap-2">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="familyId" value="@Model.Family.Id" />
+                            <input type="hidden" name="userId" value="@m.UserId" />
+                            <select name="newRole" class="form-select form-select-sm w-auto">
+                                <option value="@IdentityRoles.Admin" selected="@(m.Role == IdentityRoles.Admin)">Admin</option>
+                                <option value="@IdentityRoles.Member" selected="@(m.Role == IdentityRoles.Member)">Member</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-outline-primary">Change</button>
+                        </form>
+
+                        <form asp-action="RemoveMember"
+                              asp-controller="Families"
+                              asp-route-id="@Model.Family.Id"
+                              asp-route-userId="@m.UserId"
+                              method="post" class="d-flex justify-content-center">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger leave-family-btn">
+                                Leave Family
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12">
+            <p class="text-muted"><em>No members yet.</em></p>
+        </div>
+    }
+</div>
+
+<h4 class="mb-3">🐾 Pets</h4>
+<div class="row">
+    @if (Model.Pets.Any(p => !p.IsDeceased))
+    {
+        @foreach (var pet in Model.Pets.Where(p => !p.IsDeceased))
+        {
+            var petPhoto = !string.IsNullOrEmpty(pet.PhotoPath)
+            ? pet.PhotoPath
+            : Url.Content("~/images/placeholder-pet.png");
+
+            <div class="col-12 col-md-6 col-lg-4 mb-4 d-flex justify-content-center">
+                <div class="card shadow-sm rounded-4 text-center p-3 w-100" style="max-width: 320px;">
+                    <img src="@petPhoto" class="rounded mb-3" alt="@pet.Name" style="height: 180px; object-fit: cover;" />
+                    <h5 class="mb-2">@pet.Name</h5>
+                    <a asp-controller="Pets"
+                       asp-action="Details"
+                       asp-route-id="@pet.Id"
+                       class="btn btn-sm btn-outline-primary rounded-pill">
+                        Floof Details
+                    </a>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12">
+            <p class="text-muted">No pets yet.</p>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            @if (TempData["ErrorMessage"] is string error)
+            {
+                    <text>
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops!',
+                            text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(error))
+                        });
+                    </text>
+            }
+
+            @if (TempData["StatusMessage"] is string success)
+            {
+                    <text>
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(success))
+                        });
+                    </text>
+            }
+
+            @if (TempData["SweetError"] is string msg)
+            {
+                    <text>
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops!',
+                            text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(msg))
+                        });
+                    </text>
+            }
+        });
+
+        document.querySelectorAll(".leave-family-btn").forEach(button => {
+            button.addEventListener("click", function (e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Are you sure?',
+                    text: 'You are the last member. Leaving will delete this family permanently.',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, delete family',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = button.closest("form");
+                        if (form) form.submit();
+                    }
+                });
+            });
+        });
+
+                function handleFamilyAction(select) {
+            const selectedOption = select.options[select.selectedIndex];
+            const url = selectedOption.getAttribute('data-url');
+            const confirmText = selectedOption.getAttribute('data-confirm');
+
+            if (!url) return;
+
+            if (confirmText) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Are you sure?',
+                    text: confirmText,
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'Cancel'
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        window.location.href = url;
+                    } else {
+                        select.selectedIndex = 0; // reset to "Actions"
+                    }
+                });
+            } else {
+                window.location.href = url;
+            }
+        }
+    </script>
+}

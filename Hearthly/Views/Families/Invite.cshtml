@@ -1,0 +1,35 @@
+﻿@model Hearthly.Data.FamilyInvite
+
+@{
+    ViewData["Title"] = "Invite to Family: " + (string)ViewData["FamilyName"];
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form asp-action="Invite"
+      asp-route-id="@(ViewData["FamilyId"])"
+      method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label asp-for="InvitedEmail" class="form-label"></label>
+        <input asp-for="InvitedEmail" class="form-control" />
+        <span asp-validation-for="InvitedEmail" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        Generate Invite Token
+    </button>
+    <a asp-action="Index" class="btn btn-secondary">
+        Back to Families
+    </a>
+</form>
+
+@section Scripts {
+    @{
+        // RenderPartialAsync returns void, so wrap in a code block
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
