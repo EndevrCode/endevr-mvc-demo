@@ -28,6 +28,7 @@ namespace Hearthly.Data
         public DbSet<UserAppSettings> UserAppSettings { get; set; }
         public DbSet<Hearthly.Data.Vault.VaultFile> VaultFiles { get; set; } = default!;
         public DbSet<VaultPassword> VaultPasswords { get; set; }
+        public DbSet<Hearthly.Data.Vault.VaultDocument> VaultDocuments { get; set; } = default!;
         public DbSet<VaultBankAccount> VaultBankAccounts { get; set; }
         public DbSet<Bill> Bills { get; set; } = default!;
         public DbSet<ShoppingList> ShoppingLists { get; set; } = default!;

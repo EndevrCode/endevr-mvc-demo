@@ -1,0 +1,246 @@
+@model IEnumerable<Hearthly.Data.Vault.VaultDocument>
+@using Hearthly.Data.Vault
+
+@{
+    ViewData["Title"] = "Personal Documents";
+
+    string CategoryIcon(DocumentCategory cat) => cat switch {
+        DocumentCategory.Identity  => "fa-id-card",
+        DocumentCategory.Insurance => "fa-shield-heart",
+        DocumentCategory.Medical   => "fa-file-medical",
+        DocumentCategory.Legal     => "fa-file-contract",
+        DocumentCategory.Contract  => "fa-file-signature",
+        DocumentCategory.Financial => "fa-file-invoice-dollar",
+        DocumentCategory.Property  => "fa-house-chimney",
+        _                          => "fa-file"
+    };
+}
+
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+<input type="hidden" id="__RequestVerificationToken" value="@Xsrf.GetAndStoreTokens(Context).RequestToken" />
+
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <h2 class="mb-0"><i class="fa-light fa-file-user me-2"></i>Personal Documents</h2>
+    <a asp-controller="Vault" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+        <i class="bi bi-arrow-left me-1"></i> Vault
+    </a>
+</div>
+
+@if (TempData["UploadSuccess"] is string ok)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="fa-light fa-circle-check me-2"></i>@ok
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["UploadError"] is string err)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fa-light fa-circle-xmark me-2"></i>@err
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Error"] is string actionErr)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        <i class="fa-light fa-circle-xmark me-2"></i>@actionErr
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+@if (TempData["Success"] is string actionOk)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        <i class="fa-light fa-circle-check me-2"></i>@actionOk
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Upload Section -->
+<div class="glass-card p-4 mb-4">
+    <h5 class="mb-3 fw-semibold">
+        <i class="fa-light fa-cloud-arrow-up me-2 text-primary"></i>Upload a Document
+    </h5>
+    <form asp-action="Upload" method="post" enctype="multipart/form-data" id="uploadForm">
+        @Html.AntiForgeryToken()
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Title</label>
+                <input type="text" name="title" class="form-control" placeholder="e.g. My ID Book" maxlength="200" required />
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Category</label>
+                <select name="category" class="form-select">
+                    @foreach (var cat in Enum.GetValues<DocumentCategory>())
+                    {
+                        <option value="@((int)cat)">@cat</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12">
+                <label class="form-label fw-semibold">Notes <span class="text-muted fw-normal">(optional)</span></label>
+                <input type="text" name="notes" class="form-control" maxlength="500" placeholder="e.g. Expires Jan 2030" />
+            </div>
+            <div class="col-12">
+                <label class="form-label fw-semibold">File</label>
+                <input type="file" name="file" class="form-control" required />
+            </div>
+        </div>
+
+        <div class="mt-3 d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-primary rounded-pill px-4" onclick="promptUploadPin()">
+                <i class="fa-light fa-shield-check me-1"></i> Encrypt &amp; Upload
+            </button>
+            <small class="text-muted">Your PIN is required to encrypt the file.</small>
+        </div>
+
+        <input type="hidden" name="pin" id="uploadPin" />
+    </form>
+</div>
+
+<!-- Documents List -->
+@if (!Model.Any())
+{
+    <div class="glass-card text-center py-5">
+        <i class="fa-light fa-folder-open fa-3x text-muted mb-3 d-block"></i>
+        <p class="text-muted mb-0">No documents uploaded yet. Upload your first one above.</p>
+    </div>
+}
+else
+{
+    @foreach (var category in Enum.GetValues<DocumentCategory>())
+    {
+        var docs = Model.Where(d => d.Category == category).ToList();
+        if (!docs.Any()) continue;
+
+        <div class="mb-4">
+            <h5 class="mb-3 fw-semibold">
+                <i class="fa-light @CategoryIcon(category) me-2 text-primary"></i>@category
+            </h5>
+            <div class="row g-3">
+                @foreach (var doc in docs)
+                {
+                    <div class="col-md-6">
+                        <div class="glass-card p-3 h-100 d-flex flex-column">
+                            <div class="d-flex align-items-start gap-2 mb-2">
+                                <i class="fa-light @CategoryIcon(doc.Category) fa-lg text-primary mt-1 flex-shrink-0"></i>
+                                <div class="flex-grow-1 min-width-0">
+                                    <div class="fw-semibold text-truncate">@doc.Title</div>
+                                    <small class="text-muted d-block">@doc.OriginalFileName</small>
+                                    @if (!string.IsNullOrWhiteSpace(doc.Notes))
+                                    {
+                                        <small class="text-muted d-block fst-italic">@doc.Notes</small>
+                                    }
+                                    <small class="text-muted d-block">@doc.UploadedAt.ToLocalTime().ToString("dd MMM yyyy")</small>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 mt-auto pt-2">
+                                <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1"
+                                        onclick="promptDownloadPin('@doc.Id', '@Html.Raw(doc.Title.Replace("'", "\\'"))')">
+                                    <i class="bi bi-download me-1"></i> Download
+                                </button>
+                                <button type="button" class="btn btn-outline-danger btn-sm"
+                                        onclick="promptDeletePin('@doc.Id', '@Html.Raw(doc.Title.Replace("'", "\\'"))')">
+                                    <i class="fa-light fa-trash"></i>
+                                </button>
+                            </div>
+
+                            <!-- Hidden download form -->
+                            <form id="dl-@doc.Id" asp-action="Download" asp-route-id="@doc.Id" method="post" class="d-none">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="pin" id="pin-dl-@doc.Id" />
+                            </form>
+
+                            <!-- Hidden delete form -->
+                            <form id="del-@doc.Id" asp-action="Delete" asp-route-id="@doc.Id" method="post" class="d-none">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="pin" id="pin-del-@doc.Id" />
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}
+
+@section Scripts {
+    <script>
+        function promptUploadPin() {
+            const form = document.getElementById('uploadForm');
+            const title = form.querySelector('input[name="title"]').value.trim();
+            const file = form.querySelector('input[name="file"]').files[0];
+
+            if (!title) {
+                Swal.fire({ title: 'Missing title', text: 'Please enter a document title.', icon: 'warning' });
+                return;
+            }
+            if (!file) {
+                Swal.fire({ title: 'No file selected', text: 'Please choose a file to upload.', icon: 'warning' });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Enter Vault PIN',
+                text: 'Your PIN is used to encrypt this document.',
+                input: 'password',
+                inputAttributes: { maxlength: '6', autocomplete: 'current-password', inputmode: 'numeric' },
+                inputPlaceholder: 'PIN',
+                showCancelButton: true,
+                confirmButtonText: 'Upload',
+                confirmButtonColor: '#0d6efd'
+            }).then(result => {
+                if (result.isConfirmed && result.value) {
+                    document.getElementById('uploadPin').value = result.value;
+                    form.submit();
+                }
+            });
+        }
+
+        function promptDownloadPin(docId, title) {
+            Swal.fire({
+                title: 'Enter Vault PIN',
+                text: `Download "${title}"`,
+                input: 'password',
+                inputAttributes: { maxlength: '6', autocomplete: 'current-password', inputmode: 'numeric' },
+                inputPlaceholder: 'PIN',
+                showCancelButton: true,
+                confirmButtonText: 'Download',
+                confirmButtonColor: '#0d6efd'
+            }).then(result => {
+                if (result.isConfirmed && result.value) {
+                    document.getElementById(`pin-dl-${docId}`).value = result.value;
+                    document.getElementById(`dl-${docId}`).submit();
+                }
+            });
+        }
+
+        function promptDeletePin(docId, title) {
+            Swal.fire({
+                title: 'Delete document?',
+                text: `"${title}" will be permanently deleted. This cannot be undone.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Confirm with PIN',
+                confirmButtonColor: '#dc3545'
+            }).then(confirm => {
+                if (!confirm.isConfirmed) return;
+
+                Swal.fire({
+                    title: 'Enter Vault PIN',
+                    input: 'password',
+                    inputAttributes: { maxlength: '6', autocomplete: 'current-password', inputmode: 'numeric' },
+                    inputPlaceholder: 'PIN',
+                    showCancelButton: true,
+                    confirmButtonText: 'Delete',
+                    confirmButtonColor: '#dc3545'
+                }).then(result => {
+                    if (result.isConfirmed && result.value) {
+                        document.getElementById(`pin-del-${docId}`).value = result.value;
+                        document.getElementById(`del-${docId}`).submit();
+                    }
+                });
+            });
+        }
+    </script>
+}
