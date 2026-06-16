@@ -52,12 +52,6 @@
 
 
 
-    @* <div class="position-absolute top-0 end-0 p-3" style="z-index: 2000;">
-        <form asp-area="Identity" asp-page="/Account/Logout" method="post">
-            <button type="submit" class="btn btn-outline-danger btn-sm">Logout</button>
-        </form>
-    </div> *@
-
     <div class="container py-5">
         <main role="main">
             @RenderBody()
@@ -118,9 +112,9 @@
             </a>
             <div id="moreChildren" class="more-children">
                 <a href="/Pets/Remembrance"><i class="fa-light fa-hands-holding-heart"></i><span>Remembrance</span></a>
-                <a href="/Home/ComingSoon"><i class="fa-light fa-piggy-bank"></i><span>Banking</span></a>
-                <a href="/Home/ComingSoon"><i class="fa-light fa-file-invoice-dollar"></i><span>Bills</span></a>
-                <a href="/Home/ComingSoon"><i class="fa-light fa-cart-shopping"></i><span>Shopping</span></a>
+                <a href="/VaultBankAccounts/Index"><i class="fa-light fa-piggy-bank"></i><span>Banking</span></a>
+                <a href="/Bills/Index"><i class="fa-light fa-file-invoice-dollar"></i><span>Bills</span></a>
+                <a href="/Shopping/Index"><i class="fa-light fa-cart-shopping"></i><span>Shopping</span></a>
                 <a href="/Vault/Index"><i class="fa-light fa-vault"></i><span>Vault</span></a>
                 <a href="/Home/ComingSoon"><i class="fa-light fa-map-location-dot"></i><span>Where’s My Family?</span></a>
             </div>
@@ -136,6 +130,7 @@
             <div class="emergency-children" id="mobileEmergencyChildrenAlt"></div>
         </div>
     }
+    <script>function initAutocomplete() {}</script>
     <script src="https://maps.googleapis.com/maps/api/js?key=@Configuration["GoogleMaps:ApiKey"]&libraries=places&callback=initAutocomplete" async defer></script>
     <!-- Emergency & More Button Scripts -->
     <script>

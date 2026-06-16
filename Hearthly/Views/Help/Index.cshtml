@@ -1,0 +1,102 @@
+@{
+    ViewData["Title"] = "Help";
+}
+
+<div class="mb-4">
+    <h2 class="mb-0"><i class="fa-light fa-circle-question me-2"></i>Help &amp; FAQ</h2>
+</div>
+
+@{
+    var sections = new[]
+    {
+        new {
+            Icon = "fa-people-roof",
+            Title = "Families",
+            Items = new[] {
+                new { Q = "How do I create a family?", A = "Go to Families and tap Create a Family. Give it a name and you're set." },
+                new { Q = "How do I invite someone?", A = "Open the family details page and choose Actions → Add to Family. Enter their email address — they'll receive an invite on their Dashboard." },
+                new { Q = "Can I be in more than one family?", A = "Yes. You can join or create multiple families, and each feature (Bills, Shopping, etc.) lets you switch between them." }
+            }
+        },
+        new {
+            Icon = "fa-vault",
+            Title = "Vault",
+            Items = new[] {
+                new { Q = "What is the Vault PIN?", A = "A 4–6 digit numeric code that locks and unlocks your Vault. It's separate from your login password and encrypts your sensitive data." },
+                new { Q = "What happens if I forget my PIN?", A = "Your PIN cannot be recovered automatically. Contact support and provide identifying documentation to reset it." },
+                new { Q = "Is my data actually encrypted?", A = "Yes. Files are encrypted with AES-256 using a key derived from your PIN via PBKDF2 (100,000 iterations, SHA-256). Passwords and account numbers use ASP.NET Data Protection." }
+            }
+        },
+        new {
+            Icon = "fa-file-invoice-dollar",
+            Title = "Bills",
+            Items = new[] {
+                new { Q = "How do I track a bill?", A = "Go to Bills, select your family, and tap Add Bill. Set the name, amount, and due date. Overdue bills appear on your Dashboard." },
+                new { Q = "What does 'recurring' mean?", A = "Recurring bills are flagged with a Monthly badge as a reminder. You still need to mark each month's payment manually." },
+                new { Q = "Can I see paid bills?", A = "Yes — the Bills page shows a Paid section below the Outstanding list." }
+            }
+        },
+        new {
+            Icon = "fa-cart-shopping",
+            Title = "Shopping",
+            Items = new[] {
+                new { Q = "Can multiple family members use the same shopping list?", A = "Yes. Shopping lists are family-scoped, so any accepted family member can add or check items." },
+                new { Q = "How do I remove completed items?", A = "Tap the green checkmark button (Clear Checked) on the list header to remove all checked items at once." }
+            }
+        },
+        new {
+            Icon = "fa-paw",
+            Title = "Pets",
+            Items = new[] {
+                new { Q = "What is the Wall of Remembrance?", A = "A dedicated page for pets that have passed. When you mark a pet as deceased, they automatically appear there." },
+                new { Q = "What pet health records does Hearthly track?", A = "Deworming, tick & flea treatments, grooming, weight, vet checkups, microchip number, and insurance details." }
+            }
+        },
+        new {
+            Icon = "fa-gear",
+            Title = "App Settings",
+            Items = new[] {
+                new { Q = "How do I change the theme?", A = "Go to Settings (gear icon) → App Settings. Choose Light, Dark, or System Default." },
+                new { Q = "How do I install Hearthly on my phone?", A = "In your mobile browser, tap Share → Add to Home Screen (iOS) or the install prompt (Android). Hearthly is a Progressive Web App and works offline." }
+            }
+        }
+    };
+}
+
+<div class="d-flex flex-column gap-4">
+    @foreach (var section in sections)
+    {
+        <div class="glass-card p-4">
+            <h5 class="mb-3 fw-semibold">
+                <i class="fa-light @section.Icon me-2 text-primary"></i>@section.Title
+            </h5>
+            <div class="accordion accordion-flush" id="acc-@section.Title.Replace(" ", "")">
+                @foreach (var (item, idx) in section.Items.Select((x, i) => (x, i)))
+                {
+                    var id = $"q-{section.Title.Replace(" ", "")}-{idx}";
+                    <div class="accordion-item bg-transparent border-0 border-bottom">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed bg-transparent px-0 fw-semibold"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#@id"
+                                    aria-expanded="false"
+                                    aria-controls="@id">
+                                @item.Q
+                            </button>
+                        </h2>
+                        <div id="@id" class="accordion-collapse collapse">
+                            <div class="accordion-body px-0 text-muted">@item.A</div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<div class="glass-card p-4 mt-4 text-center">
+    <i class="fa-light fa-envelope fa-2x mb-3 d-block text-muted"></i>
+    <p class="mb-1 fw-semibold">Still need help?</p>
+    <p class="text-muted small mb-0">Contact us at <a href="mailto:support@hearthly.app">support@hearthly.app</a></p>
+</div>
