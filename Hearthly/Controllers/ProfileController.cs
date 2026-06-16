@@ -68,7 +68,6 @@ namespace Hearthly.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UserProfile profile, IFormFile? photo)
         {
-            Console.WriteLine($"Saving profile for UserId: {profile.UserId}");
             ModelState.Remove(nameof(profile.User));
             ModelState.Remove(nameof(profile.PhotoPath));
 

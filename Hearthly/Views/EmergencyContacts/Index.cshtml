@@ -1,66 +1,68 @@
-﻿@using Hearthly.Data
+@using Hearthly.Data
 @model IEnumerable<EmergencyContact>
 @{
     ViewData["Title"] = "Emergency Contacts";
     var familyId = (Guid)ViewData["FamilyId"]!;
 }
 
-<h2>@ViewData["Title"]</h2>
-
-<div class="mb-3">
-    <a asp-action="Create"
-       asp-route-familyId="@familyId"
-       class="btn btn-danger">
-        <i class="bi bi-telephone-plus"></i> Add Contact
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <h2 class="mb-0"><i class="fa-light fa-phone-emergency me-2"></i>Emergency Contacts</h2>
+    <a asp-action="Create" asp-route-familyId="@familyId" class="btn btn-danger btn-sm">
+        <i class="bi bi-telephone-plus me-1"></i> Add Contact
     </a>
 </div>
+
+@if (!Model.Any())
+{
+    <div class="glass-card text-center py-5">
+        <i class="fa-light fa-phone-slash fa-3x text-muted mb-3 d-block"></i>
+        <p class="text-muted mb-2">No emergency contacts added yet.</p>
+        <a asp-action="Create" asp-route-familyId="@familyId" class="btn btn-danger btn-sm">
+            <i class="bi bi-telephone-plus me-1"></i> Add First Contact
+        </a>
+    </div>
+}
 
 <div class="row">
     @foreach (var ec in Model)
     {
         <div class="col-md-4 mb-4">
-            <div class="card glass-card h-100">
-                <div class="card-body text-center">
-
-                    <!-- Centered Font Awesome icon -->
-                    <div class="d-flex justify-content-center mb-3">
-                        <i class="fa-light fa-@(
-                            ec.ContactType switch {
-                                EmergencyContactType.Police    => "badge-sheriff",
-                                EmergencyContactType.Fire      => "fire-flame-curved",
-                                EmergencyContactType.Ambulance => "light-emergency-on",
-                                EmergencyContactType.NSRI      => "person-water-arms-raised",
-                                EmergencyContactType.TowingService => "truck-tow",
-                                EmergencyContactType.Dad       => "person-golfing",
-                                EmergencyContactType.Mom       => "person-dress",
-                                EmergencyContactType.Sister    => "person-dress-fairy",
-                                EmergencyContactType.Brother   => "person-burst",
-                                EmergencyContactType.PoisonControl => "biohazard",
-                                EmergencyContactType.NextOfKin => "nesting-dolls",
-                                EmergencyContactType.Doctor    => "stethoscope",
-                                _                              => "cloud-question"
-                            }
-                        ) service-icon text-danger"></i>
-                    </div>
-
-                    <p class="mb-1">
-                        <strong>@ec.ContactType:</strong> @ec.Name
-                    </p>
-                    <p class="mb-3">
-                        <strong>Phone:</strong> @ec.PhoneNumber
-                    </p>
-
-                    @if (!string.IsNullOrWhiteSpace(ec.Notes))
-                    {
-                        <p class="mb-3">
-                            <strong>Notes:</strong> @ec.Notes
-                        </p>
-                    }
+            <div class="glass-card h-100 p-3 text-center d-flex flex-column">
+                <div class="d-flex justify-content-center mb-3">
+                    <i class="fa-light fa-@(
+                        ec.ContactType switch {
+                            EmergencyContactType.Police        => "badge-sheriff",
+                            EmergencyContactType.Fire          => "fire-flame-curved",
+                            EmergencyContactType.Ambulance     => "light-emergency-on",
+                            EmergencyContactType.NSRI          => "person-water-arms-raised",
+                            EmergencyContactType.TowingService => "truck-tow",
+                            EmergencyContactType.Dad           => "person-golfing",
+                            EmergencyContactType.Mom           => "person-dress",
+                            EmergencyContactType.Sister        => "person-dress-fairy",
+                            EmergencyContactType.Brother       => "person-burst",
+                            EmergencyContactType.PoisonControl => "biohazard",
+                            EmergencyContactType.NextOfKin     => "nesting-dolls",
+                            EmergencyContactType.Doctor        => "stethoscope",
+                            _                                  => "cloud-question"
+                        }
+                    ) service-icon text-danger"></i>
                 </div>
-                <div class="card-footer bg-transparent border-0 text-center">
-                    <a href="tel:@ec.PhoneNumber"
-                       class="btn btn-outline-danger">
-                        <i class="bi bi-telephone-outbound"></i> Call
+
+                <p class="mb-1"><strong>@ec.ContactType:</strong> @ec.Name</p>
+                <p class="mb-3"><strong>Phone:</strong> @ec.PhoneNumber</p>
+
+                @if (!string.IsNullOrWhiteSpace(ec.Notes))
+                {
+                    <p class="text-muted small mb-3">@ec.Notes</p>
+                }
+
+                <div class="mt-auto d-flex gap-2 justify-content-center">
+                    <a href="tel:@ec.PhoneNumber" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-telephone-outbound me-1"></i> Call
+                    </a>
+                    <a asp-action="Edit" asp-route-id="@ec.Id" asp-route-familyId="@ec.FamilyId"
+                       class="btn btn-outline-secondary btn-sm">
+                        <i class="fa-light fa-pen me-1"></i> Edit
                     </a>
                 </div>
             </div>

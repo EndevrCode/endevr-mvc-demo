@@ -1,66 +1,60 @@
-﻿@model Hearthly.Data.Utility
+@model Hearthly.Data.Utility
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Utility Details";
 }
 
-<h1>Details</h1>
-
-<div>
-    <h4>Utility</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Family)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Family.CreatedById)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Type)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Type)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AmountPaid)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AmountPaid)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PurchasedFrom)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PurchasedFrom)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AccountUsed)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AccountUsed)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PurchaseDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PurchaseDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TokenNumber)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TokenNumber)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TotalUnits)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TotalUnits)
-        </dd>
-    </dl>
+<div class="mb-4">
+    <h2 class="mb-0"><i class="fa-light fa-bolt me-2"></i>Utility Details</h2>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<div class="glass-card p-4 mx-auto" style="max-width: 560px;">
+    <dl class="row mb-4">
+        <dt class="col-sm-4">Type</dt>
+        <dd class="col-sm-8">@Model.Type</dd>
+
+        <dt class="col-sm-4">Amount Paid</dt>
+        <dd class="col-sm-8">@Model.AmountPaid.ToString("C")</dd>
+
+        @if (!string.IsNullOrWhiteSpace(Model.PurchasedFrom))
+        {
+            <dt class="col-sm-4">Purchased From</dt>
+            <dd class="col-sm-8">@Model.PurchasedFrom</dd>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.AccountUsed))
+        {
+            <dt class="col-sm-4">Account Used</dt>
+            <dd class="col-sm-8">@Model.AccountUsed</dd>
+        }
+
+        @if (Model.PurchaseDate.HasValue)
+        {
+            <dt class="col-sm-4">Purchase Date</dt>
+            <dd class="col-sm-8">@Model.PurchaseDate.Value.ToString("dd MMMM yyyy")</dd>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.TokenNumber))
+        {
+            <dt class="col-sm-4">Token Number</dt>
+            <dd class="col-sm-8">@Model.TokenNumber</dd>
+        }
+
+        @if (Model.TotalUnits.HasValue)
+        {
+            <dt class="col-sm-4">
+                @(Model.Type == Hearthly.Data.UtilityType.Electricity ? "Total Units (kWh)" : "Liters Received")
+            </dt>
+            <dd class="col-sm-8">@Model.TotalUnits.Value.ToString("0.##")</dd>
+        }
+    </dl>
+
+    <div class="d-flex justify-content-between align-items-center">
+        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-3">
+            <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary rounded-pill px-4">
+            <i class="fa-light fa-pen me-1"></i> Edit
+        </a>
+    </div>
 </div>
