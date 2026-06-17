@@ -17,6 +17,20 @@ namespace Hearthly.Controllers
         {
         }
 
+        // INDEX → "Let's Get Started" POST
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Complete()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null && !user.HasCompletedSetup)
+            {
+                user.HasCompletedSetup = true;
+                await _userManager.UpdateAsync(user);
+            }
+            return RedirectToAction("Step1");
+        }
+
         // STEP 1: Redirect to Profile if not complete
         public async Task<IActionResult> Step1()
         {
@@ -38,7 +52,7 @@ namespace Hearthly.Controllers
             // Proceed to next step
             return RedirectToAction("Step2");
         }
-        // STEP 2: Redirect to Profile if not complete, then move to Dash board
+        // STEP 2: Suggest creating a family
         public async Task<IActionResult> Step2()
         {
             var user = await _userManager.Users
@@ -48,8 +62,11 @@ namespace Hearthly.Controllers
             if (string.IsNullOrWhiteSpace(user?.Profile?.PreferredName))
                 return RedirectToAction("Edit", "Profile");
 
+            var isInFamily = await _context.FamilyMembers
+                .AnyAsync(fm => fm.UserId == user!.Id && fm.IsAccepted);
+
+            ViewData["IsInFamily"] = isInFamily;
             return View();
         }
-        // Later steps will go here...
     }
 }
