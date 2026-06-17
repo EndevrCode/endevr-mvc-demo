@@ -1,5 +1,7 @@
 ﻿@{
     ViewData["Title"] = "Set or Change Vault PIN";
+    var _pinSuccess = TempData["Success"] as string;
+    var _pinError   = TempData["Error"]   as string;
 }
 
 <div class="mt-5">
@@ -9,15 +11,6 @@
         <p class="text-center mb-3">
             Your Vault PIN must be <strong>4 to 6 numeric digits</strong>. Please keep it safe – if lost, you will need to contact support and provide identifying documentation.
         </p>
-
-        @if (TempData["Success"] != null)
-        {
-            <div class="alert alert-success text-center">@TempData["Success"]</div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="alert alert-danger text-center">@TempData["Error"]</div>
-        }
 
         <form asp-action="SetPin" method="post" novalidate onsubmit="return validatePinForm();">
             @if (ViewBag.HasExistingPin == true)
@@ -48,6 +41,17 @@
 
 @section Scripts {
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            @if (!string.IsNullOrEmpty(_pinSuccess))
+            {
+                <text>Swal.fire({ title: '@Html.Raw(_pinSuccess)', icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
+            }
+            @if (!string.IsNullOrEmpty(_pinError))
+            {
+                <text>Swal.fire({ title: 'Error', text: '@Html.Raw(_pinError)', icon: 'error', confirmButtonText: 'OK' });</text>
+            }
+        });
+
         function validatePinForm() {
             const newPin = document.getElementById('newPin').value.trim();
             const confirmPin = document.getElementById('confirmPin').value.trim();

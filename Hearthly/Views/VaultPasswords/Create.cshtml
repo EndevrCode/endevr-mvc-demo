@@ -5,9 +5,8 @@
     ViewData["Title"] = "Create Password";
     var passwordTypes = Enum.GetValues(typeof(PasswordType)).Cast<PasswordType>();
 }
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger text-center">@TempData["Error"]</div>
+@{
+    var _createErr = TempData["Error"] as string;
 }
 
 <div class="mb-4">
@@ -64,4 +63,11 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    @if (!string.IsNullOrEmpty(_createErr))
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', () =>
+                Swal.fire({ title: 'Error', text: '@Html.Raw(_createErr)', icon: 'error', confirmButtonText: 'OK' }));
+        </script>
+    }
 }

@@ -45,33 +45,11 @@
     </a>
 </div>
 
-@if (TempData["UploadSuccess"] is string ok)
-{
-    <div class="alert alert-success alert-dismissible fade show">
-        <i class="fa-light fa-circle-check me-2"></i>@ok
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-@if (TempData["UploadError"] is string err)
-{
-    <div class="alert alert-danger alert-dismissible fade show">
-        <i class="fa-light fa-circle-xmark me-2"></i>@err
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-@if (TempData["Error"] is string actionErr)
-{
-    <div class="alert alert-danger alert-dismissible fade show">
-        <i class="fa-light fa-circle-xmark me-2"></i>@actionErr
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-}
-@if (TempData["Success"] is string actionOk)
-{
-    <div class="alert alert-success alert-dismissible fade show">
-        <i class="fa-light fa-circle-check me-2"></i>@actionOk
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
+@{
+    var _uploadOk  = TempData["UploadSuccess"] as string;
+    var _uploadErr = TempData["UploadError"]   as string;
+    var _actionErr = TempData["Error"]         as string;
+    var _actionOk  = TempData["Success"]       as string;
 }
 
 <!-- Upload Section -->
@@ -195,6 +173,25 @@ else
 
 @section Scripts {
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            @if (!string.IsNullOrEmpty(_uploadOk))
+            {
+                <text>Swal.fire({ title: '@Html.Raw(_uploadOk)', icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
+            }
+            @if (!string.IsNullOrEmpty(_uploadErr))
+            {
+                <text>Swal.fire({ title: 'Upload failed', text: '@Html.Raw(_uploadErr)', icon: 'error', confirmButtonText: 'OK' });</text>
+            }
+            @if (!string.IsNullOrEmpty(_actionErr))
+            {
+                <text>Swal.fire({ title: 'Error', text: '@Html.Raw(_actionErr)', icon: 'error', confirmButtonText: 'OK' });</text>
+            }
+            @if (!string.IsNullOrEmpty(_actionOk))
+            {
+                <text>Swal.fire({ title: '@Html.Raw(_actionOk)', icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
+            }
+        });
+
         function promptUploadPin() {
             const form = document.getElementById('uploadForm');
             const title = form.querySelector('input[name="title"]').value.trim();

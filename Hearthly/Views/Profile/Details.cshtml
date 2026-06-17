@@ -34,9 +34,8 @@
     }
 }
 
-@if (TempData["StatusMessage"] is string msg)
-{
-    <div class="alert alert-success">@msg</div>
+@{
+    var _statusMsg = TempData["StatusMessage"] as string;
 }
 
 <div class="glass-card p-4 mb-4">
@@ -152,6 +151,13 @@
 
 @section Scripts {
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            @if (!string.IsNullOrEmpty(_statusMsg))
+            {
+                <text>Swal.fire({ title: '@Html.Raw(_statusMsg)', icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
+            }
+        });
+
         function confirmDeleteAccount() {
             Swal.fire({
                 title: 'Delete Your Account?',
