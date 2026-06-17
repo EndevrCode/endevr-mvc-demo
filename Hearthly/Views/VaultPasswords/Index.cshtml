@@ -180,9 +180,20 @@ else
                             Swal.fire({ title: 'Error', text: 'PIN confirmation could not be saved.', icon: 'error' });
                             return;
                         }
-                        window.location.href = window.editIdToOpen
-                            ? `/VaultPasswords/Edit/${window.editIdToOpen}`
-                            : `/VaultPasswords/Delete/${window.deleteIdToConfirm}`;
+                        if (window.editIdToOpen) {
+                            window.location.href = `/VaultPasswords/Edit/${window.editIdToOpen}`;
+                        } else {
+                            const delRes = await fetch(`/VaultPasswords/Delete/${window.deleteIdToConfirm}`, {
+                                method: 'POST',
+                                headers: { 'RequestVerificationToken': token }
+                            });
+                            const delResult = await delRes.json();
+                            if (delResult.success) {
+                                window.location.reload();
+                            } else {
+                                Swal.fire({ title: 'Error', text: delResult.message || 'Could not delete entry.', icon: 'error' });
+                            }
+                        }
                         return;
                     }
 

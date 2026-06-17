@@ -172,6 +172,13 @@ namespace Hearthly.Controllers
                 return RedirectToAction("Index");
             }
 
+            // Decrypt so the edit form shows the plain-text value
+            if (!string.IsNullOrEmpty(password.Password))
+            {
+                try { password.Password = _protector.Unprotect(password.Password); }
+                catch { password.Password = ""; }
+            }
+
             return View(password);
         }
 
@@ -202,9 +209,14 @@ namespace Hearthly.Controllers
 
             existing.Title = updatedPassword.Title;
             existing.Username = updatedPassword.Username;
-            existing.Password = updatedPassword.Password;
             existing.Notes = updatedPassword.Notes;
             existing.PasswordType = updatedPassword.PasswordType;
+
+            // Always re-encrypt the password before saving
+            if (!string.IsNullOrEmpty(updatedPassword.Password))
+            {
+                existing.Password = _protector.Protect(updatedPassword.Password);
+            }
 
             _context.Update(existing);
             await _context.SaveChangesAsync();
@@ -233,28 +245,27 @@ namespace Hearthly.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var userId = _userManager.GetUserId(User);
-            if (!HttpContext.Session.TryGetValue("VaultPinConfirmed", out _))
+            if (!IsPinConfirmedRecently())
             {
-                return RedirectToAction("Index");
+                return Json(new { success = false, message = "PIN confirmation required." });
             }
 
+            var userId = _userManager.GetUserId(User);
             var entry = await _context.VaultPasswords
                 .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
 
             if (entry == null)
             {
-                return NotFound();
+                return Json(new { success = false, message = "Entry not found." });
             }
 
             _context.VaultPasswords.Remove(entry);
             await _context.SaveChangesAsync();
 
-            TempData["SuccessMessage"] = "Password entry deleted.";
-            return RedirectToAction("Index");
+            return Json(new { success = true });
         }
     }
 }
