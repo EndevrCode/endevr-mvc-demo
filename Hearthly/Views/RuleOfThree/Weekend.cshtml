@@ -2,10 +2,16 @@
     ViewData["Title"] = "Weekend Pause";
 }
 
-<div class="text-center mt-5">
-    <h2><i class="fa-light fa-calendar-week me-2 text-primary"></i>It's the weekend!</h2>
-    <p class="lead mt-3 text-muted">
-        Rule of 3 only runs Monday to Friday.<br />
-        Take this time to relax or catch up on other things.
-    </p>
+<div class="d-flex flex-column align-items-center justify-content-center text-center" style="min-height: 60vh;">
+    <div class="glass-card p-5" style="max-width: 460px; width: 100%;">
+        <i class="fa-light fa-calendar-week fa-3x mb-3 d-block" style="color:#6366f1;"></i>
+        <h3 class="fw-semibold mb-2">It's the weekend!</h3>
+        <p class="text-muted mb-4">
+            Rule of Three only runs Monday to Friday.<br />
+            Take this time to rest and recharge.
+        </p>
+        <a asp-controller="RuleOfThree" asp-action="Dashboard" class="btn btn-outline-primary rounded-pill px-4">
+            <i class="fa-light fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+    </div>
 </div>

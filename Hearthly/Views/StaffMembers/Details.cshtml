@@ -107,25 +107,27 @@
             <div class="fw-semibold text-success">R @totalMonthly.ToString("N2")</div>
         </div>
 
-        <div class="col-12">
-            <div class="text-muted small">Address</div>
-            <div>@(Model.Address ?? "-")</div>
-
-            <div class="col-12 text-center mt-3">
-                <div class="rounded-circle overflow-hidden mx-auto"
-                     style="width: 280px; height: 280px; border: 3px solid #ccc;">
-                    <iframe src="https://www.google.com/maps?q=@System.Net.WebUtility.UrlEncode(Model.Address)&output=embed"
-                            width="280"
-                            height="280"
-                            frameborder="0"
-                            style="border:0;"
-                            allowfullscreen
-                            loading="lazy"
-                            referrerpolicy="no-referrer-when-downgrade">
-                    </iframe>
+        @if (!string.IsNullOrWhiteSpace(Model.Address))
+        {
+            <div class="col-12">
+                <div class="text-muted small">Address</div>
+                <div>@Model.Address</div>
+                <div class="text-center mt-3">
+                    <div class="rounded-circle overflow-hidden mx-auto"
+                         style="width: 280px; height: 280px; border: 3px solid #ccc;">
+                        <iframe src="https://www.google.com/maps?q=@System.Net.WebUtility.UrlEncode(Model.Address)&output=embed"
+                                width="280"
+                                height="280"
+                                frameborder="0"
+                                style="border:0;"
+                                allowfullscreen
+                                loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
                 </div>
             </div>
-        </div>
+        }
     </div>
 </div>
 
