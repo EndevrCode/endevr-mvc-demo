@@ -113,12 +113,12 @@
                             <td class="text-muted small">@file.UploadedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
                             <td class="text-end">
                                 <button type="button"
-                                        class="btn btn-sm btn-outline-primary rounded-pill me-1"
+                                        class="btn btn-sm btn-outline-primary rounded-pill px-2 me-1"
                                         onclick="submitDownload('@file.Id')">
                                     <i class="fa-light fa-cloud-arrow-down"></i>
                                 </button>
                                 <button type="button"
-                                        class="btn btn-sm btn-outline-danger rounded-pill"
+                                        class="btn btn-sm btn-outline-danger rounded-pill px-2"
                                         onclick="confirmDelete('@file.Id', '@Html.Encode(file.OriginalFileName)')">
                                     <i class="fa-light fa-trash"></i>
                                 </button>
