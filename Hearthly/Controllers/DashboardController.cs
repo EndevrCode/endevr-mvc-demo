@@ -129,7 +129,28 @@ namespace Hearthly.Controllers
                 {
                     title = $"Invite sent to {inv.InvitedEmail}",
                     start = inv.CreatedAt.ToString("yyyy-MM-dd"),
-                    allDay = true
+                    allDay = true,
+                    color = "#94a3b8",
+                    extendedProps = new { type = "invite" }
+                });
+            }
+
+            // Family calendar events
+            var calendarEvents = await _context.FamilyCalendarEvents
+                .Where(e => myFamilyIds.Contains(e.FamilyId))
+                .OrderBy(e => e.Date)
+                .ToListAsync();
+
+            foreach (var ce in calendarEvents)
+            {
+                events.Add(new
+                {
+                    id = ce.Id.ToString(),
+                    title = ce.Title,
+                    start = ce.Date.ToString("yyyy-MM-dd"),
+                    allDay = true,
+                    color = ce.Color,
+                    extendedProps = new { type = "custom", description = ce.Description ?? "" }
                 });
             }
 
@@ -144,6 +165,8 @@ namespace Hearthly.Controllers
                 .ToList();
 
             // Assemble the view‑model
+            var familiesList = familyInfos.Select(fi => new { id = fi.Family.Id, name = fi.Family.Name }).ToList();
+
             var vm = new DashboardViewModel
             {
                 Families = familyInfos,
@@ -152,7 +175,8 @@ namespace Hearthly.Controllers
                 UnpaidBillsCount = unpaidBills.Count,
                 UnpaidBillsTotal = unpaidBills.Sum(b => b.Amount),
                 OverdueBills = overdueBills,
-                EventsJson = JsonSerializer.Serialize(events)
+                EventsJson = JsonSerializer.Serialize(events),
+                FamiliesJson = JsonSerializer.Serialize(familiesList)
             };
 
             return View(vm);

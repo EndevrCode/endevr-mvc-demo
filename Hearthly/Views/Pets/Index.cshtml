@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Hearthly.Data.Pet>
+@model IEnumerable<Hearthly.Data.Pet>
 
 @{
     ViewData["Title"] = "Pets";
@@ -23,7 +23,7 @@
     </div>
 }
 
-<div class="row">
+<div class="row g-3">
     @foreach (var pet in Model)
     {
         DateTime? nextDate;
@@ -54,26 +54,37 @@
         }
 
         var daysUntil = nextDate.HasValue ? (nextDate.Value - today).Days : (int?)null;
-        var cardClass = pet.IsDeceased ? "deceased-card" : "";
-        <div class="col-md-6 mb-5 d-flex justify-content-center">
-            <a asp-action="Details" asp-route-id="@pet.Id" class="text-decoration-none w-100" style="max-width: 320px;">
-                <div class="card shadow-sm border-0 bg-transparent text-center @cardClass">
+        var isDeceased = pet.IsDeceased;
+
+        <div class="col-6 col-md-4 col-lg-3">
+            <a asp-action="Details" asp-route-id="@pet.Id" class="text-decoration-none">
+                <div class="glass-card text-center p-3 h-100 @(isDeceased ? "opacity-75" : "")">
                     @if (!string.IsNullOrEmpty(pet.PhotoPath))
                     {
-                        <img src="@pet.PhotoPath" alt="@pet.Name" class="pet-photo-lg rounded-circle mx-auto mt-3" style="width: 220px; height: 220px; object-fit: cover;" />
+                        <img src="@pet.PhotoPath" alt="@pet.Name"
+                             class="rounded-circle mb-3"
+                             style="width:96px;height:96px;object-fit:cover;border:2.5px solid rgba(255,255,255,.15);" />
+                    }
+                    else
+                    {
+                        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto mb-3"
+                             style="width:96px;height:96px;font-size:2rem;">
+                            <i class="fa-light fa-paw"></i>
+                        </div>
                     }
 
-                    <div class="card-body text-light">
-                        <h5 class="card-title">@pet.Name</h5>
+                    <h6 class="fw-semibold mb-1">@pet.Name</h6>
 
-                        @if (daysUntil.HasValue && countYears.HasValue)
-                        {
-                            <p class="card-text mb-0 small text-light">
-                                Next @label in <strong>@daysUntil</strong> day@(daysUntil == 1 ? "" : "s")<br />
-                                This will be <strong>@countYears</strong> year@(countYears == 1 ? "" : "s")
-                            </p>
-                        }
-                    </div>
+                    @if (isDeceased)
+                    {
+                        <small class="text-muted"><i class="fa-light fa-heart me-1"></i>Remembered</small>
+                    }
+                    else if (daysUntil.HasValue && countYears.HasValue)
+                    {
+                        <small class="text-muted">
+                            @label in <strong>@daysUntil</strong> day@(daysUntil == 1 ? "" : "s")
+                        </small>
+                    }
                 </div>
             </a>
         </div>

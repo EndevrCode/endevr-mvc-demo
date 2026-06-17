@@ -18,6 +18,9 @@ namespace Hearthly.Data
 
         // FullCalendar JSON blob of events (birthdays, invites, etc.)
         public string EventsJson { get; set; } = "[]";
+
+        // Families available for event creation (id + name)
+        public string FamiliesJson { get; set; } = "[]";
     }
 
     public class FamilyInfo

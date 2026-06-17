@@ -36,6 +36,7 @@ namespace Hearthly.Data
         public DbSet<ShoppingList> ShoppingLists { get; set; } = default!;
         public DbSet<ShoppingItem> ShoppingItems { get; set; } = default!;
         public DbSet<Hearthly.Data.Vault.VaultBiometricCredential> VaultBiometricCredentials { get; set; } = default!;
+        public DbSet<FamilyCalendarEvent> FamilyCalendarEvents { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
