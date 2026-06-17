@@ -36,7 +36,7 @@
             <div class="card-content">
                 <i class="fa-light fa-chart-line card-icon"></i>
                 <h3 class="theme-heading">Dashboard</h3>
-                <p>See upcoming birthdays and recent invites.</p>
+                <p>Birthdays, bills, chores &amp; family overview.</p>
             </div>
         </a>
 
@@ -123,6 +123,26 @@
                 <i class="fa-light fa-cart-shopping card-icon"></i>
                 <h3 class="theme-heading">Shopping</h3>
                 <p>Shared shopping lists for the whole family.</p>
+            </div>
+        </a>
+
+        <!-- Health -->
+        <a class="card glass-card" asp-controller="Health" asp-action="Index">
+            <div class="card-content">
+                <i class="fa-light fa-heart-pulse card-icon"></i>
+                <h3 class="theme-heading">Health</h3>
+                <p>Track medical info, allergies &amp; emergency contacts.</p>
+            </div>
+        </a>
+
+        <!-- Chores -->
+        <a href="@((isInFamily) ? Url.Action("Index", "Chores", new { familyId = firstFamilyId }) : "#")"
+           class="card glass-card @(isInFamily ? "" : "disabled-rule-card")"
+           onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
+            <div class="card-content">
+                <i class="fa-light fa-list-check card-icon"></i>
+                <h3 class="theme-heading">Chores</h3>
+                <p>Assign and track household chores for the family.</p>
             </div>
         </a>
 
