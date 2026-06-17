@@ -41,19 +41,22 @@ else
                     <button type="button"
                             class="btn btn-sm btn-outline-secondary rounded-pill px-3"
                             title="View"
-                            onclick="promptVaultPin('@item.Username', '@item.Password')">
+                            data-entry-id="@item.Id"
+                            onclick="promptVaultPin(this.dataset.entryId)">
                         <i class="fa-light fa-eye"></i>
                     </button>
                     <button type="button"
                             class="btn btn-sm btn-outline-primary rounded-pill px-3"
                             title="Edit"
-                            onclick="promptEditPin('@item.Id')">
+                            data-entry-id="@item.Id"
+                            onclick="promptEditPin(this.dataset.entryId)">
                         <i class="fa-light fa-pen"></i>
                     </button>
                     <button type="button"
                             class="btn btn-sm btn-outline-danger rounded-pill px-3"
                             title="Delete"
-                            onclick="promptDeletePin('@item.Id')">
+                            data-entry-id="@item.Id"
+                            onclick="promptDeletePin(this.dataset.entryId)">
                         <i class="fa-light fa-trash"></i>
                     </button>
                     @if (!string.IsNullOrEmpty(item.FilePath))
@@ -114,6 +117,7 @@ else
         window.passwordToReveal = '';
         window.usernameToReveal = '';
         window.passwordShown = false;
+        window.viewIdToOpen = null;
         window.editIdToOpen = null;
         window.deleteIdToConfirm = null;
 
@@ -129,9 +133,8 @@ else
             new bootstrap.Modal(document.getElementById('vaultPinModal')).show();
         }
 
-        window.promptVaultPin = function (username, password) {
-            window.usernameToReveal = username;
-            window.passwordToReveal = password;
+        window.promptVaultPin = function (entryId) {
+            window.viewIdToOpen = entryId;
             window.editIdToOpen = null;
             window.deleteIdToConfirm = null;
             openPinModal();
@@ -139,17 +142,15 @@ else
 
         window.promptEditPin = function (id) {
             window.editIdToOpen = id;
-            window.usernameToReveal = '';
-            window.passwordToReveal = '';
+            window.viewIdToOpen = null;
             window.deleteIdToConfirm = null;
             openPinModal();
         };
 
         window.promptDeletePin = function (id) {
             window.deleteIdToConfirm = id;
+            window.viewIdToOpen = null;
             window.editIdToOpen = null;
-            window.usernameToReveal = '';
-            window.passwordToReveal = '';
             openPinModal();
         };
 
@@ -167,42 +168,50 @@ else
                 });
                 const result = await res.json();
 
-                if (res.ok && result.success) {
-                    bootstrap.Modal.getInstance(document.getElementById('vaultPinModal')).hide();
-
-                    if (window.editIdToOpen || window.deleteIdToConfirm) {
-                        const confirmed = await fetch('/VaultPasswords/MarkPinConfirmed', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
-                            body: JSON.stringify({})
-                        });
-                        if (!confirmed.ok) {
-                            Swal.fire({ title: 'Error', text: 'PIN confirmation could not be saved.', icon: 'error' });
-                            return;
-                        }
-                        if (window.editIdToOpen) {
-                            window.location.href = `/VaultPasswords/Edit/${window.editIdToOpen}`;
-                        } else {
-                            const delRes = await fetch(`/VaultPasswords/Delete/${window.deleteIdToConfirm}`, {
-                                method: 'POST',
-                                headers: { 'RequestVerificationToken': token }
-                            });
-                            const delResult = await delRes.json();
-                            if (delResult.success) {
-                                window.location.reload();
-                            } else {
-                                Swal.fire({ title: 'Error', text: delResult.message || 'Could not delete entry.', icon: 'error' });
-                            }
-                        }
-                        return;
-                    }
-
-                    document.getElementById('modalUsername').textContent = window.usernameToReveal;
-                    document.getElementById('modalPassword').textContent = '••••••••';
-                    window.passwordShown = false;
-                    new bootstrap.Modal(document.getElementById('passwordDetailsModal')).show();
-                } else {
+                if (!res.ok || !result.success) {
                     Swal.fire({ title: 'Incorrect PIN', icon: 'error', confirmButtonText: 'Try again' });
+                    return;
+                }
+
+                bootstrap.Modal.getInstance(document.getElementById('vaultPinModal')).hide();
+
+                // Mark PIN confirmed in session for gated endpoints
+                await fetch('/VaultPasswords/MarkPinConfirmed', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+                    body: JSON.stringify({})
+                });
+
+                if (window.editIdToOpen) {
+                    window.location.href = `/VaultPasswords/Edit/${window.editIdToOpen}`;
+                } else if (window.deleteIdToConfirm) {
+                    const delRes = await fetch(`/VaultPasswords/Delete/${window.deleteIdToConfirm}`, {
+                        method: 'POST',
+                        headers: { 'RequestVerificationToken': token }
+                    });
+                    const delResult = await delRes.json();
+                    if (delResult.success) {
+                        window.location.reload();
+                    } else {
+                        Swal.fire({ title: 'Error', text: delResult.message || 'Could not delete entry.', icon: 'error' });
+                    }
+                } else if (window.viewIdToOpen) {
+                    // Fetch credentials via PIN-gated endpoint
+                    const credRes = await fetch(`/VaultPasswords/GetPassword/${window.viewIdToOpen}`, {
+                        method: 'POST',
+                        headers: { 'RequestVerificationToken': token }
+                    });
+                    const cred = await credRes.json();
+                    if (cred.success) {
+                        window.usernameToReveal = cred.username || '';
+                        window.passwordToReveal = cred.password || '';
+                        document.getElementById('modalUsername').textContent = window.usernameToReveal;
+                        document.getElementById('modalPassword').textContent = '••••••••';
+                        window.passwordShown = false;
+                        new bootstrap.Modal(document.getElementById('passwordDetailsModal')).show();
+                    } else {
+                        Swal.fire({ title: 'Error', text: cred.message || 'Could not load credentials.', icon: 'error' });
+                    }
                 }
             } catch {
                 Swal.fire({ title: 'Error', text: 'Something went wrong.', icon: 'error' });

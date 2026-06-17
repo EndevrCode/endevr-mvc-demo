@@ -37,23 +37,37 @@ namespace Hearthly.Controllers
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
 
-            // Decrypt passwords
+            // Clear sensitive fields — credentials are served via PIN-gated AJAX
             foreach (var item in passwords)
             {
-                if (!string.IsNullOrEmpty(item.Password))
-                {
-                    try
-                    {
-                        item.Password = _protector.Unprotect(item.Password);
-                    }
-                    catch
-                    {
-                        item.Password = "[Decryption Failed]";
-                    }
-                }
+                item.Password = null;
+                item.Username = null;
             }
 
             return View(passwords);
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> GetPassword(Guid id)
+        {
+            if (!IsPinConfirmedRecently())
+                return Json(new { success = false, message = "PIN confirmation required." });
+
+            var userId = _userManager.GetUserId(User);
+            var entry = await _context.VaultPasswords
+                .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+
+            if (entry == null)
+                return Json(new { success = false, message = "Entry not found." });
+
+            string? decryptedPassword = null;
+            if (!string.IsNullOrEmpty(entry.Password))
+            {
+                try { decryptedPassword = _protector.Unprotect(entry.Password); }
+                catch { decryptedPassword = "[Decryption Failed]"; }
+            }
+
+            return Json(new { success = true, username = entry.Username, password = decryptedPassword });
         }
 
         public IActionResult Create()
