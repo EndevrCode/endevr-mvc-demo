@@ -98,8 +98,20 @@
         const gas    = document.getElementById('gasFields');
 
         function toggleExtras() {
-            elec.style.display = select.value === 'Electricity' ? 'block' : 'none';
-            gas.style.display  = select.value === 'Gas'         ? 'block' : 'none';
+            const isElec = select.value === 'Electricity';
+            const isGas  = select.value === 'Gas';
+            elec.style.display = isElec ? 'block' : 'none';
+            gas.style.display  = isGas  ? 'block' : 'none';
+            if (isElec) { enableSection(elec);  disableSection(gas); }
+            else if (isGas) { enableSection(gas); disableSection(elec); }
+            else { disableSection(elec); disableSection(gas); }
+        }
+
+        function disableSection(section) {
+            section.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+        }
+        function enableSection(section) {
+            section.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
         }
 
         select.addEventListener('change', toggleExtras);
