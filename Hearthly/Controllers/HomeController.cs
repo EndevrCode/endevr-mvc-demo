@@ -58,6 +58,12 @@ namespace Hearthly.Controllers
             return View("~/Views/Shared/ComingSoon.cshtml");
         }
 
+        [AllowAnonymous]
+        public IActionResult Offline()
+        {
+            return View("~/Views/Shared/Offline.cshtml");
+        }
+
 
         // Other actions (Privacy, Error, etc.) ...
     }

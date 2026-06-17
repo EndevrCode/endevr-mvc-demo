@@ -1,10 +1,9 @@
 ﻿importScripts('/js/idb-queue.js');
 
-const OFFLINE_URL = '/Shared/Offline';
-const CACHE_NAME = 'hearthly-cache-v1';
+const OFFLINE_URL = '/Home/Offline';
+const CACHE_NAME = 'hearthly-cache-v2';
 const ASSETS_TO_CACHE = [
     '/',
-    '/css/bootstrap.min.css',
     '/css/site.css',
     '/js/site.js',
     '/lib/bootstrap/dist/css/bootstrap.min.css',
@@ -26,9 +25,15 @@ self.addEventListener('install', event => {
     );
 });
 
-// Activate event – claim control
+// Activate event – purge old caches and claim control
 self.addEventListener('activate', event => {
-    event.waitUntil(self.clients.claim());
+    event.waitUntil(
+        caches.keys()
+            .then(keys => Promise.all(
+                keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+            ))
+            .then(() => self.clients.claim())
+    );
 });
 
 // Fetch event – try cache first, fallback to network, then offline page

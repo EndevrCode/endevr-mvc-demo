@@ -47,13 +47,13 @@ else
         <h6 class="fw-semibold mb-3"><i class="fa-light fa-droplet me-2 text-danger"></i>Basic Info</h6>
         <div class="row gy-3">
             <div class="col-md-6">
-                <small class="text-muted d-block">Blood Type</small>
-                <strong>@(Model.BloodType ?? "—")</strong>
+                <div class="text-muted small">Blood Type</div>
+                <div class="fw-semibold">@(Model.BloodType ?? "—")</div>
             </div>
             @if (!string.IsNullOrWhiteSpace(Model.Allergies))
             {
                 <div class="col-12">
-                    <small class="text-muted d-block">Allergies</small>
+                    <div class="text-muted small">Allergies</div>
                     <div>@Model.Allergies</div>
                 </div>
             }
@@ -84,14 +84,14 @@ else
                 @if (!string.IsNullOrWhiteSpace(Model.MedicalAidName))
                 {
                     <div class="col-md-6">
-                        <small class="text-muted d-block">Provider</small>
+                        <div class="text-muted small">Provider</div>
                         <div>@Model.MedicalAidName</div>
                     </div>
                 }
                 @if (!string.IsNullOrWhiteSpace(Model.MedicalAidNumber))
                 {
                     <div class="col-md-6">
-                        <small class="text-muted d-block">Member Number</small>
+                        <div class="text-muted small">Member Number</div>
                         <div>@Model.MedicalAidNumber</div>
                     </div>
                 }
@@ -107,15 +107,15 @@ else
                 @if (!string.IsNullOrWhiteSpace(Model.DoctorName))
                 {
                     <div class="col-md-6">
-                        <small class="text-muted d-block">Name</small>
+                        <div class="text-muted small">Name</div>
                         <div>@Model.DoctorName</div>
                     </div>
                 }
                 @if (!string.IsNullOrWhiteSpace(Model.DoctorPhone))
                 {
                     <div class="col-md-6">
-                        <small class="text-muted d-block">Phone</small>
-                        <a href="tel:@Model.DoctorPhone">@Model.DoctorPhone</a>
+                        <div class="text-muted small">Phone</div>
+                        <a href="tel:@Model.DoctorPhone" class="text-decoration-none">@Model.DoctorPhone</a>
                     </div>
                 }
             </div>
