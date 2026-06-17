@@ -1,34 +1,32 @@
-﻿@model string
+@model string
 
 @{
     ViewData["Title"] = "Invite Acceptance";
-
-    // Safely grab the token from the query string
     var tokenString = Context.Request.Query["token"].FirstOrDefault();
 }
 
-<h2>@ViewData["Title"]</h2>
-
-<div class="alert alert-info">
-    @Model
+<div class="mb-4">
+    <h2 class="mb-0"><i class="fa-light fa-envelope-open-text me-2"></i>Invite Acceptance</h2>
 </div>
 
-@if (User.Identity.IsAuthenticated)
-{
-    <a asp-action="Index" class="btn btn-primary">
-        Back to My Families
-    </a>
-}
-else
-{
-    <a asp-area="Identity"
-       asp-page="/Account/Login"
-       asp-route-returnUrl="@Url.Action(
-                   "Accept",
-                   "Families",
-                   new { token = tokenString }
-              )"
-   class="btn btn-primary">
-    Log in to Accept
-</a>
-}
+<div class="glass-card p-4 mx-auto" style="max-width: 480px;">
+    <div class="alert alert-info rounded-3">
+        <i class="fa-light fa-circle-info me-2"></i>@Model
+    </div>
+
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <a asp-action="Index" class="btn btn-primary rounded-pill px-4 w-100">
+            <i class="fa-light fa-users me-1"></i> Back to My Families
+        </a>
+    }
+    else
+    {
+        <a asp-area="Identity"
+           asp-page="/Account/Login"
+           asp-route-returnUrl="@Url.Action("Accept", "Families", new { token = tokenString })"
+           class="btn btn-primary rounded-pill px-4 w-100">
+            <i class="fa-light fa-right-to-bracket me-1"></i> Log in to Accept
+        </a>
+    }
+</div>
