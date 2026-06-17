@@ -55,9 +55,14 @@
 
             <input type="hidden" name="password.Section" value="@((int)VaultSection.Passwords)" />
 
-            <button type="submit" class="btn btn-primary rounded-pill w-100">
-                <i class="fa-light fa-floppy-disk me-1"></i> Save Password
-            </button>
+            <div class="d-flex gap-2 mt-2">
+                <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="fa-light fa-arrow-left me-1"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary rounded-pill px-4 flex-grow-1">
+                    <i class="fa-light fa-floppy-disk me-1"></i> Save Password
+                </button>
+            </div>
         </form>
 </div>
 
