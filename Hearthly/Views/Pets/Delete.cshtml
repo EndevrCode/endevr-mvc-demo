@@ -1,90 +1,47 @@
-﻿@model Hearthly.Data.Pet
+@model Hearthly.Data.Pet
 
 @{
     ViewData["Title"] = "Delete Pet";
 }
 
-<h1>Delete Pet</h1>
-<hr />
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <h2 class="mb-0 text-danger"><i class="fa-light fa-triangle-exclamation me-2"></i>Delete Pet</h2>
+</div>
 
-<div class="row gx-3 gy-3">
-
-    <!-- Photo -->
-    <div class="col-md-4">
+<div class="glass-card p-4" style="max-width:480px;">
+    <div class="d-flex align-items-center gap-3 mb-4">
         @if (!string.IsNullOrEmpty(Model.PhotoPath))
         {
-            <img src="@Model.PhotoPath" alt="@Model.Name" class="img-fluid rounded-circle mb-3" />
+            <img src="@Model.PhotoPath"
+                 alt="@Model.Name"
+                 class="rounded-circle flex-shrink-0"
+                 style="width:72px;height:72px;object-fit:cover;" />
         }
+        else
+        {
+            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center flex-shrink-0"
+                 style="width:72px;height:72px;font-size:1.5rem;">
+                <i class="fa-light fa-paw"></i>
+            </div>
+        }
+        <div>
+            <div class="fw-semibold fs-5">@Model.Name</div>
+            <small class="text-muted">@Model.Species@(!string.IsNullOrEmpty(Model.Breed) ? $" · {Model.Breed}" : "")</small>
+        </div>
     </div>
 
-    <!-- Details -->
-    <div class="col-md-8">
-        <dl class="row">
+    <p class="text-muted mb-4">This will permanently remove @Model.Name and all their records. This action cannot be undone.</p>
 
-            <dt class="col-sm-4">@Html.DisplayNameFor(m => m.Name)</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(m => m.Name)</dd>
-
-            <dt class="col-sm-4">@Html.DisplayNameFor(m => m.Species)</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(m => m.Species)</dd>
-
-            <dt class="col-sm-4">@Html.DisplayNameFor(m => m.Breed)</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(m => m.Breed)</dd>
-
-            <dt class="col-sm-4">Family</dt>
-            <dd class="col-sm-8">@Model.Family.Name</dd>
-
-            <dt class="col-sm-4">@Html.DisplayNameFor(m => m.BirthDate)</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(m => m.BirthDate)</dd>
-
-            <dt class="col-sm-4">@Html.DisplayNameFor(m => m.LastDewormingDate)</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(m => m.LastDewormingDate)</dd>
-
-            <dt class="col-sm-4">@Html.DisplayNameFor(m => m.LastTickFleaDate)</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(m => m.LastTickFleaDate)</dd>
-
-            <dt class="col-sm-4">@Html.DisplayNameFor(m => m.LastGroomingDate)</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(m => m.LastGroomingDate)</dd>
-
-            <dt class="col-sm-4">@Html.DisplayNameFor(m => m.LastCheckupDate)</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(m => m.LastCheckupDate)</dd>
-
-            <dt class="col-sm-4">@Html.DisplayNameFor(m => m.HasInsurance)</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(m => m.HasInsurance)</dd>
-
-            @if (Model.HasInsurance)
-            {
-                <dt class="col-sm-4">@Html.DisplayNameFor(m => m.InsuranceNumber)</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(m => m.InsuranceNumber)</dd>
-            }
-
-            <dt class="col-sm-4">@Html.DisplayNameFor(m => m.IsMicrochipped)</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(m => m.IsMicrochipped)</dd>
-
-            @if (Model.IsMicrochipped)
-            {
-                <dt class="col-sm-4">@Html.DisplayNameFor(m => m.MicrochipNumber)</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(m => m.MicrochipNumber)</dd>
-            }
-
-            <dt class="col-sm-4">@Html.DisplayNameFor(m => m.IsDeceased)</dt>
-            <dd class="col-sm-8">@Html.DisplayFor(m => m.IsDeceased)</dd>
-
-            @if (Model.IsDeceased)
-            {
-                <dt class="col-sm-4">@Html.DisplayNameFor(m => m.DateOfDeath)</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(m => m.DateOfDeath)</dd>
-
-                <dt class="col-sm-4">@Html.DisplayNameFor(m => m.FinalAge)</dt>
-                <dd class="col-sm-8">@Html.DisplayFor(m => m.FinalAge)</dd>
-            }
-
-        </dl>
-
-        <form asp-action="Delete" method="post">
-            @Html.AntiForgeryToken()
-            <input type="hidden" asp-for="Id" />
-            <button type="submit" class="btn btn-danger">Delete</button>
-            <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
-        </form>
-    </div>
+    <form asp-action="Delete" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        <div class="d-flex justify-content-between">
+            <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="fa-light fa-arrow-left me-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-danger rounded-pill px-4">
+                <i class="fa-light fa-trash me-1"></i> Delete
+            </button>
+        </div>
+    </form>
 </div>

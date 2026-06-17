@@ -22,9 +22,8 @@
     decimal totalMonthly = daily * daysThisMonth;
 }
 
-@if (TempData["StatusMessage"] is string msg)
-{
-    <div class="alert alert-success">@msg</div>
+@{
+    var statusMsg = TempData["StatusMessage"] as string;
 }
 
 <div class="text-center mt-5 mb-4">
@@ -141,6 +140,14 @@
 
 @section Scripts {
     <script>
+        @if (!string.IsNullOrEmpty(statusMsg))
+        {
+            <text>
+        document.addEventListener('DOMContentLoaded', () =>
+            Swal.fire({ title: '@Html.Raw(statusMsg)', icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false }));
+            </text>
+        }
+
         function confirmDelete() {
             Swal.fire({
                 title: 'Delete Staff Member?',
