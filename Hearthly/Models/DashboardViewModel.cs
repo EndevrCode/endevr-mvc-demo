@@ -24,11 +24,23 @@ namespace Hearthly.Data
         // Pending chores across all families
         public int PendingChoresCount { get; set; }
 
+        // Pet care reminders
+        public List<PetCareReminder> PetCareReminders { get; set; } = new();
+
         // FullCalendar JSON blob of events (birthdays, invites, etc.)
         public string EventsJson { get; set; } = "[]";
 
         // Families available for event creation (id + name)
         public string FamiliesJson { get; set; } = "[]";
+    }
+
+    public class PetCareReminder
+    {
+        public Guid PetId { get; set; }
+        public string PetName { get; set; } = "";
+        public string CareType { get; set; } = "";
+        public DateTime LastDate { get; set; }
+        public int DaysOverdue { get; set; }
     }
 
     public class BirthdayInfo

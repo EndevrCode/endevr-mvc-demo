@@ -216,6 +216,40 @@ namespace Hearthly.Controllers
                 .Where(c => myFamilyIds.Contains(c.FamilyId) && !c.IsDone)
                 .CountAsync();
 
+            // 7) Pet care reminders (overdue care tasks for living pets)
+            var petCareReminders = new List<PetCareReminder>();
+            var reminderThresholds = new (string Label, int Days, Func<Pet, DateTime?> GetDate)[]
+            {
+                ("Deworming",  90, p => p.LastDewormingDate),
+                ("Tick & Flea", 30, p => p.LastTickFleaDate),
+                ("Grooming",   60, p => p.LastGroomingDate),
+                ("Checkup",   365, p => p.LastCheckupDate),
+            };
+
+            foreach (var fi in familyInfos)
+            {
+                foreach (var pet in fi.Pets.Where(p => !p.IsDeceased))
+                {
+                    foreach (var (label, thresholdDays, getDate) in reminderThresholds)
+                    {
+                        var lastDate = getDate(pet);
+                        if (!lastDate.HasValue) continue;
+                        var daysAgo = (today2 - lastDate.Value.Date).Days;
+                        if (daysAgo > thresholdDays)
+                            petCareReminders.Add(new PetCareReminder
+                            {
+                                PetId      = pet.Id,
+                                PetName    = pet.Name,
+                                CareType   = label,
+                                LastDate   = lastDate.Value,
+                                DaysOverdue = daysAgo - thresholdDays
+                            });
+                    }
+                }
+            }
+
+            petCareReminders = petCareReminders.OrderByDescending(r => r.DaysOverdue).ToList();
+
             // Assemble the view‑model
             var familiesList = familyInfos.Select(fi => new { id = fi.Family.Id, name = fi.Family.Name }).ToList();
 
@@ -230,6 +264,7 @@ namespace Hearthly.Controllers
                 UpcomingBills = upcomingBills,
                 UpcomingBirthdays = upcomingBirthdays,
                 PendingChoresCount = pendingChoresCount,
+                PetCareReminders = petCareReminders,
                 EventsJson = JsonSerializer.Serialize(events),
                 FamiliesJson = JsonSerializer.Serialize(familiesList)
             };

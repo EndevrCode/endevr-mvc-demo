@@ -135,6 +135,35 @@
     </div>
 }
 
+@* ── Pet care reminders ────────────────────────────── *@
+@if (Model.PetCareReminders.Any())
+{
+    <div class="mb-4">
+        <h5 class="mb-2"><i class="fa-light fa-paw me-1 text-warning"></i>Pet Care Overdue</h5>
+        <div class="d-flex flex-column gap-2">
+            @foreach (var r in Model.PetCareReminders.Take(5))
+            {
+                <div class="glass-card p-3 d-flex align-items-center justify-content-between border border-warning border-opacity-25">
+                    <div>
+                        <strong>@r.PetName</strong>
+                        <span class="text-muted ms-1">— @r.CareType</span>
+                        <div class="text-muted small">Last: @r.LastDate.ToString("dd MMM yyyy")</div>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-warning text-dark">@r.DaysOverdue d overdue</span>
+                        <div class="mt-1">
+                            <a asp-controller="Pets" asp-action="Details" asp-route-id="@r.PetId"
+                               class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                                <i class="fa-light fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
 @* ── Upcoming bills ────────────────────────────────── *@
 @if (Model.UpcomingBills.Any())
 {
