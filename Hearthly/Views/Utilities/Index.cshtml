@@ -10,7 +10,7 @@
     <a asp-action="Create"
        asp-route-familyId="@familyId"
        class="btn btn-primary rounded-pill shadow-sm">
-        <i class="bi bi-patch-plus me-1"></i> Add Utility
+        <i class="fa-light fa-circle-plus me-1"></i> Add Utility
     </a>
 </div>
 
@@ -19,7 +19,7 @@
     <div class="glass-card mb-4">
         <div class="card-body">
             <h5 class="card-title text-capitalize mb-3">
-                <i class="bi bi-tools me-1"></i> @u.Type
+                <i class="fa-light fa-screwdriver-wrench me-1"></i> @u.Type
             </h5>
 
             <div class="row gy-2">
@@ -59,7 +59,7 @@
                    asp-route-familyId="@familyId"
                    asp-route-id="@u.Id"
                    class="btn btn-sm btn-outline-primary me-2">
-                    <i class="bi bi-pencil-square"></i> Edit
+                    <i class="fa-light fa-pen-to-square"></i> Edit
                 </a>
                 <form id="deleteForm-@u.Id" asp-action="Delete"
                       asp-route-familyId="@familyId"
@@ -70,7 +70,7 @@
                     <button type="button"
                             class="btn btn-sm btn-outline-danger"
                             onclick="confirmDelete('@u.Id')">
-                        <i class="bi bi-trash3"></i> Delete
+                        <i class="fa-light fa-trash"></i> Delete
                     </button>
                 </form>
             </div>
@@ -101,11 +101,11 @@
     <a asp-action="ElectricitySummary"
        asp-route-familyId="@familyId"
        class="btn btn-outline-secondary rounded-pill">
-        <i class="bi bi-lightning-charge me-1"></i> View Electricity Summary
+        <i class="fa-light fa-bolt me-1"></i> View Electricity Summary
     </a>
     <a asp-action="GasSummary"
        asp-route-familyId="@familyId"
        class="btn btn-outline-secondary rounded-pill">
-        <i class="bi bi-fire me-1"></i> View Gas Summary
+        <i class="fa-light fa-fire me-1"></i> View Gas Summary
     </a>
 </div>

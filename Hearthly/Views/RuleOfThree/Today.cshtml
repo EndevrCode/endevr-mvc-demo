@@ -14,7 +14,7 @@
     @if (Model.IsComplete)
     {
         <span class="badge bg-success ms-2 align-middle">
-            <i class="bi bi-check-circle-fill me-1"></i> Completed
+            <i class="fa-light fa-circle-check me-1"></i> Completed
         </span>
     }
 
@@ -31,7 +31,7 @@
                 <input type="hidden" name="id" value="@Model.Id" />
                 <input type="hidden" name="familyId" value="@familyId" />
                 <button type="submit" class="btn btn-success btn-lg rounded-pill px-4">
-                    <i class="bi bi-check-circle-fill me-1"></i> Mark Today as Done
+                    <i class="fa-light fa-circle-check me-1"></i> Mark Today as Done
                 </button>
             </form>
         }
@@ -73,7 +73,7 @@
 
     <!-- Short Tasks -->
     <div class="mb-3">
-        <label class="form-label fw-bold"><i class="bi bi-check-circle me-1"></i> 3 Short Tasks</label>
+        <label class="form-label fw-bold"><i class="fa-light fa-circle-check me-1"></i> 3 Short Tasks</label>
         @for (int i = 0; i < 3; i++)
         {
             var task = Model.Tasks.ElementAtOrDefault(i);

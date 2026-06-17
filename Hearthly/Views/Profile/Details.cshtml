@@ -132,7 +132,7 @@
     @if (isOwner)
     {
         <a asp-action="Edit" class="btn btn-primary me-2">
-            <i class="bi bi-pencil-square"></i> Edit Profile
+            <i class="fa-light fa-pen-to-square"></i> Edit Profile
         </a>
         <form id="deleteAccountForm" asp-controller="Profile"
               asp-action="DeleteAccount"
@@ -140,13 +140,13 @@
               class="d-inline-block">
             @Html.AntiForgeryToken()
             <button type="button" class="btn btn-danger me-2" onclick="confirmDeleteAccount()">
-                <i class="bi bi-trash3"></i> Delete My Account
+                <i class="fa-light fa-trash"></i> Delete My Account
             </button>
         </form>
     }
 
     <a href="javascript:history.back()" class="btn btn-secondary">
-        <i class="bi bi-arrow-left-circle"></i> Back
+        <i class="fa-light fa-circle-arrow-left"></i> Back
     </a>
 </div>
 
