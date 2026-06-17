@@ -1,7 +1,15 @@
 ﻿@model IEnumerable<Hearthly.Data.Utility>
+@using Hearthly.Data
 @{
     ViewData["Title"] = "Utilities";
     var familyId = (Guid)ViewData["FamilyId"]!;
+
+    var lastElec = Model.FirstOrDefault(u => u.Type == UtilityType.Electricity);
+    var lastGas  = Model.FirstOrDefault(u => u.Type == UtilityType.Gas);
+    var monthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+    var spentThisMonth = Model.Where(u => u.PurchaseDate >= monthStart).Sum(u => u.AmountPaid);
+
+    int DaysAgo(DateTime d) => (DateTime.Today - d.Date).Days;
 }
 
 <div class="mb-4 d-flex justify-content-between align-items-center">
@@ -13,7 +21,60 @@
     </a>
 </div>
 
-@if (!Model.Any())
+@if (Model.Any())
+{
+    <div class="d-flex gap-2 mb-3">
+        <a asp-action="ElectricitySummary" asp-route-familyId="@familyId"
+           class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="fa-light fa-bolt me-1 text-warning"></i> Electricity Summary
+        </a>
+        <a asp-action="GasSummary" asp-route-familyId="@familyId"
+           class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <i class="fa-light fa-fire me-1 text-danger"></i> Gas Summary
+        </a>
+    </div>
+    <div class="glass-card p-3 mb-4">
+        <div class="row g-3 text-center">
+            <div class="col-4">
+                <div class="text-muted small">This Month</div>
+                <div class="fw-bold @(spentThisMonth > 0 ? "" : "text-muted")">
+                    R @spentThisMonth.ToString("N0")
+                </div>
+            </div>
+            <div class="col-4">
+                @if (lastElec != null)
+                {
+                    var daysElec = DaysAgo(lastElec.PurchaseDate);
+                    <div class="text-muted small"><i class="fa-light fa-bolt text-warning me-1"></i>Last Elec</div>
+                    <div class="fw-bold @(daysElec > 45 ? "text-danger" : daysElec > 30 ? "text-warning" : "")">
+                        @(daysElec == 0 ? "Today" : $"{daysElec}d ago")
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted small"><i class="fa-light fa-bolt text-warning me-1"></i>Last Elec</div>
+                    <div class="text-muted">—</div>
+                }
+            </div>
+            <div class="col-4">
+                @if (lastGas != null)
+                {
+                    var daysGas = DaysAgo(lastGas.PurchaseDate);
+                    <div class="text-muted small"><i class="fa-light fa-fire text-danger me-1"></i>Last Gas</div>
+                    <div class="fw-bold @(daysGas > 60 ? "text-danger" : daysGas > 45 ? "text-warning" : "")">
+                        @(daysGas == 0 ? "Today" : $"{daysGas}d ago")
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted small"><i class="fa-light fa-fire text-danger me-1"></i>Last Gas</div>
+                    <div class="text-muted">—</div>
+                }
+            </div>
+        </div>
+    </div>
+}
+else
 {
     <div class="glass-card text-center py-5 mb-4">
         <i class="fa-light fa-screwdriver-wrench fa-3x text-muted mb-3 d-block"></i>
@@ -119,15 +180,3 @@
     </script>
 }
 
-<div class="mt-5 d-flex flex-column gap-3">
-    <a asp-action="ElectricitySummary"
-       asp-route-familyId="@familyId"
-       class="btn btn-outline-secondary rounded-pill px-4">
-        <i class="fa-light fa-bolt me-1"></i> View Electricity Summary
-    </a>
-    <a asp-action="GasSummary"
-       asp-route-familyId="@familyId"
-       class="btn btn-outline-secondary rounded-pill px-4">
-        <i class="fa-light fa-fire me-1"></i> View Gas Summary
-    </a>
-</div>
