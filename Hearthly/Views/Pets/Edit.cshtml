@@ -36,7 +36,7 @@
             <span asp-validation-for="Pet.Breed" class="text-danger"></span>
         </div>
         <div class="col-md-6 text-center">
-            <label for="PhotoFile" class="form-label fw-bold d-block">Pet Photo</label>
+            <label for="PhotoFile" class="form-label fw-semibold d-block">Pet Photo</label>
 
             @if (!string.IsNullOrEmpty(Model.PhotoPath))
             {
@@ -57,11 +57,13 @@
         </div>
 
         <!-- Family Dropdown -->
-        <label asp-for="FamilyId" class="form-label">Family</label>
-        <select asp-for="FamilyId" asp-items="ViewBag.FamilyOptions" class="form-select">
-            <option value="">-- select family --</option>
-        </select>
-        <span asp-validation-for="FamilyId" class="text-danger"></span>
+        <div class="col-md-6">
+            <label asp-for="FamilyId" class="form-label fw-semibold">Family</label>
+            <select asp-for="FamilyId" asp-items="ViewBag.FamilyOptions" class="form-select">
+                <option value="">-- select family --</option>
+            </select>
+            <span asp-validation-for="FamilyId" class="text-danger small"></span>
+        </div>
 
         <!-- Birthdate / Service Dates -->
         <div class="col-md-6">
@@ -107,7 +109,7 @@
 
         <!-- Options Section -->
         <div class="col-12">
-            <h4>Options</h4>
+            <h5 class="fw-semibold mt-2 mb-3">Options</h5>
             <div class="row gx-3 gy-3">
                 <div class="col-md-4">
                     <div class="form-check">
