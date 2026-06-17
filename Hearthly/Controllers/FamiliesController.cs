@@ -430,6 +430,51 @@ namespace Hearthly.Controllers
             return RedirectToAction(nameof(Invites), new { id = invite.FamilyId });
         }
 
+        // GET: Families/Accept?token={token}
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> Accept(Guid? token)
+        {
+            if (!token.HasValue)
+                return NotFound();
+
+            var invite = await _context.FamilyInvites
+                .Include(i => i.Family)
+                .FirstOrDefaultAsync(i => i.Token == token.Value && i.ExpiresAt > DateTime.UtcNow);
+
+            if (invite == null)
+                return View("AcceptResult", "This invite link is invalid or has expired.");
+
+            if (User.Identity?.IsAuthenticated != true)
+                return View("AcceptResult", "Please log in to accept this family invite.");
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return View("AcceptResult", "Please log in to accept this family invite.");
+
+            if (!string.Equals(invite.InvitedEmail, user.Email, StringComparison.OrdinalIgnoreCase))
+                return View("AcceptResult", "This invite was sent to a different email address.");
+
+            var alreadyMember = await _context.FamilyMembers
+                .AnyAsync(m => m.FamilyId == invite.FamilyId && m.UserId == user.Id && m.IsAccepted);
+            if (alreadyMember)
+                return View("AcceptResult", $"You are already a member of {invite.Family.Name}.");
+
+            _context.FamilyMembers.Add(new FamilyMember
+            {
+                FamilyId = invite.FamilyId,
+                UserId = user.Id,
+                Role = IdentityRoles.Member,
+                IsAccepted = true,
+                JoinedAt = DateTime.UtcNow
+            });
+
+            _context.FamilyInvites.Remove(invite);
+            await _context.SaveChangesAsync();
+
+            return View("AcceptResult", $"You've been added to {invite.Family.Name}! Head to your families to get started.");
+        }
+
         // POST: Families/Resend
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Resend(Guid token)
