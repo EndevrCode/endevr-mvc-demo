@@ -245,6 +245,31 @@ namespace Hearthly.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Download(Guid id)
+        {
+            if (!IsPinConfirmedRecently())
+            {
+                TempData["Error"] = "Please unlock the vault to download files.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var userId = _userManager.GetUserId(User);
+            var entry = await _context.VaultPasswords
+                .FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+
+            if (entry == null || string.IsNullOrEmpty(entry.FilePath))
+                return NotFound();
+
+            var absolutePath = Path.Combine(_env.WebRootPath, entry.FilePath.TrimStart('/'));
+            if (!System.IO.File.Exists(absolutePath))
+                return NotFound();
+
+            var contentType = "application/octet-stream";
+            var fileName = Path.GetFileName(absolutePath);
+            return PhysicalFile(absolutePath, contentType, fileName);
+        }
+
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
