@@ -208,6 +208,13 @@ namespace Hearthly.Controllers
 
 
         [HttpGet]
+        public IActionResult Weekend(Guid? familyId)
+        {
+            ViewData["FamilyId"] = familyId;
+            return View();
+        }
+
+        [HttpGet]
         [Authorize]
         public async Task<IActionResult> ViewEntry(DateTime date, Guid? familyId)
         {
