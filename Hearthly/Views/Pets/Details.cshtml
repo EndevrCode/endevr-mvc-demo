@@ -7,7 +7,7 @@
 }
 
 <!-- Header Card -->
-<div class="card glass-card p-4 rounded shadow-sm mb-4">
+<div class="glass-card p-4 mb-4">
     <div class="d-flex flex-column flex-md-row align-items-center gap-4">
         <!-- Profile Photo -->
         <div class="text-center">
@@ -22,9 +22,9 @@
             }
             else
             {
-                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
-                     style="width: 140px; height: 140px;">
-                    <span>No Photo</span>
+                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                     style="width:140px;height:140px;background:rgba(255,255,255,.08);">
+                    <i class="fa-light fa-paw fa-3x text-muted"></i>
                 </div>
             }
         </div>
@@ -38,7 +38,7 @@
 </div>
 
 <!-- Details Card -->
-<div class="card glass-card p-4 rounded shadow-sm mb-4">
+<div class="glass-card p-4 mb-4">
     <div class="row gy-3">
         <div class="col-md-6"><strong>Species:</strong> @pet.Species</div>
         <div class="col-md-6"><strong>Breed:</strong> @pet.Breed</div>

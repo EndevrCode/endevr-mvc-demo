@@ -15,6 +15,7 @@ namespace Hearthly.Data
         public int UnpaidBillsCount { get; set; }
         public decimal UnpaidBillsTotal { get; set; }
         public List<Bill> OverdueBills { get; set; } = new();
+        public List<Bill> UpcomingBills { get; set; } = new();
 
         // FullCalendar JSON blob of events (birthdays, invites, etc.)
         public string EventsJson { get; set; } = "[]";

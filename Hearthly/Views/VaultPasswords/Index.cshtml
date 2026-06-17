@@ -8,69 +8,66 @@
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
 <input type="hidden" name="__RequestVerificationToken" value="@Xsrf.GetAndStoreTokens(Context).RequestToken" />
 
-<div class="container mt-4">
-    <div class="glass-card p-4 rounded-4 shadow-lg">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mb-0"><i class="fa-light fa-lock-keyhole me-2"></i>My Saved Passwords</h4>
-            <a asp-action="Create" class="btn btn-primary rounded-pill px-3">
-                <i class="fa-light fa-plus me-1"></i> Add New
-            </a>
-        </div>
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <h2 class="mb-0"><i class="fa-light fa-lock-keyhole me-2"></i>Saved Passwords</h2>
+    <a asp-action="Create" class="btn btn-primary btn-sm rounded-pill px-3">
+        <i class="fa-light fa-plus me-1"></i> Add New
+    </a>
+</div>
 
-        @if (!Model.Any())
+@if (!Model.Any())
+{
+    <div class="glass-card text-center py-5">
+        <i class="fa-light fa-lock-keyhole fa-3x text-muted mb-3 d-block"></i>
+        <p class="text-muted mb-3">No passwords saved yet.</p>
+        <a asp-action="Create" class="btn btn-outline-primary rounded-pill px-4">Add your first one</a>
+    </div>
+}
+else
+{
+    <div class="d-flex flex-column gap-3">
+        @foreach (var item in Model.OrderByDescending(p => p.CreatedAt))
         {
-            <div class="text-center text-muted py-5">
-                <p class="mb-3">No passwords saved yet.</p>
-                <a asp-action="Create" class="btn btn-outline-primary rounded-pill">Add your first one</a>
-            </div>
-        }
-        else
-        {
-            <div class="d-grid gap-3">
-                @foreach (var item in Model.OrderByDescending(p => p.CreatedAt))
-                {
-                    <div class="glass-card p-3 rounded-4 shadow-sm d-flex flex-column align-items-center">
-                        <h6 class="fw-semibold text-center mb-2">@item.Title</h6>
-
-                        <div class="d-flex align-items-center w-100 justify-content-between">
-                            <div class="d-flex align-items-center justify-content-center" style="width: 70px;">
-                                <span class="badge bg-light text-dark small">@item.PasswordType</span>
-                            </div>
-
-                            <div class="btn-group flex-grow-1 ms-2" role="group">
-                                <button type="button"
-                                        class="btn btn-outline-light border"
-                                        title="View"
-                                        onclick="promptVaultPin('@item.Username', '@item.Password')">
-                                    <i class="fa-light fa-eye"></i>
-                                </button>
-                                <button type="button"
-                                        class="btn btn-outline-primary border-start-0 border-end-0"
-                                        title="Edit"
-                                        onclick="promptEditPin('@item.Id')">
-                                    <i class="fa-light fa-pen"></i>
-                                </button>
-                                <button type="button"
-                                        class="btn btn-outline-danger border-end-0"
-                                        title="Delete"
-                                        onclick="promptDeletePin('@item.Id')">
-                                    <i class="fa-light fa-trash"></i>
-                                </button>
-                                @if (!string.IsNullOrEmpty(item.FilePath))
-                                {
-                                    <a class="btn btn-outline-success" title="Download"
-                                       href="@Url.Action("Download", "VaultPasswords", new { id = item.Id })">
-                                        <i class="fa-light fa-cloud-arrow-down"></i>
-                                    </a>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                }
+            <div class="glass-card p-3 d-flex align-items-center gap-3">
+                <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded"
+                     style="width:40px;height:40px;background:rgba(255,255,255,.06);">
+                    <i class="fa-light fa-lock fs-5 text-muted"></i>
+                </div>
+                <div class="flex-grow-1 min-width-0">
+                    <div class="fw-semibold">@item.Title</div>
+                    <span class="badge bg-secondary small">@item.PasswordType</span>
+                </div>
+                <div class="d-flex gap-2 flex-shrink-0">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary rounded-pill px-3"
+                            title="View"
+                            onclick="promptVaultPin('@item.Username', '@item.Password')">
+                        <i class="fa-light fa-eye"></i>
+                    </button>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-primary rounded-pill px-3"
+                            title="Edit"
+                            onclick="promptEditPin('@item.Id')">
+                        <i class="fa-light fa-pen"></i>
+                    </button>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                            title="Delete"
+                            onclick="promptDeletePin('@item.Id')">
+                        <i class="fa-light fa-trash"></i>
+                    </button>
+                    @if (!string.IsNullOrEmpty(item.FilePath))
+                    {
+                        <a class="btn btn-sm btn-outline-success rounded-pill px-3" title="Download"
+                           href="@Url.Action("Download", "VaultPasswords", new { id = item.Id })">
+                            <i class="fa-light fa-cloud-arrow-down"></i>
+                        </a>
+                    }
+                </div>
             </div>
         }
     </div>
-</div>
+}
 
 <!-- Password Reveal Modal -->
 <div class="modal fade" id="passwordDetailsModal" tabindex="-1" aria-hidden="true">

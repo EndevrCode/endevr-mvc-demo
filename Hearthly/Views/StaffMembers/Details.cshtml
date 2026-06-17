@@ -38,8 +38,8 @@
     }
     else
     {
-        <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mx-auto"
-             style="width:130px; height:130px; font-size:2rem;">
+        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto"
+             style="width:130px;height:130px;background:rgba(255,255,255,.08);font-size:2.5rem;color:rgba(255,255,255,.5);">
             @Model.FirstName.Substring(0, 1).ToUpper()
         </div>
     }
@@ -51,58 +51,65 @@
 <div class="glass-card p-4 mb-4">
     <div class="row gy-3">
         <div class="col-12 col-md-6">
-            <small>Preferred Name</small>
-            <div>@Model.PreferredName</div>
+            <div class="text-muted small">Preferred Name</div>
+            <div>@(Model.PreferredName ?? "-")</div>
         </div>
         <div class="col-12 col-md-6">
-            <small>Contact Number</small>
-            <div>@Model.ContactNumber</div>
+            <div class="text-muted small">Contact Number</div>
+            <div>@(Model.ContactNumber ?? "-")</div>
         </div>
         <div class="col-12 col-md-6">
-            <small>Nationality</small>
-            <div>@Model.Nationality</div>
+            <div class="text-muted small">Nationality</div>
+            <div>@(Model.Nationality ?? "-")</div>
         </div>
 
         @if (!string.IsNullOrWhiteSpace(Model.IdNumber))
         {
             <div class="col-12 col-md-6">
-                <small>ID Number</small>
+                <div class="text-muted small">ID Number</div>
                 <div>@Model.IdNumber</div>
             </div>
         }
 
+        @if (!string.IsNullOrWhiteSpace(Model.PassportNumber))
+        {
+            <div class="col-12 col-md-6">
+                <div class="text-muted small">Passport Number</div>
+                <div>@Model.PassportNumber</div>
+            </div>
+        }
+
+        @if (Model.BirthDate.HasValue)
+        {
+            <div class="col-12 col-md-6">
+                <div class="text-muted small">Birth Date</div>
+                <div>@Model.BirthDate.Value.ToString("dd MMMM yyyy")</div>
+            </div>
+        }
+
         <div class="col-12 col-md-6">
-            <small>Passport Number</small>
-            <div>@Model.PassportNumber</div>
-        </div>
-        <div class="col-12 col-md-6">
-            <small>Birth Date</small>
-            <div>@Model.BirthDate?.ToString("dd MMMM yyyy")</div>
+            <div class="text-muted small">Work Days</div>
+            <div>@(Model.WorkDays ?? "-")</div>
         </div>
 
         <div class="col-12 col-md-6">
-            <small>Work Days</small>
-            <div>@Model.WorkDays</div>
+            <div class="text-muted small">Daily Wage (ZAR)</div>
+            <div class="fw-semibold">R @daily.ToString("N2")</div>
         </div>
 
         <div class="col-12 col-md-6">
-            <small>Daily Wage (ZAR)</small>
-            <div>@daily.ToString("C")</div>
-        </div>
-
-        <div class="col-12 col-md-6">
-            <small>Days This Month</small>
+            <div class="text-muted small">Days This Month</div>
             <div>@daysThisMonth days</div>
         </div>
 
         <div class="col-12 col-md-6">
-            <small>Total Monthly Salary</small>
-            <div>@totalMonthly.ToString("C")</div>
+            <div class="text-muted small">Est. Monthly Salary</div>
+            <div class="fw-semibold text-success">R @totalMonthly.ToString("N2")</div>
         </div>
 
         <div class="col-12">
-            <small>Address</small>
-            <div>@Model.Address</div>
+            <div class="text-muted small">Address</div>
+            <div>@(Model.Address ?? "-")</div>
 
             <div class="col-12 text-center mt-3">
                 <div class="rounded-circle overflow-hidden mx-auto"

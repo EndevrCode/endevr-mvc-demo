@@ -9,32 +9,38 @@
     <h2 class="mb-0"><i class="fa-light fa-address-book me-2"></i>@ViewData["Title"]</h2>
 </div>
 
-<div class="glass-card p-3 mb-4 text-center">
-    <div class="mb-3">
-        <small>Service Type</small>
-        <div>@Model.ServiceType</div>
-    </div>
-
-    <div class="mb-3">
-        <small>Company</small>
-        <div>@Model.Company</div>
-    </div>
-
-    <div class="mb-3">
-        <small>Contact Person</small>
-        <div>@Model.ContactPerson</div>
-    </div>
-
-    <div class="mb-3">
-        <small>Contact Number</small>
-        <div>
-            <a href="tel:@Model.ContactNumber">@Model.ContactNumber</a>
+<div class="glass-card p-4 mb-4">
+    <div class="row gy-3">
+        <div class="col-md-6">
+            <div class="text-muted small">Service Type</div>
+            <div class="fw-semibold">@Model.ServiceType</div>
         </div>
-    </div>
-
-    <div class="mb-1">
-        <small>Notes</small>
-        <div>@Model.Notes</div>
+        <div class="col-md-6">
+            <div class="text-muted small">Company</div>
+            <div class="fw-semibold">@Model.Company</div>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.ContactPerson))
+        {
+            <div class="col-md-6">
+                <div class="text-muted small">Contact Person</div>
+                <div>@Model.ContactPerson</div>
+            </div>
+        }
+        <div class="col-md-6">
+            <div class="text-muted small">Contact Number</div>
+            <div>
+                <a href="tel:@Model.ContactNumber" class="fw-semibold text-decoration-none">
+                    <i class="fa-light fa-phone me-1 text-muted"></i>@Model.ContactNumber
+                </a>
+            </div>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.Notes))
+        {
+            <div class="col-12">
+                <div class="text-muted small">Notes</div>
+                <div>@Model.Notes</div>
+            </div>
+        }
     </div>
 </div>
 

@@ -7,7 +7,7 @@
 
 <div class="mb-4 d-flex justify-content-between align-items-center">
     <h2 class="mb-0"><i class="fa-light fa-phone-emergency me-2"></i>Emergency Contacts</h2>
-    <a asp-action="Create" asp-route-familyId="@familyId" class="btn btn-danger btn-sm">
+    <a asp-action="Create" asp-route-familyId="@familyId" class="btn btn-danger btn-sm rounded-pill px-3">
         <i class="fa-light fa-phone-plus me-1"></i> Add Contact
     </a>
 </div>
@@ -17,7 +17,7 @@
     <div class="glass-card text-center py-5">
         <i class="fa-light fa-phone-slash fa-3x text-muted mb-3 d-block"></i>
         <p class="text-muted mb-2">No emergency contacts added yet.</p>
-        <a asp-action="Create" asp-route-familyId="@familyId" class="btn btn-danger btn-sm">
+        <a asp-action="Create" asp-route-familyId="@familyId" class="btn btn-danger btn-sm rounded-pill px-3">
             <i class="fa-light fa-phone-plus me-1"></i> Add First Contact
         </a>
     </div>
@@ -57,11 +57,11 @@
                 }
 
                 <div class="mt-auto d-flex gap-2 justify-content-center">
-                    <a href="tel:@ec.PhoneNumber" class="btn btn-outline-danger btn-sm">
+                    <a href="tel:@ec.PhoneNumber" class="btn btn-outline-danger btn-sm rounded-pill px-3">
                         <i class="fa-light fa-phone-arrow-up-right me-1"></i> Call
                     </a>
                     <a asp-action="Edit" asp-route-id="@ec.Id" asp-route-familyId="@ec.FamilyId"
-                       class="btn btn-outline-secondary btn-sm">
+                       class="btn btn-outline-secondary btn-sm rounded-pill px-3">
                         <i class="fa-light fa-pen me-1"></i> Edit
                     </a>
                 </div>

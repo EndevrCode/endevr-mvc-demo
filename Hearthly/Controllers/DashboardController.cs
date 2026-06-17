@@ -164,6 +164,11 @@ namespace Hearthly.Controllers
                 .OrderBy(b => b.DueDate)
                 .ToList();
 
+            var upcomingBills = unpaidBills
+                .Where(b => b.DueDate.Date >= DateTime.Today && b.DueDate.Date <= DateTime.Today.AddDays(14))
+                .OrderBy(b => b.DueDate)
+                .ToList();
+
             // Assemble the view‑model
             var familiesList = familyInfos.Select(fi => new { id = fi.Family.Id, name = fi.Family.Name }).ToList();
 
@@ -175,6 +180,7 @@ namespace Hearthly.Controllers
                 UnpaidBillsCount = unpaidBills.Count,
                 UnpaidBillsTotal = unpaidBills.Sum(b => b.Amount),
                 OverdueBills = overdueBills,
+                UpcomingBills = upcomingBills,
                 EventsJson = JsonSerializer.Serialize(events),
                 FamiliesJson = JsonSerializer.Serialize(familiesList)
             };
