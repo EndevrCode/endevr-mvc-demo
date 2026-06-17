@@ -233,17 +233,36 @@ namespace Hearthly.Controllers
                     foreach (var (label, thresholdDays, getDate) in reminderThresholds)
                     {
                         var lastDate = getDate(pet);
-                        if (!lastDate.HasValue) continue;
-                        var daysAgo = (today2 - lastDate.Value.Date).Days;
-                        if (daysAgo > thresholdDays)
-                            petCareReminders.Add(new PetCareReminder
-                            {
-                                PetId      = pet.Id,
-                                PetName    = pet.Name,
-                                CareType   = label,
-                                LastDate   = lastDate.Value,
-                                DaysOverdue = daysAgo - thresholdDays
-                            });
+                        if (lastDate.HasValue)
+                        {
+                            var daysAgo = (today2 - lastDate.Value.Date).Days;
+                            if (daysAgo > thresholdDays)
+                                petCareReminders.Add(new PetCareReminder
+                                {
+                                    PetId       = pet.Id,
+                                    PetName     = pet.Name,
+                                    CareType    = label,
+                                    LastDate    = lastDate.Value,
+                                    DaysOverdue = daysAgo - thresholdDays
+                                });
+                        }
+                        else
+                        {
+                            // Never recorded — flag if pet is old enough that care should have happened
+                            var petAgeInDays = pet.BirthDate.HasValue
+                                ? (today2 - pet.BirthDate.Value.Date).Days
+                                : thresholdDays + 1; // unknown age → assume overdue
+                            if (petAgeInDays > thresholdDays)
+                                petCareReminders.Add(new PetCareReminder
+                                {
+                                    PetId         = pet.Id,
+                                    PetName       = pet.Name,
+                                    CareType      = label,
+                                    LastDate      = today2, // placeholder, not shown
+                                    DaysOverdue   = petAgeInDays - thresholdDays,
+                                    NeverRecorded = true
+                                });
+                        }
                     }
                 }
             }

@@ -147,7 +147,9 @@
                     <div>
                         <strong>@r.PetName</strong>
                         <span class="text-muted ms-1">— @r.CareType</span>
-                        <div class="text-muted small">Last: @r.LastDate.ToString("dd MMM yyyy")</div>
+                        <div class="text-muted small">
+                            @(r.NeverRecorded ? "Never recorded" : $"Last: {r.LastDate:dd MMM yyyy}")
+                        </div>
                     </div>
                     <div class="text-end">
                         <span class="badge bg-warning text-dark">@r.DaysOverdue d overdue</span>

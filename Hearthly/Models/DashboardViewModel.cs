@@ -41,6 +41,7 @@ namespace Hearthly.Data
         public string CareType { get; set; } = "";
         public DateTime LastDate { get; set; }
         public int DaysOverdue { get; set; }
+        public bool NeverRecorded { get; set; }
     }
 
     public class BirthdayInfo
