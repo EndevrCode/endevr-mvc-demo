@@ -40,14 +40,26 @@
 <!-- Details Card -->
 <div class="glass-card p-4 mb-4">
     <div class="row gy-3">
-        <div class="col-md-6"><strong>Species:</strong> @pet.Species</div>
-        <div class="col-md-6"><strong>Breed:</strong> @pet.Breed</div>
-        <div class="col-md-6"><strong>Family:</strong> @pet.Family?.Name</div>
-        <div class="col-md-6"><strong>Birth Date:</strong> @(pet.BirthDate?.ToString("dd MMMM yyyy") ?? "-")</div>
-        <div class="col-md-6">
-            <strong>Age:</strong>
-            @{
-                if (pet.IsDeceased)
+        <div class="col-6 col-md-4">
+            <div class="text-muted small">Species</div>
+            <div>@(pet.Species ?? "-")</div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="text-muted small">Breed</div>
+            <div>@(pet.Breed ?? "-")</div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="text-muted small">Family</div>
+            <div>@(pet.Family?.Name ?? "-")</div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="text-muted small">Birth Date</div>
+            <div>@(pet.BirthDate?.ToString("dd MMMM yyyy") ?? "-")</div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="text-muted small">Age</div>
+            <div>
+                @if (pet.IsDeceased)
                 {
                     @pet.FinalAge
                 }
@@ -57,55 +69,86 @@
                     var birth = pet.BirthDate.Value;
                     int years = today.Year - birth.Year;
                     int months = today.Month - birth.Month;
-
-                    if (today.Day < birth.Day)
-                        months--;
-
-                    if (months < 0)
-                    {
-                        years--;
-                        months += 12;
-                    }
-
-                    var yearPart = years > 0 ? $"{years} year{(years > 1 ? "s" : "")}" : "";
-                    var monthPart = months > 0 ? $"{months} month{(months > 1 ? "s" : "")}" : "";
-
+                    if (today.Day < birth.Day) months--;
+                    if (months < 0) { years--; months += 12; }
+                    var yearPart  = years  > 0 ? $"{years} yr{(years == 1 ? "" : "s")}" : "";
+                    var monthPart = months > 0 ? $"{months} mo" : "";
                     var ageDisplay = string.Join(", ", new[] { yearPart, monthPart }.Where(s => !string.IsNullOrEmpty(s)));
+                    @(string.IsNullOrEmpty(ageDisplay) ? "< 1 month" : ageDisplay)
+                }
+                else { <text>-</text> }
+            </div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="text-muted small">Last Weight</div>
+            <div>@(pet.LastWeightKg.HasValue ? $"{pet.LastWeightKg.Value:0.##} kg" : "-")</div>
+        </div>
 
-                    @ageDisplay
+        <div class="col-6 col-md-4">
+            <div class="text-muted small">Last Weighed</div>
+            <div>@(pet.LastWeighedDate?.ToString("dd MMM yyyy") ?? "-")</div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="text-muted small">Last Deworming</div>
+            <div>@(pet.LastDewormingDate?.ToString("dd MMM yyyy") ?? "-")</div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="text-muted small">Last Tick/Flea</div>
+            <div>@(pet.LastTickFleaDate?.ToString("dd MMM yyyy") ?? "-")</div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="text-muted small">Last Grooming</div>
+            <div>@(pet.LastGroomingDate?.ToString("dd MMM yyyy") ?? "-")</div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="text-muted small">Last Checkup</div>
+            <div>@(pet.LastCheckupDate?.ToString("dd MMM yyyy") ?? "-")</div>
+        </div>
+        <div class="col-6 col-md-4">
+            <div class="text-muted small">Insurance</div>
+            <div>
+                @if (pet.HasInsurance)
+                {
+                    <span class="badge bg-success">Yes</span>
+                    @if (!string.IsNullOrWhiteSpace(pet.InsuranceNumber))
+                    {
+                        <span class="ms-2 small">@pet.InsuranceNumber</span>
+                    }
                 }
                 else
                 {
-                    @("-")
+                    <span class="text-muted">None</span>
                 }
-            }
+            </div>
         </div>
-        <div class="col-md-6"><strong>Last Weight:</strong> @(pet.LastWeightKg?.ToString("0.##") ?? "-") kg</div>
-        <div class="col-md-6"><strong>Last Weighed:</strong> @(pet.LastWeighedDate?.ToString("dd MMMM yyyy") ?? "-")</div>
-        <div class="col-md-6"><strong>Last Deworming:</strong> @(pet.LastDewormingDate?.ToString("dd MMMM yyyy") ?? "-")</div>
-        <div class="col-md-6"><strong>Last Tick/Flea:</strong> @(pet.LastTickFleaDate?.ToString("dd MMMM yyyy") ?? "-")</div>
-        <div class="col-md-6"><strong>Last Grooming:</strong> @(pet.LastGroomingDate?.ToString("dd MMMM yyyy") ?? "-")</div>
-        <div class="col-md-6"><strong>Last Checkup:</strong> @(pet.LastCheckupDate?.ToString("dd MMMM yyyy") ?? "-")</div>
-        <div class="col-md-6"><strong>Has Insurance:</strong> @(pet.HasInsurance ? "Yes" : "No")</div>
-
-        @if (pet.HasInsurance)
-        {
-            <div class="col-md-6"><strong>Insurance Number:</strong> @pet.InsuranceNumber</div>
-        }
-
-        <div class="col-md-6"><strong>Microchipped:</strong> @(pet.IsMicrochipped ? "Yes" : "No")</div>
-
-        @if (pet.IsMicrochipped)
-        {
-            <div class="col-md-6"><strong>Microchip Number:</strong> @pet.MicrochipNumber</div>
-        }
-
-        <div class="col-md-6"><strong>Deceased:</strong> @(pet.IsDeceased ? "Yes" : "No")</div>
+        <div class="col-6 col-md-4">
+            <div class="text-muted small">Microchipped</div>
+            <div>
+                @if (pet.IsMicrochipped)
+                {
+                    <span class="badge bg-info text-dark">Yes</span>
+                    @if (!string.IsNullOrWhiteSpace(pet.MicrochipNumber))
+                    {
+                        <span class="ms-2 small">@pet.MicrochipNumber</span>
+                    }
+                }
+                else
+                {
+                    <span class="text-muted">No</span>
+                }
+            </div>
+        </div>
 
         @if (pet.IsDeceased)
         {
-            <div class="col-md-6"><strong>Date of Death:</strong> @(pet.DateOfDeath?.ToString("dd MMMM yyyy") ?? "-")</div>
-            <div class="col-md-6"><strong>Final Age:</strong> @pet.FinalAge</div>
+            <div class="col-6 col-md-4">
+                <div class="text-muted small">Date of Death</div>
+                <div>@(pet.DateOfDeath?.ToString("dd MMMM yyyy") ?? "-")</div>
+            </div>
+            <div class="col-6 col-md-4">
+                <div class="text-muted small">Final Age</div>
+                <div>@pet.FinalAge</div>
+            </div>
         }
     </div>
 </div>
