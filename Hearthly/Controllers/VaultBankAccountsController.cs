@@ -43,7 +43,7 @@ namespace Hearthly.Controllers
                 .Where(v => v.UserId == user.Id)
                 .ToListAsync();
 
-            // Decrypt full account number for modal; prepare last 4 for display
+            // Only prepare last 4 digits for display; full number is served via PIN-gated AJAX
             foreach (var account in accounts)
             {
                 try
@@ -51,9 +51,7 @@ namespace Hearthly.Controllers
                     if (!string.IsNullOrEmpty(account.AccountNumber))
                     {
                         var decrypted = _protector.Unprotect(account.AccountNumber);
-                        account.AccountNumber = decrypted; // full account number
-
-                        // Store last 4 into ViewData using a key
+                        account.AccountNumber = null; // never expose full number in HTML
                         ViewData[$"Last4_{account.Id}"] = decrypted.Length >= 4
                             ? decrypted[^4..]
                             : decrypted;
@@ -61,7 +59,7 @@ namespace Hearthly.Controllers
                 }
                 catch
                 {
-                    account.AccountNumber = "[Decryption Failed]";
+                    account.AccountNumber = null;
                     ViewData[$"Last4_{account.Id}"] = "[Err]";
                 }
             }
@@ -231,7 +229,31 @@ namespace Hearthly.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        [HttpGet]
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> GetAccountNumber(int id)
+        {
+            if (!IsPinConfirmedRecently())
+                return Json(new { success = false, message = "PIN confirmation required." });
+
+            var user = await _userManager.GetUserAsync(User);
+            var account = await _context.VaultBankAccounts
+                .FirstOrDefaultAsync(a => a.Id == id && a.UserId == user.Id);
+
+            if (account == null)
+                return Json(new { success = false, message = "Account not found." });
+
+            try
+            {
+                var decrypted = _protector.Unprotect(account.AccountNumber);
+                return Json(new { success = true, accountNumber = decrypted });
+            }
+            catch
+            {
+                return Json(new { success = false, message = "Decryption failed." });
+            }
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> UnlinkCard(int id)
         {
             var user = await _userManager.GetUserAsync(User);

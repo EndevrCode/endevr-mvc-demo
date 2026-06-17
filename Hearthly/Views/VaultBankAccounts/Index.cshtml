@@ -41,7 +41,7 @@ else
 
                     <div class="d-flex gap-2 mt-3">
                         <button class="btn btn-sm btn-outline-primary rounded-pill px-3 flex-grow-1"
-                                onclick="promptBankAccountPin('@account.AccountHolder', '@account.AccountNumber')">
+                                onclick="promptBankAccountPin('@Html.Raw(account.AccountHolder.Replace("'", "\\'"))', @account.Id)">
                             <i class="fa-light fa-eye me-1"></i> View
                         </button>
 
@@ -144,15 +144,16 @@ else
 
     <script>
         window.accountHolderToReveal = '';
+        window.accountIdToReveal = null;
         window.accountNumberToReveal = '';
         window.accountShown = false;
         window.cardFrontToShow = null;
         window.cardBackToShow = null;
         window.cardAccountId = null;
 
-        function promptBankAccountPin(holder, number) {
+        function promptBankAccountPin(holder, accountId) {
             window.accountHolderToReveal = holder;
-            window.accountNumberToReveal = number;
+            window.accountIdToReveal = accountId;
             window.cardFrontToShow = null;
             window.cardBackToShow = null;
             window.accountShown = false;
@@ -167,40 +168,62 @@ else
             window.cardFrontToShow = frontPath;
             window.cardBackToShow = backPath;
             window.cardAccountId = accountId;
+            window.accountIdToReveal = null;
 
             document.getElementById('vaultPinInput').value = '';
             new bootstrap.Modal(document.getElementById('vaultPinModal')).show();
         }
 
-        function confirmPin() {
+        async function confirmPin() {
             const pin = document.getElementById('vaultPinInput').value;
             if (!pin) return;
 
             const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || "";
 
-            fetch('/Vault/ValidatePinAjax', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
-                body: JSON.stringify({ pin })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    bootstrap.Modal.getInstance(document.getElementById('vaultPinModal')).hide();
+            try {
+                const verifyRes = await fetch('/Vault/ValidatePinAjax', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+                    body: JSON.stringify({ pin })
+                });
+                const verifyData = await verifyRes.json();
 
-                    if (window.cardFrontToShow || window.cardBackToShow) {
-                        showLinkedCardModal();
-                    } else {
+                if (!verifyData.success) {
+                    Swal.fire({ title: 'Incorrect PIN', icon: 'error', confirmButtonText: 'Try again' });
+                    return;
+                }
+
+                bootstrap.Modal.getInstance(document.getElementById('vaultPinModal')).hide();
+
+                // Mark PIN confirmed in session for gated endpoints
+                await fetch('/VaultPasswords/MarkPinConfirmed', {
+                    method: 'POST',
+                    headers: { 'RequestVerificationToken': token }
+                });
+
+                if (window.cardFrontToShow || window.cardBackToShow) {
+                    showLinkedCardModal();
+                } else {
+                    // Fetch the decrypted account number server-side
+                    const numRes = await fetch(`/VaultBankAccounts/GetAccountNumber/${window.accountIdToReveal}`, {
+                        method: 'POST',
+                        headers: { 'RequestVerificationToken': token }
+                    });
+                    const numData = await numRes.json();
+
+                    if (numData.success) {
+                        window.accountNumberToReveal = numData.accountNumber;
                         document.getElementById('modalHolder').textContent = window.accountHolderToReveal;
                         document.getElementById('modalAccount').textContent = '••••••••';
                         window.accountShown = false;
                         new bootstrap.Modal(document.getElementById('bankDetailsModal')).show();
+                    } else {
+                        Swal.fire({ title: 'Error', text: numData.message || 'Could not load account details.', icon: 'error' });
                     }
-                } else {
-                    Swal.fire({ title: 'Incorrect PIN', icon: 'error', confirmButtonText: 'Try again' });
                 }
-            })
-            .catch(() => Swal.fire({ title: 'Error', text: 'Could not validate PIN.', icon: 'error' }));
+            } catch {
+                Swal.fire({ title: 'Error', text: 'Something went wrong.', icon: 'error' });
+            }
         }
 
         function showLinkedCardModal() {
@@ -237,9 +260,15 @@ else
                 confirmButtonText: 'Yes, remove it',
                 cancelButtonText: 'Cancel',
                 reverseButtons: true
-            }).then(result => {
-                if (result.isConfirmed)
-                    window.location.href = `/VaultBankAccounts/UnlinkCard/${window.cardAccountId}`;
+            }).then(async result => {
+                if (result.isConfirmed) {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                    await fetch(`/VaultBankAccounts/UnlinkCard/${window.cardAccountId}`, {
+                        method: 'POST',
+                        headers: { 'RequestVerificationToken': token }
+                    });
+                    window.location.reload();
+                }
             });
         }
 
