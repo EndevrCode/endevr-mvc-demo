@@ -53,9 +53,9 @@
             }
             else
             {
-                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
-                     style="width: 140px; height: 140px;">
-                    <span>No Photo</span>
+                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                     style="width:140px;height:140px;background:rgba(255,255,255,.08);">
+                    <i class="fa-light fa-user fa-3x text-muted"></i>
                 </div>
             }
         </div>
@@ -71,16 +71,46 @@
 <!-- Profile Info Section -->
 <div class="glass-card p-4 mb-4">
     <div class="row gy-3">
-        <div class="col-md-6"><strong>User Name:</strong> @user.UserName</div>
-        <div class="col-md-6"><strong>Email:</strong> @user.Email</div>
-        <div class="col-md-6"><strong>First Name:</strong> @profile.FirstName</div>
-        <div class="col-md-6"><strong>Last Name:</strong> @profile.LastName</div>
-        <div class="col-md-6"><strong>Preferred Name:</strong> @profile.PreferredName</div>
-        <div class="col-md-6"><strong>Birth Date:</strong> @(profile.BirthDate?.ToString("dd MMMM yyyy") ?? "-")</div>
+        <div class="col-md-6">
+            <div class="text-muted small">Username</div>
+            <div>@user.UserName</div>
+        </div>
+        <div class="col-md-6">
+            <div class="text-muted small">Email</div>
+            <div>@user.Email</div>
+        </div>
+        <div class="col-md-6">
+            <div class="text-muted small">First Name</div>
+            <div>@(profile.FirstName ?? "-")</div>
+        </div>
+        <div class="col-md-6">
+            <div class="text-muted small">Last Name</div>
+            <div>@(profile.LastName ?? "-")</div>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(profile.PreferredName))
+        {
+            <div class="col-md-6">
+                <div class="text-muted small">Preferred Name</div>
+                <div>@profile.PreferredName</div>
+            </div>
+        }
+        <div class="col-md-6">
+            <div class="text-muted small">Birth Date</div>
+            <div>@(profile.BirthDate?.ToString("dd MMMM yyyy") ?? "-")</div>
+        </div>
         @if (age.HasValue)
         {
-            <div class="col-md-6"><strong>Age:</strong> @age years</div>
-            <div class="col-md-6"><strong>Next Birthday:</strong> @monthsUntil months and @daysUntil days</div>
+            <div class="col-md-6">
+                <div class="text-muted small">Age</div>
+                <div>@age year@(age == 1 ? "" : "s")</div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-muted small">Next Birthday</div>
+                <div>
+                    @if (monthsUntil > 0) { <text>@monthsUntil month@(monthsUntil == 1 ? "" : "s") </text> }
+                    @daysUntil day@(daysUntil == 1 ? "" : "s")
+                </div>
+            </div>
             @{
                 var bd = profile.BirthDate!.Value.Date;
                 var nextBd = bd.AddYears(today.Year - bd.Year);
@@ -101,11 +131,27 @@
                 </div>
             </div>
         }
-        <div class="col-md-6"><strong>ID Number:</strong> @profile.IdNumber</div>
-        <div class="col-md-6"><strong>Phone Number:</strong> @profile.PhoneNumber</div>
-        <div class="col-12">
-            <strong>Address:</strong> @profile.Address
-        </div>
+        @if (!string.IsNullOrWhiteSpace(profile.IdNumber))
+        {
+            <div class="col-md-6">
+                <div class="text-muted small">ID Number</div>
+                <div>@profile.IdNumber</div>
+            </div>
+        }
+        @if (!string.IsNullOrWhiteSpace(profile.PhoneNumber))
+        {
+            <div class="col-md-6">
+                <div class="text-muted small">Phone Number</div>
+                <div><i class="fa-light fa-phone me-1 text-muted"></i>@profile.PhoneNumber</div>
+            </div>
+        }
+        @if (!string.IsNullOrWhiteSpace(profile.Address))
+        {
+            <div class="col-12">
+                <div class="text-muted small">Address</div>
+                <div>@profile.Address</div>
+            </div>
+        }
 
         @if (!string.IsNullOrWhiteSpace(profile.Address))
         {
