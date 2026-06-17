@@ -169,6 +169,53 @@ namespace Hearthly.Controllers
                 .OrderBy(b => b.DueDate)
                 .ToList();
 
+            // 5) Upcoming birthdays (people + pets, next 30 days)
+            var today2 = DateTime.Today;
+            var upcomingBirthdays = new List<BirthdayInfo>();
+
+            foreach (var prof in profiles)
+            {
+                if (!prof.BirthDate.HasValue) continue;
+                var bd = prof.BirthDate.Value;
+                var thisYear = new DateTime(today2.Year, bd.Month, bd.Day);
+                var next = thisYear >= today2 ? thisYear : thisYear.AddYears(1);
+                var days = (next - today2).Days;
+                if (days <= 30)
+                    upcomingBirthdays.Add(new BirthdayInfo
+                    {
+                        Name = $"{prof.FirstName} {prof.LastName}".Trim(),
+                        NextBirthday = next,
+                        DaysUntil = days,
+                        IsPet = false
+                    });
+            }
+
+            foreach (var fi in familyInfos)
+            {
+                foreach (var pet in fi.Pets.Where(p => !p.IsDeceased && p.BirthDate.HasValue))
+                {
+                    var bd = pet.BirthDate!.Value;
+                    var thisYear = new DateTime(today2.Year, bd.Month, bd.Day);
+                    var next = thisYear >= today2 ? thisYear : thisYear.AddYears(1);
+                    var days = (next - today2).Days;
+                    if (days <= 30)
+                        upcomingBirthdays.Add(new BirthdayInfo
+                        {
+                            Name = pet.Name,
+                            NextBirthday = next,
+                            DaysUntil = days,
+                            IsPet = true
+                        });
+                }
+            }
+
+            upcomingBirthdays = upcomingBirthdays.OrderBy(b => b.DaysUntil).ToList();
+
+            // 6) Pending chores count
+            var pendingChoresCount = await _context.FamilyChores
+                .Where(c => myFamilyIds.Contains(c.FamilyId) && !c.IsDone)
+                .CountAsync();
+
             // Assemble the view‑model
             var familiesList = familyInfos.Select(fi => new { id = fi.Family.Id, name = fi.Family.Name }).ToList();
 
@@ -181,6 +228,8 @@ namespace Hearthly.Controllers
                 UnpaidBillsTotal = unpaidBills.Sum(b => b.Amount),
                 OverdueBills = overdueBills,
                 UpcomingBills = upcomingBills,
+                UpcomingBirthdays = upcomingBirthdays,
+                PendingChoresCount = pendingChoresCount,
                 EventsJson = JsonSerializer.Serialize(events),
                 FamiliesJson = JsonSerializer.Serialize(familiesList)
             };

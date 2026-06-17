@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Hearthly.Data
 {
@@ -17,11 +18,25 @@ namespace Hearthly.Data
         public List<Bill> OverdueBills { get; set; } = new();
         public List<Bill> UpcomingBills { get; set; } = new();
 
+        // Upcoming birthdays (next 30 days)
+        public List<BirthdayInfo> UpcomingBirthdays { get; set; } = new();
+
+        // Pending chores across all families
+        public int PendingChoresCount { get; set; }
+
         // FullCalendar JSON blob of events (birthdays, invites, etc.)
         public string EventsJson { get; set; } = "[]";
 
         // Families available for event creation (id + name)
         public string FamiliesJson { get; set; } = "[]";
+    }
+
+    public class BirthdayInfo
+    {
+        public string Name { get; set; } = "";
+        public DateTime NextBirthday { get; set; }
+        public int DaysUntil { get; set; }
+        public bool IsPet { get; set; }
     }
 
     public class FamilyInfo
