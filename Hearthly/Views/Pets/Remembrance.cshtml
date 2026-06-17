@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Hearthly.Data.Pet>
+@model IEnumerable<Hearthly.Data.Pet>
 
 @{
     ViewData["Title"] = "Wall of Remembrance";
@@ -17,61 +17,64 @@
     </div>
 }
 
-<div class="row">
+<div class="row g-3">
     @foreach (var pet in Model)
     {
-        // calculate full years & months between BirthDate and DateOfDeath
         int? fullYears = null;
         int? fullMonths = null;
         if (pet.BirthDate.HasValue && pet.DateOfDeath.HasValue)
         {
             var birth = pet.BirthDate.Value;
             var death = pet.DateOfDeath.Value;
-
-            // start with year difference
             int years = death.Year - birth.Year;
-            // adjust if death month/day is before birth month/day
-            if (death < birth.AddYears(years))
-                years--;
-
-            // calculate month difference
+            if (death < birth.AddYears(years)) years--;
             int months = death.Month - birth.Month;
-            if (death.Day < birth.Day)
-                months--;
-
-            if (months < 0)
-                months += 12;
-
+            if (death.Day < birth.Day) months--;
+            if (months < 0) months += 12;
             fullYears = years;
             fullMonths = months;
         }
 
-        <div class="col-md-4 mb-4">
-            <div class="card glass-card h-100">
+        <div class="col-md-4 col-sm-6">
+            <div class="glass-card text-center p-4 h-100">
                 @if (!string.IsNullOrEmpty(pet.PhotoPath))
                 {
-                    <img class="card-img-top" src="@pet.PhotoPath" alt="@pet.Name" />
+                    <img src="@pet.PhotoPath" alt="@pet.Name"
+                         class="rounded mb-3 w-100"
+                         style="height:180px;object-fit:cover;border-radius:12px;" />
                 }
-                <div class="card-body text-center">
-                    <h5 class="card-title">@pet.Name</h5>
+                else
+                {
+                    <div class="rounded mb-3 d-flex align-items-center justify-content-center mx-auto"
+                         style="height:180px;background:rgba(255,255,255,.05);">
+                        <i class="fa-light fa-paw fa-3x text-muted"></i>
+                    </div>
+                }
 
-                    <p class="card-text mb-1">
-                        <strong>Final Age:</strong>
-                        @if (fullYears.HasValue && fullMonths.HasValue)
+                <h5 class="fw-semibold mb-2">@pet.Name</h5>
+
+                @if (fullYears.HasValue && fullMonths.HasValue)
+                {
+                    <p class="text-muted small mb-1">
+                        Lived @fullYears year@(fullYears == 1 ? "" : "s")
+                        @if (fullMonths > 0)
                         {
-                            @($"{fullYears} year{(fullYears == 1 ? "" : "s")}, {fullMonths} month{(fullMonths == 1 ? "" : "s")}")
-                        }
-                        else
-                        {
-                            <em>N/A</em>
+                            <text>, @fullMonths month@(fullMonths == 1 ? "" : "s")</text>
                         }
                     </p>
+                }
 
-                    <p class="card-text">
-                        <strong>Date of Death:</strong>
-                        @(pet.DateOfDeath?.ToString("dd MMMM yyyy") ?? "")
+                @if (pet.DateOfDeath.HasValue)
+                {
+                    <p class="text-muted small mb-3">
+                        <i class="fa-light fa-heart me-1 text-danger"></i>@pet.DateOfDeath.Value.ToString("dd MMMM yyyy")
                     </p>
-                </div>
+                }
+
+                <a asp-controller="Pets" asp-action="Details" asp-route-id="@pet.Id"
+                   class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                    <i class="fa-light fa-arrow-right me-1"></i> View
+                </a>
             </div>
         </div>
     }
