@@ -33,7 +33,7 @@
                 <tr>
                     <td>@r.PurchaseDate.ToString("dd MMMM yyyy")</td>
                     <td>@(r.UnitsReceived?.ToString("0.##") ?? "-")</td>
-                    <td>@r.AmountPaid.ToString("C")</td>
+                    <td>R @r.AmountPaid.ToString("N2")</td>
                     <td>@r.PurchasedFrom</td>
                     <td>@(r.PreviousPurchase?.ToString("dd MMMM yyyy") ?? "-")</td>
                     <td>@(r.DaysBetween?.ToString() ?? "-")</td>
@@ -49,15 +49,29 @@
     @foreach (var r in Model)
     {
         <div class="glass-card mb-3 p-3">
-            <h5 class="mb-2">@r.PurchaseDate.ToString("dd MMMM yyyy")</h5>
-            <ul class="list-unstyled mb-0">
-                <li><strong>@(type == Hearthly.Data.UtilityType.Electricity ? "Units Received (kWh)" : "Liters Received"):</strong> @(r.UnitsReceived?.ToString("0.##") ?? "-")</li>
-                <li><strong>Amount Paid:</strong> @r.AmountPaid.ToString("C")</li>
-                <li><strong>Purchased From:</strong> @r.PurchasedFrom</li>
-                <li><strong>Previous Purchase:</strong> @(r.PreviousPurchase?.ToString("dd MMMM yyyy") ?? "-")</li>
-                <li><strong>Days Between:</strong> @(r.DaysBetween?.ToString() ?? "-")</li>
-                <li><strong>Average Daily Usage:</strong> @(r.AverageDailyUsage?.ToString("0.##") ?? "-")</li>
-            </ul>
+            <div class="fw-semibold mb-2">@r.PurchaseDate.ToString("dd MMMM yyyy")</div>
+            <div class="row gy-2">
+                <div class="col-6">
+                    <div class="text-muted small">@(type == Hearthly.Data.UtilityType.Electricity ? "Units (kWh)" : "Litres")</div>
+                    <div>@(r.UnitsReceived?.ToString("0.##") ?? "-")</div>
+                </div>
+                <div class="col-6">
+                    <div class="text-muted small">Amount Paid</div>
+                    <div>R @r.AmountPaid.ToString("N2")</div>
+                </div>
+                <div class="col-6">
+                    <div class="text-muted small">Purchased From</div>
+                    <div>@(r.PurchasedFrom ?? "-")</div>
+                </div>
+                <div class="col-6">
+                    <div class="text-muted small">Days Since Last</div>
+                    <div>@(r.DaysBetween?.ToString() ?? "-")</div>
+                </div>
+                <div class="col-6">
+                    <div class="text-muted small">Avg Daily Usage</div>
+                    <div>@(r.AverageDailyUsage?.ToString("0.##") ?? "-")</div>
+                </div>
+            </div>
         </div>
     }
 </div>

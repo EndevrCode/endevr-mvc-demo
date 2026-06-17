@@ -16,7 +16,7 @@
         </div>
         <h5 class="fw-semibold">@Model.Type</h5>
         <p class="text-muted mb-0">
-            @Model.AmountPaid.ToString("C")
+            R @Model.AmountPaid.ToString("N2")
             @if (!string.IsNullOrEmpty(Model.PurchasedFrom))
             {
                 <text>&bull; @Model.PurchasedFrom</text>
