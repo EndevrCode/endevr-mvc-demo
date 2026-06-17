@@ -32,7 +32,7 @@ namespace Hearthly.Controllers
                 .ToListAsync();
 
             var families = await _context.Families
-                .Include(f => f.CreatedBy)
+                .Include(f => f.CreatedBy).ThenInclude(u => u.Profile)
                 .Where(f => allowedFamilyIds.Contains(f.Id))
                 .ToListAsync();
 
