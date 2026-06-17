@@ -248,6 +248,30 @@ namespace Hearthly.Controllers
             return RedirectToAction(nameof(Index), new { familyId = pet.FamilyId });
         }
 
+        // POST: Pets/LogCare
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> LogCare(Guid id, string careType)
+        {
+            var pet = await _context.Pets.FindAsync(id);
+            if (pet == null) return Json(new { success = false });
+
+            var allowed = await GetAllowedFamilyIdsAsync();
+            if (!allowed.Contains(pet.FamilyId)) return Json(new { success = false });
+
+            var today = DateTime.Today;
+            switch (careType)
+            {
+                case "Deworming":  pet.LastDewormingDate = today; break;
+                case "Tick & Flea": pet.LastTickFleaDate = today; break;
+                case "Grooming":   pet.LastGroomingDate  = today; break;
+                case "Checkup":    pet.LastCheckupDate   = today; break;
+                default: return Json(new { success = false, message = "Unknown care type." });
+            }
+
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, dateStr = today.ToString("dd MMM yyyy") });
+        }
+
         // GET: Pets/Remembrance
         public async Task<IActionResult> Remembrance()
         {

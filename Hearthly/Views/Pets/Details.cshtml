@@ -110,6 +110,46 @@
     </div>
 </div>
 
+@if (!pet.IsDeceased)
+{
+    <!-- Care Log Section -->
+    <div class="glass-card p-4 mb-4">
+        <h5 class="mb-3 fw-semibold"><i class="fa-light fa-calendar-medical me-2"></i>Log Care Today</h5>
+        <div class="row g-2" id="careButtons">
+            @{
+                var careItems = new (string Label, string Icon, DateTime? LastDate)[]
+                {
+                    ("Deworming",   "fa-capsules",     pet.LastDewormingDate),
+                    ("Tick & Flea", "fa-bug",          pet.LastTickFleaDate),
+                    ("Grooming",    "fa-scissors",     pet.LastGroomingDate),
+                    ("Checkup",     "fa-stethoscope",  pet.LastCheckupDate),
+                };
+            }
+            @foreach (var (label, icon, lastDate) in careItems)
+            {
+                <div class="col-6 col-md-3">
+                    <button type="button"
+                            class="btn btn-outline-secondary w-100 text-start px-3 py-2 care-log-btn"
+                            data-care="@label"
+                            data-pet="@pet.Id"
+                            onclick="logCare('@pet.Id', '@label', this)">
+                        <i class="fa-light @icon me-2"></i>
+                        <span class="fw-semibold d-block small">@label</span>
+                        @if (lastDate.HasValue)
+                        {
+                            <span class="text-muted" style="font-size:.7rem;">Last: @lastDate.Value.ToString("dd MMM")</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted" style="font-size:.7rem;">Never recorded</span>
+                        }
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+}
+
 <!-- Action Buttons -->
 <div class="d-flex justify-content-center flex-wrap gap-2 mt-4 mb-4">
     <a asp-action="Edit" asp-route-id="@pet.Id" class="btn btn-outline-primary rounded-pill px-4">
@@ -142,6 +182,34 @@
             }).then(result => {
                 if (result.isConfirmed) document.getElementById('deleteForm').submit();
             });
+        }
+
+        async function logCare(petId, careType, btn) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+            btn.disabled = true;
+
+            try {
+                const resp = await fetch('/Pets/LogCare', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ id: petId, careType, __RequestVerificationToken: token })
+                });
+                const data = await resp.json();
+
+                if (data.success) {
+                    const small = btn.querySelector('.text-muted');
+                    if (small) small.textContent = 'Last: ' + data.dateStr;
+                    btn.classList.remove('btn-outline-secondary');
+                    btn.classList.add('btn-outline-success');
+                    Swal.fire({ title: careType + ' logged!', icon: 'success', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+                } else {
+                    btn.disabled = false;
+                    Swal.fire({ title: 'Error', text: data.message ?? 'Could not log care.', icon: 'error', confirmButtonText: 'OK' });
+                }
+            } catch {
+                btn.disabled = false;
+                Swal.fire({ title: 'Error', text: 'Something went wrong.', icon: 'error', confirmButtonText: 'OK' });
+            }
         }
     </script>
 }
