@@ -41,7 +41,9 @@ else
 
                     <div class="d-flex gap-2 mt-3">
                         <button class="btn btn-sm btn-outline-primary rounded-pill px-3 flex-grow-1"
-                                onclick="promptBankAccountPin('@Html.Raw(account.AccountHolder.Replace("'", "\\'"))', @account.Id)">
+                                data-holder="@account.AccountHolder"
+                                data-account-id="@account.Id"
+                                onclick="promptBankAccountPin(this.dataset.holder, this.dataset.accountId)">
                             <i class="fa-light fa-eye me-1"></i> View
                         </button>
 
@@ -56,7 +58,10 @@ else
                         {
                             <button type="button"
                                     class="btn btn-sm btn-outline-success rounded-pill px-3 flex-grow-1"
-                                    onclick="promptCardPin('@account.CardFrontPath', '@account.CardBackPath', @account.Id)">
+                                    data-front="@account.CardFrontPath"
+                                    data-back="@account.CardBackPath"
+                                    data-account-id="@account.Id"
+                                    onclick="promptCardPin(this.dataset.front, this.dataset.back, this.dataset.accountId)">
                                 <i class="fa-light fa-check me-1"></i> Card Linked
                             </button>
                         }
@@ -64,7 +69,8 @@ else
                         <form id="deleteForm-@account.Id" asp-action="Delete" asp-route-id="@account.Id" method="post">
                             @Html.AntiForgeryToken()
                             <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3"
-                                    onclick="confirmDelete('@account.Id')">
+                                    data-account-id="@account.Id"
+                                    onclick="confirmDelete(this.dataset.accountId)">
                                 <i class="fa-light fa-trash"></i>
                             </button>
                         </form>
