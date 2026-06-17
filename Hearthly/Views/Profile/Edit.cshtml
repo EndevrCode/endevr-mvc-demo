@@ -38,8 +38,7 @@
             <input type="file"
                    name="photo"
                    class="form-control"
-                   accept="image/*"
-                   @(string.IsNullOrWhiteSpace(Model.PhotoPath) ? "required" : "") />
+                   accept="image/*" />
 
             <span class="text-danger small d-block mt-1">
                 @if (!string.IsNullOrEmpty(ViewData.ModelState["photo"]?.Errors.FirstOrDefault()?.ErrorMessage))
