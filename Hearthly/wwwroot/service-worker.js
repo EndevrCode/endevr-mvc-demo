@@ -45,13 +45,6 @@ self.addEventListener('fetch', event => {
     );
 });
 
-// Background Sync: profile sync
-self.addEventListener('sync', function (event) {
-    if (event.tag === 'sync-profile') {
-        event.waitUntil(syncUserProfile());
-    }
-});
-
 // Background Sync: queued requests
 self.addEventListener('sync', event => {
     if (event.tag === 'sync-queued-requests') {

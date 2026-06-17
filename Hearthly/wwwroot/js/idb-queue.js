@@ -1,47 +1,52 @@
-﻿// idb-queue.js
+// idb-queue.js — loaded via importScripts in service-worker.js AND as a classic
+// page script. Must NOT use ES module export/import syntax.
 
-// Legacy queue (used for profile sync or other general-purpose requests)
-const dbName = 'HearthlyQueueDB';
-const storeName = 'requests';
+const _dbName    = 'HearthlyQueueDB';
+const _storeName = 'requests';
 
-function openDatabase() {
+function _openQueueDB() {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open(dbName, 1);
+        const request = indexedDB.open(_dbName, 1);
         request.onupgradeneeded = event => {
             const db = event.target.result;
-            if (!db.objectStoreNames.contains(storeName)) {
-                db.createObjectStore(storeName, { autoIncrement: true });
+            if (!db.objectStoreNames.contains(_storeName)) {
+                db.createObjectStore(_storeName, { autoIncrement: true });
             }
         };
         request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
+        request.onerror  = () => reject(request.error);
     });
 }
 
-export async function queueRequest(data) {
-    const db = await openDatabase();
-    const tx = db.transaction(storeName, 'readwrite');
-    const store = tx.objectStore(storeName);
-    store.add(data);
-    return tx.complete;
-}
-
-export async function getAllQueuedRequests() {
-    const db = await openDatabase();
+async function queueRequest(data) {
+    const db = await _openQueueDB();
     return new Promise((resolve, reject) => {
-        const tx = db.transaction(storeName, 'readonly');
-        const store = tx.objectStore(storeName);
-        const request = store.getAll();
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
+        const tx    = db.transaction(_storeName, 'readwrite');
+        const store = tx.objectStore(_storeName);
+        const req   = store.add(data);
+        req.onsuccess = () => resolve();
+        req.onerror   = () => reject(req.error);
     });
 }
 
-export async function clearQueue() {
-    const db = await openDatabase();
-    const tx = db.transaction(storeName, 'readwrite');
-    const store = tx.objectStore(storeName);
-    store.clear();
-    return tx.complete;
+async function getAllQueuedRequests() {
+    const db = await _openQueueDB();
+    return new Promise((resolve, reject) => {
+        const tx    = db.transaction(_storeName, 'readonly');
+        const store = tx.objectStore(_storeName);
+        const req   = store.getAll();
+        req.onsuccess = () => resolve(req.result);
+        req.onerror   = () => reject(req.error);
+    });
 }
 
+async function clearQueue() {
+    const db = await _openQueueDB();
+    return new Promise((resolve, reject) => {
+        const tx    = db.transaction(_storeName, 'readwrite');
+        const store = tx.objectStore(_storeName);
+        const req   = store.clear();
+        req.onsuccess = () => resolve();
+        req.onerror   = () => reject(req.error);
+    });
+}
