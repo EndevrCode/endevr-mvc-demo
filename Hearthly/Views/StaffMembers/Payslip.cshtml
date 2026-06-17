@@ -1,0 +1,273 @@
+@model Hearthly.Data.StaffPayment
+@using Hearthly.Data
+
+@{
+    ViewData["Title"] = "Payslip";
+    var staff = Model.StaffMember;
+    var family = staff.Family;
+    var isSA = staff.Nationality == "South Africa" || string.IsNullOrWhiteSpace(staff.Nationality);
+
+    int? daysInPeriod = null;
+    if (Model.PeriodStart.HasValue && Model.PeriodEnd.HasValue)
+    {
+        var workDays = (staff.WorkDays ?? "")
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(d => d.Trim())
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        if (workDays.Count > 0)
+        {
+            daysInPeriod = Enumerable.Range(0, (Model.PeriodEnd.Value - Model.PeriodStart.Value).Days + 1)
+                .Select(d => Model.PeriodStart.Value.AddDays(d).DayOfWeek.ToString())
+                .Count(dow => workDays.Contains(dow));
+        }
+    }
+}
+
+@section Styles {
+<style>
+    @@media print {
+        .no-print { display: none !important; }
+        .navbar, .mobile-nav, footer { display: none !important; }
+        .container-main { padding: 0 !important; max-width: 100% !important; }
+        .payslip-card {
+            background: white !important;
+            color: black !important;
+            border: 1px solid #ccc !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+        }
+        .payslip-divider { border-color: #ccc !important; }
+        .label-cell { color: #555 !important; }
+        .payslip-logo { color: #6366f1 !important; }
+    }
+
+    .payslip-card {
+        max-width: 680px;
+        margin: 0 auto;
+    }
+    .payslip-header {
+        border-bottom: 2px solid rgba(255,255,255,.12);
+        padding-bottom: 1.25rem;
+        margin-bottom: 1.25rem;
+    }
+    .payslip-section-title {
+        font-size: .75rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,.4);
+        margin-bottom: .5rem;
+    }
+    .payslip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .35rem 1.5rem; }
+    .label-cell { font-size: .82rem; color: rgba(255,255,255,.5); }
+    .value-cell { font-size: .9rem; }
+    .payslip-divider { border-top: 1px solid rgba(255,255,255,.08); margin: 1.25rem 0; }
+    .sig-line {
+        border-top: 1px solid rgba(255,255,255,.25);
+        margin-top: 2.5rem;
+        padding-top: .4rem;
+        font-size: .78rem;
+        color: rgba(255,255,255,.4);
+    }
+    @@media print {
+        .sig-line { border-top-color: #aaa; color: #888; }
+    }
+</style>
+}
+
+<div class="mb-4 d-flex justify-content-between align-items-center no-print">
+    <h2 class="mb-0"><i class="fa-light fa-file-invoice me-2"></i>Payslip</h2>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-primary rounded-pill px-4" onclick="window.print()">
+            <i class="fa-light fa-print me-1"></i> Print
+        </button>
+        <a asp-action="PaymentHistory" asp-route-id="@staff.Id" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="fa-light fa-arrow-left me-1"></i> Back
+        </a>
+    </div>
+</div>
+
+<div class="glass-card p-4 payslip-card">
+
+    <!-- Header -->
+    <div class="payslip-header d-flex justify-content-between align-items-start">
+        <div>
+            <div class="fw-bold fs-5 payslip-logo">
+                <i class="fa-light fa-house-heart me-2" style="color:#6366f1;"></i>@family.Name
+            </div>
+            <div class="text-muted small">Employer / Family</div>
+        </div>
+        <div class="text-end">
+            <div class="fw-bold fs-6">PAYSLIP</div>
+            <div class="text-muted small">@Model.PaymentDate.ToString("MMMM yyyy")</div>
+            <div class="text-muted" style="font-size:.72rem;">Ref: @Model.Id.ToString()[..8].ToUpper()</div>
+        </div>
+    </div>
+
+    <!-- Employee details -->
+    <div class="mb-3">
+        <div class="payslip-section-title">Employee</div>
+        <div class="payslip-grid">
+            <div>
+                <div class="label-cell">Full Name</div>
+                <div class="value-cell fw-semibold">@staff.FirstName @staff.LastName</div>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(staff.PreferredName))
+            {
+                <div>
+                    <div class="label-cell">Known As</div>
+                    <div class="value-cell">@staff.PreferredName</div>
+                </div>
+            }
+            @if (isSA && !string.IsNullOrWhiteSpace(staff.IdNumber))
+            {
+                <div>
+                    <div class="label-cell">ID Number</div>
+                    <div class="value-cell font-monospace">@staff.IdNumber</div>
+                </div>
+            }
+            else if (!isSA && !string.IsNullOrWhiteSpace(staff.PassportNumber))
+            {
+                <div>
+                    <div class="label-cell">Passport Number</div>
+                    <div class="value-cell font-monospace">@staff.PassportNumber</div>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(staff.Nationality))
+            {
+                <div>
+                    <div class="label-cell">Nationality</div>
+                    <div class="value-cell">@staff.Nationality</div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <hr class="payslip-divider" />
+
+    <!-- Payment period -->
+    <div class="mb-3">
+        <div class="payslip-section-title">Payment Period</div>
+        <div class="payslip-grid">
+            <div>
+                <div class="label-cell">Payment Date</div>
+                <div class="value-cell fw-semibold">@Model.PaymentDate.ToString("dd MMMM yyyy")</div>
+            </div>
+            <div>
+                <div class="label-cell">Method</div>
+                <div class="value-cell">@Model.PaymentMethod</div>
+            </div>
+            @if (Model.PeriodStart.HasValue)
+            {
+                <div>
+                    <div class="label-cell">Period From</div>
+                    <div class="value-cell">@Model.PeriodStart.Value.ToString("dd MMMM yyyy")</div>
+                </div>
+            }
+            @if (Model.PeriodEnd.HasValue)
+            {
+                <div>
+                    <div class="label-cell">Period To</div>
+                    <div class="value-cell">@Model.PeriodEnd.Value.ToString("dd MMMM yyyy")</div>
+                </div>
+            }
+            @if (daysInPeriod.HasValue)
+            {
+                <div>
+                    <div class="label-cell">Days Worked (est.)</div>
+                    <div class="value-cell">@daysInPeriod</div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <hr class="payslip-divider" />
+
+    <!-- Earnings -->
+    <div class="mb-3">
+        <div class="payslip-section-title">Earnings</div>
+        <div class="d-flex flex-column gap-2">
+            @if (staff.DailyWageZAR.HasValue)
+            {
+                <div class="d-flex justify-content-between">
+                    <span class="label-cell">Daily Rate</span>
+                    <span class="value-cell">R @staff.DailyWageZAR.Value.ToString("N2")</span>
+                </div>
+                @if (daysInPeriod.HasValue)
+                {
+                    <div class="d-flex justify-content-between">
+                        <span class="label-cell">Estimated Earnings (@daysInPeriod × R @staff.DailyWageZAR.Value.ToString("N2"))</span>
+                        <span class="value-cell">R @((staff.DailyWageZAR.Value * daysInPeriod.Value).ToString("N2"))</span>
+                    </div>
+                }
+            }
+            <div class="d-flex justify-content-between fw-bold border-top pt-2 mt-1" style="border-color:rgba(255,255,255,.12)!important;">
+                <span>Amount Paid</span>
+                <span class="fs-5 text-success">R @Model.AmountPaid.ToString("N2")</span>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(staff.BankName) || !string.IsNullOrWhiteSpace(staff.AccountNumber))
+    {
+        <hr class="payslip-divider" />
+        <div class="mb-3">
+            <div class="payslip-section-title">Banking Details</div>
+            <div class="payslip-grid">
+                @if (!string.IsNullOrWhiteSpace(staff.BankName))
+                {
+                    <div>
+                        <div class="label-cell">Bank</div>
+                        <div class="value-cell">@staff.BankName</div>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(staff.AccountName))
+                {
+                    <div>
+                        <div class="label-cell">Account Name</div>
+                        <div class="value-cell">@staff.AccountName</div>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(staff.AccountNumber))
+                {
+                    <div>
+                        <div class="label-cell">Account Number</div>
+                        <div class="value-cell font-monospace">@staff.AccountNumber</div>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(staff.BranchCode))
+                {
+                    <div>
+                        <div class="label-cell">Branch Code</div>
+                        <div class="value-cell font-monospace">@staff.BranchCode</div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.Notes))
+    {
+        <hr class="payslip-divider" />
+        <div class="mb-3">
+            <div class="payslip-section-title">Notes</div>
+            <div class="value-cell">@Model.Notes</div>
+        </div>
+    }
+
+    <!-- Signature block -->
+    <hr class="payslip-divider" />
+    <div class="row mt-4">
+        <div class="col-6">
+            <div class="sig-line">Employer Signature &amp; Date</div>
+        </div>
+        <div class="col-6">
+            <div class="sig-line">Employee Signature &amp; Date</div>
+        </div>
+    </div>
+
+    <div class="text-center mt-4 text-muted no-print" style="font-size:.75rem;">
+        <i class="fa-light fa-lock me-1"></i>This payslip was generated by Hearthly on @DateTime.Now.ToString("dd MMM yyyy HH:mm")
+    </div>
+</div>

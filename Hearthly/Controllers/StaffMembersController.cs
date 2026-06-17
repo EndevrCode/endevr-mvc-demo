@@ -274,6 +274,22 @@ namespace Hearthly.Controllers
             return View(payment);
         }
 
+        // GET: StaffMembers/Payslip/{paymentId}
+        public async Task<IActionResult> Payslip(Guid paymentId)
+        {
+            var payment = await _context.StaffPayments
+                .Include(p => p.StaffMember)
+                    .ThenInclude(s => s.Family)
+                .FirstOrDefaultAsync(p => p.Id == paymentId);
+
+            if (payment == null) return NotFound();
+
+            if (!await IsUserInFamily(payment.StaffMember.FamilyId))
+                return Forbid();
+
+            return View(payment);
+        }
+
         // POST: StaffMembers/DeletePayment
         [HttpPost]
         [ValidateAntiForgeryToken]
