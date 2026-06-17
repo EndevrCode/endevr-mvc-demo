@@ -90,8 +90,18 @@ else
                 </div>
             }
 
-            <div class="mt-2 text-muted" style="font-size:0.72rem;">
-                Recorded @payment.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")
+            <div class="d-flex justify-content-between align-items-center mt-2">
+                <div class="text-muted" style="font-size:0.72rem;">
+                    Recorded @payment.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")
+                </div>
+                <form asp-action="DeletePayment" method="post" id="del-@payment.Id" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@payment.Id" />
+                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-2"
+                            onclick="confirmDeletePayment('@payment.Id', 'R @payment.AmountPaid.ToString("N2") on @payment.PaymentDate.ToString("dd MMM yyyy")')">
+                        <i class="fa-light fa-trash"></i>
+                    </button>
+                </form>
             </div>
         </div>
     }
@@ -105,12 +115,24 @@ else
 
 @section Scripts {
     <script>
-        @if (!string.IsNullOrEmpty(statusMsg))
-        {
-            <text>
-        document.addEventListener('DOMContentLoaded', () =>
-            Swal.fire({ title: '@Html.Raw(statusMsg)', icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false }));
-            </text>
+        document.addEventListener('DOMContentLoaded', () => {
+            @if (!string.IsNullOrEmpty(statusMsg))
+            {
+                <text>Swal.fire({ title: '@Html.Raw(statusMsg)', icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
+            }
+        });
+
+        function confirmDeletePayment(id, label) {
+            Swal.fire({
+                title: 'Delete payment?',
+                html: `<span class="text-muted small">${label}</span><br>This cannot be undone.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Delete',
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then(r => { if (r.isConfirmed) document.getElementById('del-' + id).submit(); });
         }
     </script>
 }

@@ -69,6 +69,17 @@ namespace Hearthly.Controllers
             if (!await IsUserInFamily(staffMember.FamilyId))
                 return Forbid();
 
+            // Month-to-date payment summary
+            var now = DateTime.Today;
+            var monthStart = new DateTime(now.Year, now.Month, 1);
+            var monthEnd = monthStart.AddMonths(1);
+
+            var paidThisMonth = await _context.StaffPayments
+                .Where(p => p.StaffMemberId == id && p.PaymentDate >= monthStart && p.PaymentDate < monthEnd)
+                .SumAsync(p => (decimal?)p.AmountPaid) ?? 0m;
+
+            ViewData["PaidThisMonth"] = paidThisMonth;
+
             return View(staffMember);
         }
 
@@ -261,6 +272,27 @@ namespace Hearthly.Controllers
 
             ViewData["StaffMember"] = staffMember;
             return View(payment);
+        }
+
+        // POST: StaffMembers/DeletePayment
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePayment(Guid id)
+        {
+            var payment = await _context.StaffPayments.FindAsync(id);
+            if (payment == null) return NotFound();
+
+            var staffMember = await _context.StaffMembers.FindAsync(payment.StaffMemberId);
+            if (staffMember == null) return NotFound();
+
+            if (!await IsUserInFamily(staffMember.FamilyId))
+                return Forbid();
+
+            _context.StaffPayments.Remove(payment);
+            await _context.SaveChangesAsync();
+
+            TempData["StatusMessage"] = "Payment record deleted.";
+            return RedirectToAction(nameof(PaymentHistory), new { id = payment.StaffMemberId });
         }
 
         // POST: StaffMembers/LogPayment

@@ -24,6 +24,8 @@
 
 @{
     var statusMsg = TempData["StatusMessage"] as string;
+    var paidThisMonth = (decimal)(ViewData["PaidThisMonth"] ?? 0m);
+    var outstanding = Math.Max(0m, totalMonthly - paidThisMonth);
 }
 
 <div class="text-center mt-5 mb-4">
@@ -130,6 +132,40 @@
         }
     </div>
 </div>
+
+<!-- This month payment summary -->
+@if (daily > 0)
+{
+    <div class="glass-card p-4 mb-4">
+        <h6 class="fw-semibold mb-3">
+            <i class="fa-light fa-calendar-check me-2"></i>@DateTime.Today.ToString("MMMM yyyy")
+        </h6>
+        <div class="row gy-3">
+            <div class="col-4 text-center">
+                <div class="text-muted small">Estimated</div>
+                <div class="fw-semibold">R @totalMonthly.ToString("N0")</div>
+            </div>
+            <div class="col-4 text-center">
+                <div class="text-muted small">Paid</div>
+                <div class="fw-semibold text-success">R @paidThisMonth.ToString("N0")</div>
+            </div>
+            <div class="col-4 text-center">
+                <div class="text-muted small">Outstanding</div>
+                <div class="fw-semibold @(outstanding > 0 ? "text-warning" : "text-success")">
+                    R @outstanding.ToString("N0")
+                </div>
+            </div>
+        </div>
+        @if (totalMonthly > 0)
+        {
+            var pct = Math.Min(100, (int)Math.Round(paidThisMonth / totalMonthly * 100));
+            <div class="progress mt-3" style="height:6px;">
+                <div class="progress-bar bg-success" style="width:@pct%;"></div>
+            </div>
+            <div class="text-muted small text-end mt-1">@pct% paid</div>
+        }
+    </div>
+}
 
 <!-- Action buttons -->
 <div class="d-flex justify-content-center flex-wrap gap-2 mb-5">
