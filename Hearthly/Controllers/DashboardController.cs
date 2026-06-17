@@ -290,6 +290,42 @@ namespace Hearthly.Controllers
 
             petCareReminders = petCareReminders.OrderByDescending(r => r.DaysOverdue).ToList();
 
+            // 9) Utility purchase reminders
+            var utilityReminders = new List<UtilityReminder>();
+            var utilityThresholds = new (UtilityType Type, string Label, int ThresholdDays)[]
+            {
+                (UtilityType.Electricity, "Electricity", 30),
+                (UtilityType.Gas,         "Gas",         60),
+            };
+
+            foreach (var fi in familyInfos)
+            {
+                var familyUtilities = await _context.Utilities
+                    .Where(u => u.FamilyId == fi.Family.Id)
+                    .ToListAsync();
+
+                foreach (var (utilType, label, threshold) in utilityThresholds)
+                {
+                    var last = familyUtilities
+                        .Where(u => u.Type == utilType)
+                        .OrderByDescending(u => u.PurchaseDate)
+                        .FirstOrDefault();
+
+                    if (last != null)
+                    {
+                        var daysAgo = (today2 - last.PurchaseDate.Date).Days;
+                        if (daysAgo > threshold)
+                            utilityReminders.Add(new UtilityReminder
+                            {
+                                FamilyId    = fi.Family.Id,
+                                FamilyName  = fi.Family.Name,
+                                UtilityType = label,
+                                DaysAgo     = daysAgo
+                            });
+                    }
+                }
+            }
+
             // Assemble the view‑model
             var familiesList = familyInfos.Select(fi => new { id = fi.Family.Id, name = fi.Family.Name }).ToList();
 
@@ -305,6 +341,7 @@ namespace Hearthly.Controllers
                 UpcomingBirthdays = upcomingBirthdays,
                 PendingChoresCount = pendingChoresCount,
                 PetCareReminders = petCareReminders,
+                UtilityReminders = utilityReminders,
                 EstimatedMonthlyPayroll = totalPayroll,
                 StaffCount = allStaff.Count,
                 EventsJson = JsonSerializer.Serialize(events),

@@ -31,6 +31,9 @@ namespace Hearthly.Data
         // Pet care reminders
         public List<PetCareReminder> PetCareReminders { get; set; } = new();
 
+        // Utility purchase reminders
+        public List<UtilityReminder> UtilityReminders { get; set; } = new();
+
         // FullCalendar JSON blob of events (birthdays, invites, etc.)
         public string EventsJson { get; set; } = "[]";
 
@@ -45,6 +48,15 @@ namespace Hearthly.Data
         public string CareType { get; set; } = "";
         public DateTime LastDate { get; set; }
         public int DaysOverdue { get; set; }
+        public bool NeverRecorded { get; set; }
+    }
+
+    public class UtilityReminder
+    {
+        public Guid FamilyId { get; set; }
+        public string FamilyName { get; set; } = "";
+        public string UtilityType { get; set; } = "";
+        public int? DaysAgo { get; set; }
         public bool NeverRecorded { get; set; }
     }
 
