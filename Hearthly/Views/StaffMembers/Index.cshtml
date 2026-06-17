@@ -1,7 +1,10 @@
 ﻿@model IEnumerable<Hearthly.Data.StaffMember>
+@using System
 
 @{
     ViewData["Title"] = "Staff Members";
+    var lastPayments = ViewData["LastPayments"] as Dictionary<Guid, (DateTime LastDate, decimal Total)>
+                       ?? new Dictionary<Guid, (DateTime, decimal)>();
 }
 
 <div class="mb-4 d-flex justify-content-between align-items-center">
@@ -46,7 +49,17 @@ else
                             <i class="fa-light fa-user fa-2x text-muted"></i>
                         </div>
                     }
-                    <h6 class="fw-semibold mb-0">@displayName</h6>
+                    <h6 class="fw-semibold mb-1">@displayName</h6>
+                    @if (lastPayments.TryGetValue(staff.Id, out var pay))
+                    {
+                        <small class="text-muted" style="font-size:0.7rem;">
+                            <i class="fa-light fa-money-bill-wave me-1"></i>@pay.LastDate.ToString("dd MMM yyyy")
+                        </small>
+                    }
+                    else
+                    {
+                        <small class="text-muted" style="font-size:0.7rem;">No payments yet</small>
+                    }
                 </a>
             </div>
         }

@@ -41,6 +41,18 @@ namespace Hearthly.Controllers
             var staff = await _context.StaffMembers
                                       .Where(s => s.FamilyId == familyId.Value)
                                       .ToListAsync();
+
+            var staffIds = staff.Select(s => s.Id).ToList();
+            var lastPayments = await _context.StaffPayments
+                .Where(p => staffIds.Contains(p.StaffMemberId))
+                .GroupBy(p => p.StaffMemberId)
+                .Select(g => new { StaffMemberId = g.Key, LastDate = g.Max(p => p.PaymentDate), Total = g.Sum(p => p.AmountPaid) })
+                .ToListAsync();
+
+            ViewData["LastPayments"] = lastPayments.ToDictionary(
+                x => x.StaffMemberId,
+                x => (LastDate: x.LastDate, Total: x.Total));
+
             return View(staff);
         }
 

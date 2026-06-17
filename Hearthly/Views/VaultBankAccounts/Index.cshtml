@@ -10,13 +10,9 @@
     </a>
 </div>
 
-@if (TempData["Success"] is string ok)
-{
-    <div class="alert alert-success">@ok</div>
-}
-@if (TempData["Error"] is string err)
-{
-    <div class="alert alert-danger">@err</div>
+@{
+    var _successMsg = TempData["Success"] as string;
+    var _errorMsg   = TempData["Error"] as string;
 }
 
 @if (!Model.Any())
@@ -44,7 +40,7 @@ else
                     </div>
 
                     <div class="d-flex gap-2 mt-3">
-                        <button class="btn btn-sm btn-outline-primary flex-grow-1"
+                        <button class="btn btn-sm btn-outline-primary rounded-pill px-3 flex-grow-1"
                                 onclick="promptBankAccountPin('@account.AccountHolder', '@account.AccountNumber')">
                             <i class="fa-light fa-eye me-1"></i> View
                         </button>
@@ -52,14 +48,14 @@ else
                         @if (string.IsNullOrEmpty(account.CardFrontPath) && string.IsNullOrEmpty(account.CardBackPath))
                         {
                             <a asp-action="LinkCard" asp-route-id="@account.Id"
-                               class="btn btn-sm btn-outline-secondary flex-grow-1">
+                               class="btn btn-sm btn-outline-secondary rounded-pill px-3 flex-grow-1">
                                 <i class="fa-light fa-credit-card me-1"></i> Link Card
                             </a>
                         }
                         else
                         {
                             <button type="button"
-                                    class="btn btn-sm btn-outline-success flex-grow-1"
+                                    class="btn btn-sm btn-outline-success rounded-pill px-3 flex-grow-1"
                                     onclick="promptCardPin('@account.CardFrontPath', '@account.CardBackPath', @account.Id)">
                                 <i class="fa-light fa-check me-1"></i> Card Linked
                             </button>
@@ -67,7 +63,7 @@ else
 
                         <form id="deleteForm-@account.Id" asp-action="Delete" asp-route-id="@account.Id" method="post">
                             @Html.AntiForgeryToken()
-                            <button type="button" class="btn btn-sm btn-outline-danger"
+                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3"
                                     onclick="confirmDelete('@account.Id')">
                                 <i class="fa-light fa-trash"></i>
                             </button>
@@ -263,6 +259,15 @@ else
         }
 
         document.addEventListener("DOMContentLoaded", () => {
+            @if (!string.IsNullOrEmpty(_successMsg))
+            {
+                <text>Swal.fire({ title: '@Html.Raw(_successMsg)', icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
+            }
+            @if (!string.IsNullOrEmpty(_errorMsg))
+            {
+                <text>Swal.fire({ title: '@Html.Raw(_errorMsg)', icon: 'error', toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });</text>
+            }
+
             document.getElementById('toggleAccountBtn')?.addEventListener('click', () => {
                 window.accountShown = !window.accountShown;
                 document.getElementById('modalAccount').textContent =
