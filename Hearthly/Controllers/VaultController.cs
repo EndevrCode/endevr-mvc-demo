@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -7,13 +6,11 @@ using Hearthly.Controllers;
 using Hearthly.Data;
 using Hearthly.Data.Vault;
 using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
 
 [Authorize]
 public class VaultController : BaseController
 {
-    private readonly IDataProtector _protector;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly ApplicationDbContext _context;
     private readonly ILogger<VaultController> _logger;
@@ -21,13 +18,11 @@ public class VaultController : BaseController
     public VaultController(
         ApplicationDbContext context,
         UserManager<ApplicationUser> userManager,
-        IDataProtectionProvider dataProtectionProvider,
         ILogger<VaultController> logger)
         : base(context, userManager)
     {
         _context = context;
         _userManager = userManager;
-        _protector = dataProtectionProvider.CreateProtector("VaultFileProtector");
         _logger = logger;
     }
 
@@ -54,13 +49,6 @@ public class VaultController : BaseController
         ViewData["UserFiles"] = files;
 
         return View();
-    }
-
-    private byte[] GetDecryptedVaultKey(ApplicationUser user)
-    {
-        var protectedString = Encoding.UTF8.GetString(user.EncryptedVaultKey);
-        var unprotected = _protector.Unprotect(protectedString);
-        return Convert.FromBase64String(unprotected);
     }
 
     [HttpGet]
