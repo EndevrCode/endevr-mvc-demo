@@ -38,6 +38,7 @@ namespace Hearthly.Data
         public DbSet<Hearthly.Data.Vault.VaultBiometricCredential> VaultBiometricCredentials { get; set; } = default!;
         public DbSet<FamilyCalendarEvent> FamilyCalendarEvents { get; set; } = default!;
         public DbSet<HealthProfile> HealthProfiles { get; set; } = default!;
+        public DbSet<FamilyChore> FamilyChores { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
