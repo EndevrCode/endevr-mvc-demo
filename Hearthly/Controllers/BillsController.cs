@@ -113,18 +113,48 @@ namespace Hearthly.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> MarkPaid(int id, Guid familyId)
         {
-            if (!await IsUserInFamily(familyId)) return Forbid();
+            if (!await IsUserInFamily(familyId)) return Json(new { success = false });
 
             var bill = await _context.Bills
                 .FirstOrDefaultAsync(b => b.Id == id && b.FamilyId == familyId);
 
-            if (bill == null) return NotFound();
+            if (bill == null) return Json(new { success = false });
 
-            bill.IsPaid = !bill.IsPaid;
-            bill.PaidDate = bill.IsPaid ? DateTime.UtcNow : null;
+            var wasUnpaid = !bill.IsPaid;
+            bill.IsPaid   = !bill.IsPaid;
+            bill.PaidDate = bill.IsPaid ? DateTime.UtcNow : (DateTime?)null;
+
+            bool nextBillCreated = false;
+
+            // Auto-generate next month's bill when a recurring bill is marked paid
+            if (bill.IsPaid && bill.IsRecurring && wasUnpaid)
+            {
+                var nextDue = bill.DueDate.AddMonths(1);
+                var alreadyExists = await _context.Bills
+                    .AnyAsync(b => b.FamilyId == familyId
+                               && b.Name == bill.Name
+                               && b.DueDate.Year  == nextDue.Year
+                               && b.DueDate.Month == nextDue.Month);
+
+                if (!alreadyExists)
+                {
+                    _context.Bills.Add(new Bill
+                    {
+                        FamilyId    = familyId,
+                        Name        = bill.Name,
+                        Category    = bill.Category,
+                        Amount      = bill.Amount,
+                        DueDate     = nextDue,
+                        IsRecurring = true,
+                        Notes       = bill.Notes,
+                        CreatedAt   = DateTime.UtcNow
+                    });
+                    nextBillCreated = true;
+                }
+            }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index), new { familyId });
+            return Json(new { success = true, isPaid = bill.IsPaid, nextBillCreated });
         }
 
         // GET: /Bills/Delete/5?familyId=...
