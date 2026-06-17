@@ -69,20 +69,20 @@
         <div id="emergencyMain"
              class="glass-card emergency-btn"
              style="width:56px; height:56px; display:flex; align-items:center; justify-content:center; cursor:grab;">
-            <i class="bi bi-heart-pulse fs-4 text-danger"></i>
+            <i class="fa-light fa-heart-pulse fs-4 text-danger"></i>
         </div>
         <div id="emergencyChildren" class="emergency-children">
             <a href="tel:10111" class="glass-card emergency-child" title="Police"
                style="position:absolute; width:48px; height:48px; display:flex; align-items:center; justify-content:center; top:-80px; left:0;">
-                <i class="bi bi-shield-shaded text-danger"></i>
+                <i class="fa-light fa-shield-halved text-danger"></i>
             </a>
             <a href="tel:102" class="glass-card emergency-child" title="Fire"
                style="position:absolute; width:48px; height:48px; display:flex; align-items:center; justify-content:center; top:-60px; left:60px;">
-                <i class="bi bi-fire text-danger"></i>
+                <i class="fa-light fa-fire text-danger"></i>
             </a>
             <a href="tel:10177" class="glass-card emergency-child" title="Ambulance"
                style="position:absolute; width:48px; height:48px; display:flex; align-items:center; justify-content:center; top:0; left:80px;">
-                <i class="bi bi-capsule text-danger"></i>
+                <i class="fa-light fa-capsule text-danger"></i>
             </a>
         </div>
     </div>
@@ -90,10 +90,10 @@
     <!-- Mobile Bottom Nav -->
     <nav class="mobile-nav d-md-none">
         <a asp-controller="Home" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
-            <i class="bi bi-house"></i><span>Home</span>
+            <i class="fa-light fa-house"></i><span>Home</span>
         </a>
         <a asp-controller="Dashboard" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
-            <i class="bi bi-grid"></i><span>Dashboard</span>
+            <i class="fa-light fa-grid-2"></i><span>Dashboard</span>
         </a>
 
         <div class="emergency-center">
@@ -104,7 +104,7 @@
         </div>
 
         <a asp-controller="Families" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Families" ? "active" : "")">
-            <i class="bi bi-people"></i><span>Family</span>
+            <i class="fa-light fa-people-group"></i><span>Family</span>
         </a>
         <div class="more-center">
             <a href="javascript:void(0);" id="mobileMoreBtn" class="glass-card" role="button" aria-label="More">
