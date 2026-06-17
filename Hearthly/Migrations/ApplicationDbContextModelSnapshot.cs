@@ -309,6 +309,12 @@ namespace Hearthly.Migrations
                     b.Property<Guid>("FamilyId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int?>("BatteryLevel")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("IsCharging")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsVisible")
                         .HasColumnType("bit");
 
@@ -321,6 +327,13 @@ namespace Hearthly.Migrations
                     b.Property<string>("Note")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("PlaceName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<double?>("Speed")
+                        .HasColumnType("float");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -336,6 +349,48 @@ namespace Hearthly.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("FamilyLocations");
+                });
+
+            modelBuilder.Entity("Hearthly.Data.FamilyPlace", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedByUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("FamilyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("PlaceType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RadiusMeters")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("FamilyId");
+
+                    b.ToTable("FamilyPlaces");
                 });
 
             modelBuilder.Entity("Hearthly.Data.FamilyInvite", b =>
@@ -1035,6 +1090,25 @@ namespace Hearthly.Migrations
                     b.Navigation("Family");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Hearthly.Data.FamilyPlace", b =>
+                {
+                    b.HasOne("Hearthly.Data.ApplicationUser", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("Hearthly.Data.Family", "Family")
+                        .WithMany()
+                        .HasForeignKey("FamilyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedBy");
+
+                    b.Navigation("Family");
                 });
 
             modelBuilder.Entity("Hearthly.Data.FamilyMember", b =>

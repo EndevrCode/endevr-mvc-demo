@@ -32,5 +32,12 @@ namespace Hearthly.Data
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         public bool IsVisible { get; set; } = true;
+
+        public int? BatteryLevel { get; set; }
+        public bool? IsCharging { get; set; }
+        public double? Speed { get; set; }
+
+        [StringLength(100)]
+        public string? PlaceName { get; set; }
     }
 }
