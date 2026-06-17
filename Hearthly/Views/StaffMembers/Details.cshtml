@@ -124,15 +124,15 @@
 
 <!-- Action buttons -->
 <div class="d-flex justify-content-center flex-wrap gap-2 mb-5">
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary rounded-pill">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary rounded-pill px-4">
         <i class="fa-light fa-pen-to-square me-1"></i> Edit
     </a>
-    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill">
+    <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
         <i class="fa-light fa-arrow-left me-1"></i> Back
     </a>
     <form id="deleteForm" asp-action="Delete" asp-route-id="@Model.Id" method="post" class="d-inline">
         @Html.AntiForgeryToken()
-        <button type="button" class="btn btn-outline-danger rounded-pill" onclick="confirmDelete()">
+        <button type="button" class="btn btn-outline-danger rounded-pill px-4" onclick="confirmDelete()">
             <i class="fa-light fa-trash me-1"></i> Delete
         </button>
     </form>

@@ -88,14 +88,11 @@
             </div>
         </div>
 
-        <div class="mt-3 d-flex align-items-center gap-2">
-            <button type="button" class="btn btn-primary rounded-pill px-4" onclick="promptUploadPin()">
+        <div class="mt-3">
+            <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitUpload()">
                 <i class="fa-light fa-shield-check me-1"></i> Encrypt &amp; Upload
             </button>
-            <small class="text-muted">Your PIN is required to encrypt the file.</small>
         </div>
-
-        <input type="hidden" name="pin" id="uploadPin" />
     </form>
 </div>
 
@@ -137,18 +134,17 @@ else
                             </div>
                             <div class="d-flex gap-2 mt-auto pt-2">
                                 <button type="button" class="btn btn-outline-primary btn-sm flex-grow-1"
-                                        onclick="promptDownloadPin('@doc.Id', '@Html.Raw(doc.Title.Replace("'", "\\'"))')">
+                                        onclick="submitDownload('@doc.Id')">
                                     <i class="fa-light fa-cloud-arrow-down me-1"></i> Download
                                 </button>
                                 <button type="button" class="btn btn-outline-danger btn-sm"
-                                        onclick="promptDeletePin('@doc.Id', '@Html.Raw(doc.Title.Replace("'", "\\'"))')">
+                                        onclick="confirmDelete('@doc.Id', '@Html.Raw(doc.Title.Replace("'", "\\'"))')">
                                     <i class="fa-light fa-trash"></i>
                                 </button>
                             </div>
 
                             <form id="dl-@doc.Id" asp-action="Download" asp-route-id="@doc.Id" method="post" class="d-none">
                                 @Html.AntiForgeryToken()
-                                <input type="hidden" name="pin" id="pin-dl-@doc.Id" />
                                 @if (filter.HasValue)
                                 {
                                     <input type="hidden" name="filter" value="@((int)filter.Value)" />
@@ -157,7 +153,6 @@ else
 
                             <form id="del-@doc.Id" asp-action="Delete" asp-route-id="@doc.Id" method="post" class="d-none">
                                 @Html.AntiForgeryToken()
-                                <input type="hidden" name="pin" id="pin-del-@doc.Id" />
                                 @if (filter.HasValue)
                                 {
                                     <input type="hidden" name="filter" value="@((int)filter.Value)" />
@@ -192,11 +187,10 @@ else
             }
         });
 
-        function promptUploadPin() {
+        function submitUpload() {
             const form = document.getElementById('uploadForm');
             const title = form.querySelector('input[name="title"]').value.trim();
-            const file = form.querySelector('input[name="file"]').files[0];
-
+            const file  = form.querySelector('input[name="file"]').files[0];
             if (!title) {
                 Swal.fire({ title: 'Missing title', text: 'Please enter a document title.', icon: 'warning' });
                 return;
@@ -205,68 +199,24 @@ else
                 Swal.fire({ title: 'No file selected', text: 'Please choose a file to upload.', icon: 'warning' });
                 return;
             }
-
-            Swal.fire({
-                title: 'Enter Vault PIN',
-                text: 'Your PIN is used to encrypt this document.',
-                input: 'password',
-                inputAttributes: { maxlength: '6', autocomplete: 'current-password', inputmode: 'numeric' },
-                inputPlaceholder: 'PIN',
-                showCancelButton: true,
-                confirmButtonText: 'Upload',
-                confirmButtonColor: '#0d6efd'
-            }).then(result => {
-                if (result.isConfirmed && result.value) {
-                    document.getElementById('uploadPin').value = result.value;
-                    form.submit();
-                }
-            });
+            form.submit();
         }
 
-        function promptDownloadPin(docId, title) {
-            Swal.fire({
-                title: 'Enter Vault PIN',
-                text: `Download "${title}"`,
-                input: 'password',
-                inputAttributes: { maxlength: '6', autocomplete: 'current-password', inputmode: 'numeric' },
-                inputPlaceholder: 'PIN',
-                showCancelButton: true,
-                confirmButtonText: 'Download',
-                confirmButtonColor: '#0d6efd'
-            }).then(result => {
-                if (result.isConfirmed && result.value) {
-                    document.getElementById(`pin-dl-${docId}`).value = result.value;
-                    document.getElementById(`dl-${docId}`).submit();
-                }
-            });
+        function submitDownload(docId) {
+            document.getElementById(`dl-${docId}`).submit();
         }
 
-        function promptDeletePin(docId, title) {
-            Swal.fire({
+        async function confirmDelete(docId, title) {
+            const { isConfirmed } = await Swal.fire({
                 title: 'Delete document?',
-                text: `"${title}" will be permanently deleted. This cannot be undone.`,
+                html: `<strong>${title}</strong><br><small class="text-muted">This cannot be undone.</small>`,
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Confirm with PIN',
-                confirmButtonColor: '#dc3545'
-            }).then(confirm => {
-                if (!confirm.isConfirmed) return;
-
-                Swal.fire({
-                    title: 'Enter Vault PIN',
-                    input: 'password',
-                    inputAttributes: { maxlength: '6', autocomplete: 'current-password', inputmode: 'numeric' },
-                    inputPlaceholder: 'PIN',
-                    showCancelButton: true,
-                    confirmButtonText: 'Delete',
-                    confirmButtonColor: '#dc3545'
-                }).then(result => {
-                    if (result.isConfirmed && result.value) {
-                        document.getElementById(`pin-del-${docId}`).value = result.value;
-                        document.getElementById(`del-${docId}`).submit();
-                    }
-                });
+                confirmButtonText: 'Delete',
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: 'Cancel'
             });
+            if (isConfirmed) document.getElementById(`del-${docId}`).submit();
         }
     </script>
 }
