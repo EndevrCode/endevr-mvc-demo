@@ -62,57 +62,57 @@ namespace Hearthly.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> AddItem(int listId, Guid familyId, string name, string? quantity)
         {
-            if (!await IsUserInFamily(familyId)) return Forbid();
+            if (!await IsUserInFamily(familyId)) return Json(new { success = false, error = "Forbidden" });
 
             var list = await _context.ShoppingLists
                 .FirstOrDefaultAsync(l => l.Id == listId && l.FamilyId == familyId);
 
-            if (list == null) return NotFound();
+            if (list == null) return Json(new { success = false, error = "List not found" });
 
-            if (!string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(name))
+                return Json(new { success = false, error = "Name required" });
+
+            var maxSort = await _context.ShoppingItems
+                .Where(i => i.ShoppingListId == listId)
+                .MaxAsync(i => (int?)i.SortOrder) ?? 0;
+
+            var item = new ShoppingItem
             {
-                var maxSort = await _context.ShoppingItems
-                    .Where(i => i.ShoppingListId == listId)
-                    .MaxAsync(i => (int?)i.SortOrder) ?? 0;
+                ShoppingListId = listId,
+                Name           = name.Trim(),
+                Quantity       = string.IsNullOrWhiteSpace(quantity) ? null : quantity.Trim(),
+                SortOrder      = maxSort + 1,
+                AddedAt        = DateTime.UtcNow
+            };
+            _context.ShoppingItems.Add(item);
+            await _context.SaveChangesAsync();
 
-                var item = new ShoppingItem
-                {
-                    ShoppingListId = listId,
-                    Name = name.Trim(),
-                    Quantity = string.IsNullOrWhiteSpace(quantity) ? null : quantity.Trim(),
-                    SortOrder = maxSort + 1,
-                    AddedAt = DateTime.UtcNow
-                };
-                _context.ShoppingItems.Add(item);
-                await _context.SaveChangesAsync();
-            }
-
-            return RedirectToAction(nameof(Index), new { familyId });
+            return Json(new { success = true, id = item.Id, name = item.Name, quantity = item.Quantity });
         }
 
         // POST: /Shopping/ToggleItem
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleItem(int itemId, Guid familyId)
         {
-            if (!await IsUserInFamily(familyId)) return Forbid();
+            if (!await IsUserInFamily(familyId)) return Json(new { success = false });
 
             var item = await _context.ShoppingItems
                 .Include(i => i.ShoppingList)
                 .FirstOrDefaultAsync(i => i.Id == itemId && i.ShoppingList.FamilyId == familyId);
 
-            if (item == null) return NotFound();
+            if (item == null) return Json(new { success = false });
 
             item.IsChecked = !item.IsChecked;
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index), new { familyId });
+            return Json(new { success = true, isChecked = item.IsChecked, itemId });
         }
 
         // POST: /Shopping/DeleteItem
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteItem(int itemId, Guid familyId)
         {
-            if (!await IsUserInFamily(familyId)) return Forbid();
+            if (!await IsUserInFamily(familyId)) return Json(new { success = false });
 
             var item = await _context.ShoppingItems
                 .Include(i => i.ShoppingList)
@@ -124,7 +124,7 @@ namespace Hearthly.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            return RedirectToAction(nameof(Index), new { familyId });
+            return Json(new { success = true });
         }
 
         // POST: /Shopping/ClearChecked
