@@ -419,6 +419,51 @@ namespace Hearthly.Migrations
                     b.ToTable("FamilyInvites");
                 });
 
+            modelBuilder.Entity("Hearthly.Data.HealthProfile", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Allergies")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("BloodType")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("CurrentMedications")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DoctorName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("DoctorPhone")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("EmergencyNotes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MedicalAidName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("MedicalAidNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("VaccinationNotes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId");
+
+                    b.ToTable("HealthProfiles");
+                });
+
             modelBuilder.Entity("Hearthly.Data.FamilyCalendarEvent", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1152,6 +1197,17 @@ namespace Hearthly.Migrations
                         .IsRequired();
 
                     b.Navigation("CreatedBy");
+                });
+
+            modelBuilder.Entity("Hearthly.Data.HealthProfile", b =>
+                {
+                    b.HasOne("Hearthly.Data.ApplicationUser", "User")
+                        .WithOne()
+                        .HasForeignKey("Hearthly.Data.HealthProfile", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Hearthly.Data.FamilyCalendarEvent", b =>

@@ -136,6 +136,9 @@
         <a asp-action="Edit" class="btn btn-outline-primary rounded-pill px-4">
             <i class="fa-light fa-pen-to-square me-1"></i> Edit Profile
         </a>
+        <a asp-controller="Health" asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="fa-light fa-heart-pulse me-1"></i> Health Profile
+        </a>
         <form id="deleteAccountForm" asp-controller="Profile" asp-action="DeleteAccount"
               method="post" class="d-inline-block">
             @Html.AntiForgeryToken()
@@ -144,6 +147,13 @@
                 <i class="fa-light fa-trash me-1"></i> Delete Account
             </button>
         </form>
+    }
+    else
+    {
+        <a asp-controller="Health" asp-action="View" asp-route-userId="@user.Id"
+           class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="fa-light fa-heart-pulse me-1"></i> Health Profile
+        </a>
     }
 </div>
 
