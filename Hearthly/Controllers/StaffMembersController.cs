@@ -214,6 +214,73 @@ namespace Hearthly.Controllers
             return RedirectToAction(nameof(Index), new { familyId = staffMember.FamilyId });
         }
 
+        // GET: StaffMembers/PaymentHistory/{id}
+        public async Task<IActionResult> PaymentHistory(Guid id)
+        {
+            var staffMember = await _context.StaffMembers.FindAsync(id);
+            if (staffMember == null) return NotFound();
+
+            if (!await IsUserInFamily(staffMember.FamilyId))
+                return Forbid();
+
+            var payments = await _context.StaffPayments
+                .Where(p => p.StaffMemberId == id)
+                .OrderByDescending(p => p.PaymentDate)
+                .ToListAsync();
+
+            ViewData["StaffMember"] = staffMember;
+            return View(payments);
+        }
+
+        // GET: StaffMembers/LogPayment/{id}
+        public async Task<IActionResult> LogPayment(Guid id)
+        {
+            var staffMember = await _context.StaffMembers.FindAsync(id);
+            if (staffMember == null) return NotFound();
+
+            if (!await IsUserInFamily(staffMember.FamilyId))
+                return Forbid();
+
+            var payment = new StaffPayment
+            {
+                StaffMemberId = id,
+                PaymentDate = DateTime.Today
+            };
+
+            ViewData["StaffMember"] = staffMember;
+            return View(payment);
+        }
+
+        // POST: StaffMembers/LogPayment
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LogPayment(StaffPayment payment)
+        {
+            var staffMember = await _context.StaffMembers.FindAsync(payment.StaffMemberId);
+            if (staffMember == null) return NotFound();
+
+            if (!await IsUserInFamily(staffMember.FamilyId))
+                return Forbid();
+
+            ModelState.Remove(nameof(StaffPayment.StaffMember));
+
+            if (!ModelState.IsValid)
+            {
+                ViewData["StaffMember"] = staffMember;
+                return View(payment);
+            }
+
+            payment.Id = Guid.NewGuid();
+            payment.RecordedByUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            payment.CreatedAt = DateTime.UtcNow;
+
+            _context.StaffPayments.Add(payment);
+            await _context.SaveChangesAsync();
+
+            TempData["StatusMessage"] = "Payment logged successfully.";
+            return RedirectToAction(nameof(PaymentHistory), new { id = payment.StaffMemberId });
+        }
+
         private bool StaffMemberExists(Guid id)
         {
             return _context.StaffMembers.Any(e => e.Id == id);

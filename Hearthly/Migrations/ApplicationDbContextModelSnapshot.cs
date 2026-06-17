@@ -843,6 +843,51 @@ namespace Hearthly.Migrations
                     b.ToTable("StaffMembers");
                 });
 
+            modelBuilder.Entity("Hearthly.Data.StaffPayment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("AmountPaid")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime?>("PeriodEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("PeriodStart")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RecordedByUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("StaffMemberId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RecordedByUserId");
+
+                    b.HasIndex("StaffMemberId");
+
+                    b.ToTable("StaffPayments");
+                });
+
             modelBuilder.Entity("Hearthly.Data.UserAppSettings", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1424,6 +1469,22 @@ namespace Hearthly.Migrations
                         .IsRequired();
 
                     b.Navigation("Family");
+                });
+
+            modelBuilder.Entity("Hearthly.Data.StaffPayment", b =>
+                {
+                    b.HasOne("Hearthly.Data.StaffMember", "StaffMember")
+                        .WithMany()
+                        .HasForeignKey("StaffMemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Hearthly.Data.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("RecordedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("StaffMember");
                 });
 
             modelBuilder.Entity("Hearthly.Data.UserAppSettings", b =>

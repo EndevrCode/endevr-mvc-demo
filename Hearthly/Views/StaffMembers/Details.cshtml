@@ -133,6 +133,12 @@
 
 <!-- Action buttons -->
 <div class="d-flex justify-content-center flex-wrap gap-2 mb-5">
+    <a asp-action="LogPayment" asp-route-id="@Model.Id" class="btn btn-success rounded-pill px-4">
+        <i class="fa-light fa-money-bill-wave me-1"></i> Log Payment
+    </a>
+    <a asp-action="PaymentHistory" asp-route-id="@Model.Id" class="btn btn-outline-info rounded-pill px-4">
+        <i class="fa-light fa-clock-rotate-left me-1"></i> Payment History
+    </a>
     <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary rounded-pill px-4">
         <i class="fa-light fa-pen-to-square me-1"></i> Edit
     </a>
