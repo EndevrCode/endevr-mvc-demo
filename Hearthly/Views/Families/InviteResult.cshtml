@@ -19,16 +19,20 @@
 </div>
 
 <div class="glass-card p-3 mb-3">
-    <dl class="row mb-0">
-        <dt class="col-sm-3">Invite Email</dt>
-        <dd class="col-sm-9"><strong>@ViewData["InviteEmail"]</strong></dd>
-
-        <dt class="col-sm-3">Token</dt>
-        <dd class="col-sm-9 text-muted small">@token</dd>
-
-        <dt class="col-sm-3">Expires</dt>
-        <dd class="col-sm-9">@expires.ToLocalTime().ToString("dd MMM yyyy HH:mm")</dd>
-    </dl>
+    <div class="row gy-2">
+        <div class="col-12">
+            <div class="text-muted small">Invite Email</div>
+            <div class="fw-semibold">@ViewData["InviteEmail"]</div>
+        </div>
+        <div class="col-md-6">
+            <div class="text-muted small">Expires</div>
+            <div>@expires.ToLocalTime().ToString("dd MMM yyyy HH:mm")</div>
+        </div>
+        <div class="col-md-6">
+            <div class="text-muted small">Token</div>
+            <div class="font-monospace small text-muted">@token</div>
+        </div>
+    </div>
 </div>
 
 <div class="mb-4">
