@@ -342,7 +342,7 @@ public class VaultController : BaseController
             !await _context.VaultBiometricCredentials
                 .AnyAsync(c => c.CredentialId == args.CredentialId, ct);
 
-        RegisteredPublicKeyCredential credential;
+        Fido2.CredentialMakeResult credential;
         try
         {
             credential = await _fido2.MakeNewCredentialAsync(attestation, origOptions, isUnique);
