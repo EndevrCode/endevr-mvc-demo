@@ -24,6 +24,10 @@ namespace Hearthly.Data
         // Pending chores across all families
         public int PendingChoresCount { get; set; }
 
+        // Staff payroll estimate for this month
+        public decimal EstimatedMonthlyPayroll { get; set; }
+        public int StaffCount { get; set; }
+
         // Pet care reminders
         public List<PetCareReminder> PetCareReminders { get; set; } = new();
 

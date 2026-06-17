@@ -47,6 +47,13 @@
             <small class="text-muted">chore@(Model.PendingChoresCount == 1 ? "" : "s") to do</small>
         </a>
     }
+    @if (Model.StaffCount > 0)
+    {
+        <a asp-controller="StaffMembers" asp-action="Index" class="glass-card px-3 py-2 text-center text-decoration-none" style="min-width:140px;">
+            <div class="fs-4 fw-bold">R @Model.EstimatedMonthlyPayroll.ToString("N0")</div>
+            <small class="text-muted">payroll est. (@Model.StaffCount staff)</small>
+        </a>
+    }
 </div>
 
 @* ── Pending invites ───────────────────────────────── *@

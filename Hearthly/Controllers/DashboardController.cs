@@ -216,6 +216,27 @@ namespace Hearthly.Controllers
                 .Where(c => myFamilyIds.Contains(c.FamilyId) && !c.IsDone)
                 .CountAsync();
 
+            // 8) Staff payroll estimate for this month
+            var allStaff = await _context.StaffMembers
+                .Where(s => myFamilyIds.Contains(s.FamilyId))
+                .ToListAsync();
+
+            var today3 = DateTime.Today;
+            var daysInMonth3 = DateTime.DaysInMonth(today3.Year, today3.Month);
+            decimal totalPayroll = 0m;
+            foreach (var s in allStaff)
+            {
+                if (s.DailyWageZAR == null) continue;
+                var workDays = (s.WorkDays ?? "")
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(d => d.Trim())
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+                if (!workDays.Any()) continue;
+                var daysThisMonth = Enumerable.Range(1, daysInMonth3)
+                    .Count(d => workDays.Contains(new DateTime(today3.Year, today3.Month, d).DayOfWeek.ToString()));
+                totalPayroll += s.DailyWageZAR.Value * daysThisMonth;
+            }
+
             // 7) Pet care reminders (overdue care tasks for living pets)
             var petCareReminders = new List<PetCareReminder>();
             var reminderThresholds = new (string Label, int Days, Func<Pet, DateTime?> GetDate)[]
@@ -284,6 +305,8 @@ namespace Hearthly.Controllers
                 UpcomingBirthdays = upcomingBirthdays,
                 PendingChoresCount = pendingChoresCount,
                 PetCareReminders = petCareReminders,
+                EstimatedMonthlyPayroll = totalPayroll,
+                StaffCount = allStaff.Count,
                 EventsJson = JsonSerializer.Serialize(events),
                 FamiliesJson = JsonSerializer.Serialize(familiesList)
             };
