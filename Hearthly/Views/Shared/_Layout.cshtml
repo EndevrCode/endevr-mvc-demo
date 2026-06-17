@@ -124,7 +124,7 @@
             }
             @if (SignInManager.IsSignedIn(User)
                         && string.IsNullOrEmpty(area)
-                        && !new[] { "Profile", "Dashboard", "Families" }.Contains(ctrl))
+                        && !new[] { "Profile", "Dashboard", "Families", "Chores", "RuleOfThree" }.Contains(ctrl))
             {
                 @await Component.InvokeAsync("FamilySelector", new { selectedFamilyId = (Guid?)ViewData["FamilyId"] })
             }
