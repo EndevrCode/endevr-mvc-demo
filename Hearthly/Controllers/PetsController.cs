@@ -190,9 +190,9 @@ namespace Hearthly.Controllers
 
             if (!ModelState.IsValid)
             {
-                ViewBag.FamilyList = await _context.Families
-                    .Where(f => allowed.Contains(f.Id))
-                    .ToListAsync();
+                ViewBag.FamilyOptions = new SelectList(
+                    await _context.Families.Where(f => allowed.Contains(f.Id)).ToListAsync(),
+                    "Id", "Name", model.FamilyId);
                 return View(model);
             }
 
