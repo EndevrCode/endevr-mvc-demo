@@ -43,6 +43,7 @@ namespace Hearthly.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Submit(RuleOfThreeEntry model, Guid? familyId)
         {
             if (!ModelState.IsValid)
@@ -229,6 +230,7 @@ namespace Hearthly.Controllers
 
         [HttpPost("RuleOfThree/MarkComplete")]
         [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> MarkComplete(Guid id, Guid? familyId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
