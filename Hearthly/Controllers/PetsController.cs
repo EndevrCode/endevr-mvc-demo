@@ -79,7 +79,7 @@ namespace Hearthly.Controllers
                 .Where(f => allowed.Contains(f.Id))
                 .ToListAsync();
 
-            return View(new Pet()); // Ensure Model is not null
+            return View(new PetCreateViewModel());
         }
 
         [HttpPost]
@@ -103,9 +103,27 @@ namespace Hearthly.Controllers
                 return View(model);
             }
 
-            var pet = model.Pet;
-            pet.Id = Guid.NewGuid();
-            pet.FamilyId = model.FamilyId;
+            var pet = new Pet
+            {
+                Id = Guid.NewGuid(),
+                FamilyId = model.FamilyId,
+                Name = model.Name,
+                Species = model.Species,
+                Breed = model.Breed,
+                BirthDate = model.BirthDate,
+                LastWeightKg = model.LastWeightKg,
+                LastWeighedDate = model.LastWeighedDate,
+                LastDewormingDate = model.LastDewormingDate,
+                LastTickFleaDate = model.LastTickFleaDate,
+                LastGroomingDate = model.LastGroomingDate,
+                LastCheckupDate = model.LastCheckupDate,
+                HasInsurance = model.HasInsurance,
+                InsuranceNumber = model.InsuranceNumber,
+                IsMicrochipped = model.IsMicrochipped,
+                MicrochipNumber = model.MicrochipNumber,
+                IsDeceased = model.IsDeceased,
+                DateOfDeath = model.DateOfDeath,
+            };
 
             if (model.PhotoFile != null && model.PhotoFile.Length > 0)
             {
