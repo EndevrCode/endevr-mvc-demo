@@ -783,7 +783,7 @@ function renderMemberMarker(m) {
     });
 
     const speed = m.speed;
-    const movingText = speed > 4 ? '🚗 Driving' : speed > 1 ? '🚶 Walking' : '';
+    const movingText = speed > 4 ? '<i class="fa-light fa-car" style="font-size:11px;"></i> Driving' : speed > 1 ? '<i class="fa-light fa-person-walking" style="font-size:11px;"></i> Walking' : '';
     const popupHtml = `
         <div class="map-member-popup">
             <div class="popup-name">${escHtml(m.name)}${m.isMe ? ' <span style="font-size:10px;color:#6366f1;">(You)</span>' : ''}</div>
@@ -791,7 +791,7 @@ function renderMemberMarker(m) {
             ${m.address && !m.placeName ? `<div class="popup-address">${escHtml(m.address)}</div>` : ''}
             ${m.note ? `<div class="popup-note">"${escHtml(m.note)}"</div>` : ''}
             ${movingText ? `<div class="popup-meta">${movingText}</div>` : ''}
-            <div class="popup-meta">${m.battery != null ? `🔋 ${m.battery}% ${m.charging ? '⚡' : ''}  ·  ` : ''}Updated just now</div>
+            <div class="popup-meta">${m.battery != null ? `<i class="fa-solid fa-battery-half" style="font-size:10px;"></i> ${m.battery}%${m.charging ? ' <i class="fa-solid fa-bolt" style="font-size:9px;color:#818cf8;"></i>' : ''}  ·  ` : ''}Updated just now</div>
         </div>`;
 
     const infoWindow = new google.maps.InfoWindow({ content: popupHtml, disableAutoPan: false });

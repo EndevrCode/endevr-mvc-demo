@@ -134,6 +134,17 @@
                 <p>Securely store passwords, banking &amp; documents.</p>
             </div>
         </a>
+
+        <!-- Family Tracker -->
+        <a href="@((isInFamily) ? Url.Action("Index", "Location") : "#")"
+           class="card glass-card @(isInFamily ? "" : "disabled-rule-card")"
+           onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
+            <div class="card-content">
+                <i class="fa-light fa-map-location-dot card-icon"></i>
+                <h3 class="theme-heading">Family Tracker</h3>
+                <p>See where your family is in real time.</p>
+            </div>
+        </a>
     </div>
 </section>
 
