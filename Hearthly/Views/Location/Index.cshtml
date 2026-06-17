@@ -798,6 +798,7 @@ function renderMemberMarker(m) {
     marker.addListener('click', () => {
         closeAllInfoWindows();
         infoWindow.open(map, marker);
+        openInfoWindows.push(infoWindow);
         selectMemberCard(m.userId);
     });
 
