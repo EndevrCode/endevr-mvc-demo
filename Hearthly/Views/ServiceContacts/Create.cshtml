@@ -25,7 +25,7 @@
 </div>
 
 <div class="glass-card p-4 mx-auto" style="max-width: 600px;">
-    <form id="serviceForm" asp-action="Create">
+    <form id="serviceForm" asp-action="Create" method="post">
         @Html.AntiForgeryToken()
         <div asp-validation-summary="All" class="text-danger mb-3"></div>
         <input asp-for="FamilyId" type="hidden" />

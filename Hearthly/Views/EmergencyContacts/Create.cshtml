@@ -10,6 +10,7 @@
 
 <div class="glass-card p-4" style="max-width:560px;">
     <form id="emergencyForm" asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
         <div asp-validation-summary="All" class="alert alert-danger"></div>
 
         <input asp-for="FamilyId" type="hidden" />
