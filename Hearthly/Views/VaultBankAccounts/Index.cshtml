@@ -6,7 +6,7 @@
 <div class="mb-4 d-flex justify-content-between align-items-center">
     <h2 class="mb-0"><i class="fa-light fa-building-columns me-2"></i>Bank Accounts</h2>
     <a class="btn btn-primary btn-sm" asp-action="Create">
-        <i class="bi bi-plus-lg me-1"></i> Add Account
+        <i class="fa-light fa-plus me-1"></i> Add Account
     </a>
 </div>
 
@@ -24,7 +24,7 @@
     <div class="glass-card text-center py-4">
         <p class="text-muted mb-2">No bank accounts added yet.</p>
         <a asp-action="Create" class="btn btn-primary btn-sm">
-            <i class="bi bi-plus-lg me-1"></i> Add Your First Account
+            <i class="fa-light fa-plus me-1"></i> Add Your First Account
         </a>
     </div>
 }
@@ -46,7 +46,7 @@ else
                     <div class="d-flex gap-2 mt-3">
                         <button class="btn btn-sm btn-outline-primary flex-grow-1"
                                 onclick="promptBankAccountPin('@account.AccountHolder', '@account.AccountNumber')">
-                            <i class="bi bi-eye me-1"></i> View
+                            <i class="fa-light fa-eye me-1"></i> View
                         </button>
 
                         @if (string.IsNullOrEmpty(account.CardFrontPath) && string.IsNullOrEmpty(account.CardBackPath))
@@ -61,7 +61,7 @@ else
                             <button type="button"
                                     class="btn btn-sm btn-outline-success flex-grow-1"
                                     onclick="promptCardPin('@account.CardFrontPath', '@account.CardBackPath', @account.Id)">
-                                <i class="bi bi-check-lg me-1"></i> Card Linked
+                                <i class="fa-light fa-check me-1"></i> Card Linked
                             </button>
                         }
 
@@ -69,7 +69,7 @@ else
                             @Html.AntiForgeryToken()
                             <button type="button" class="btn btn-sm btn-outline-danger"
                                     onclick="confirmDelete('@account.Id')">
-                                <i class="bi bi-trash3"></i>
+                                <i class="fa-light fa-trash"></i>
                             </button>
                         </form>
                     </div>
@@ -95,7 +95,7 @@ else
                     <strong>Account Number:</strong>
                     <span id="modalAccount">••••••••</span>
                     <button id="toggleAccountBtn" type="button" class="btn btn-sm btn-outline-secondary ms-2">
-                        <i class="bi bi-eye"></i>
+                        <i class="fa-light fa-eye"></i>
                     </button>
                 </p>
             </div>
@@ -136,7 +136,7 @@ else
             <div class="modal-footer justify-content-center">
                 <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
                 <button id="removeCardBtn" class="btn btn-outline-danger" onclick="confirmUnlink()">
-                    <i class="bi bi-trash3 me-1"></i> Remove Linked Card
+                    <i class="fa-light fa-trash me-1"></i> Remove Linked Card
                 </button>
             </div>
         </div>
@@ -163,7 +163,7 @@ else
 
             document.getElementById('vaultPinInput').value = '';
             document.getElementById('modalAccount').textContent = '••••••••';
-            document.getElementById('toggleAccountBtn').innerHTML = '<i class="bi bi-eye"></i>';
+            document.getElementById('toggleAccountBtn').innerHTML = '<i class="fa-light fa-eye"></i>';
             new bootstrap.Modal(document.getElementById('vaultPinModal')).show();
         }
 
@@ -268,7 +268,7 @@ else
                 document.getElementById('modalAccount').textContent =
                     window.accountShown ? window.accountNumberToReveal : '••••••••';
                 document.getElementById('toggleAccountBtn').innerHTML =
-                    window.accountShown ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+                    window.accountShown ? '<i class="fa-light fa-eye-slash"></i>' : '<i class="fa-light fa-eye"></i>';
             });
 
             document.getElementById('vaultPinInput')?.addEventListener('keydown', e => {

@@ -43,8 +43,7 @@ public class VaultController : BaseController
 
         if (TempData["Pin"] is string pin)
         {
-            ViewBag.Pin = pin;
-            TempData.Keep("Pin");
+            TempData.Remove("Pin"); // PIN consumed; never expose it in ViewBag
         }
 
         var files = await _context.VaultFiles
@@ -212,6 +211,63 @@ public class VaultController : BaseController
 
         TempData["UploadSuccess"] = "File uploaded securely.";
         return RedirectToAction("Index");
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Download(Guid id, string pin)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Challenge();
+
+        if (HttpContext.Session.GetString("VaultUnlocked") != "true")
+            return RedirectToAction("EnterPin");
+
+        var file = await _context.VaultFiles
+            .FirstOrDefaultAsync(f => f.Id == id && f.UserId == user.Id);
+        if (file == null) return NotFound();
+
+        using var pbkdf2 = new Rfc2898DeriveBytes(pin, user.VaultKeySalt!, 100_000, HashAlgorithmName.SHA256);
+        var derivedKey = pbkdf2.GetBytes(32);
+
+        byte[] vaultKey;
+        try { vaultKey = EncryptionHelper.DecryptData(user.EncryptedVaultKey!, derivedKey); }
+        catch
+        {
+            return Json(new { success = false, error = "Incorrect PIN." });
+        }
+
+        byte[] plaintext;
+        try { plaintext = EncryptionHelper.DecryptData(file.EncryptedData, vaultKey); }
+        catch
+        {
+            return Json(new { success = false, error = "Decryption failed." });
+        }
+
+        return File(plaintext, file.ContentType, file.OriginalFileName);
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteFile(Guid id, string pin)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null) return Json(new { success = false });
+
+        if (HttpContext.Session.GetString("VaultUnlocked") != "true")
+            return Json(new { success = false, error = "Vault locked." });
+
+        var file = await _context.VaultFiles
+            .FirstOrDefaultAsync(f => f.Id == id && f.UserId == user.Id);
+        if (file == null) return Json(new { success = false, error = "Not found." });
+
+        var hasher = new PasswordHasher<ApplicationUser>();
+        var result  = hasher.VerifyHashedPassword(user, user.VaultPinHash ?? "", pin);
+        if (result != PasswordVerificationResult.Success)
+            return Json(new { success = false, error = "Incorrect PIN." });
+
+        _context.VaultFiles.Remove(file);
+        await _context.SaveChangesAsync();
+
+        return Json(new { success = true });
     }
 
     [HttpPost]

@@ -13,7 +13,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="mb-0"><i class="fa-light fa-lock-keyhole me-2"></i>My Saved Passwords</h4>
             <a asp-action="Create" class="btn btn-primary rounded-pill px-3">
-                <i class="bi bi-plus-lg me-1"></i> Add New
+                <i class="fa-light fa-plus me-1"></i> Add New
             </a>
         </div>
 
@@ -42,25 +42,25 @@
                                         class="btn btn-outline-light border"
                                         title="View"
                                         onclick="promptVaultPin('@item.Username', '@item.Password')">
-                                    <i class="bi bi-eye"></i>
+                                    <i class="fa-light fa-eye"></i>
                                 </button>
                                 <button type="button"
                                         class="btn btn-outline-primary border-start-0 border-end-0"
                                         title="Edit"
                                         onclick="promptEditPin('@item.Id')">
-                                    <i class="bi bi-pencil"></i>
+                                    <i class="fa-light fa-pen"></i>
                                 </button>
                                 <button type="button"
                                         class="btn btn-outline-danger border-end-0"
                                         title="Delete"
                                         onclick="promptDeletePin('@item.Id')">
-                                    <i class="bi bi-trash"></i>
+                                    <i class="fa-light fa-trash"></i>
                                 </button>
                                 @if (!string.IsNullOrEmpty(item.FilePath))
                                 {
                                     <a class="btn btn-outline-success" title="Download"
                                        href="@Url.Action("Download", "VaultPasswords", new { id = item.Id })">
-                                        <i class="bi bi-download"></i>
+                                        <i class="fa-light fa-cloud-arrow-down"></i>
                                     </a>
                                 }
                             </div>
@@ -86,7 +86,7 @@
                     <strong>Password:</strong>
                     <span id="modalPassword">••••••••</span>
                     <button id="togglePasswordBtn" type="button" class="btn btn-sm btn-outline-secondary ms-2">
-                        <i class="bi bi-eye"></i>
+                        <i class="fa-light fa-eye"></i>
                     </button>
                 </p>
             </div>
@@ -127,7 +127,7 @@
         function openPinModal() {
             document.getElementById('vaultPinInput').value = '';
             document.getElementById('modalPassword').textContent = '••••••••';
-            document.getElementById('togglePasswordBtn').innerHTML = '<i class="bi bi-eye"></i>';
+            document.getElementById('togglePasswordBtn').innerHTML = '<i class="fa-light fa-eye"></i>';
             window.passwordShown = false;
             new bootstrap.Modal(document.getElementById('vaultPinModal')).show();
         }
@@ -207,7 +207,7 @@
                 document.getElementById('modalPassword').textContent =
                     window.passwordShown ? window.passwordToReveal : '••••••••';
                 document.getElementById('togglePasswordBtn').innerHTML =
-                    window.passwordShown ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+                    window.passwordShown ? '<i class="fa-light fa-eye-slash"></i>' : '<i class="fa-light fa-eye"></i>';
             });
 
             document.getElementById('vaultPinInput')?.addEventListener('keydown', e => {
