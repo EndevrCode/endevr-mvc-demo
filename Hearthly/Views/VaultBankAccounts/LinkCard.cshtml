@@ -9,11 +9,18 @@
 </div>
 
 <div class="glass-card p-4 mx-auto" style="max-width: 500px;">
-    <div class="mb-4">
-        <div class="row g-2 text-muted small">
-            <div class="col-6"><strong class="text-body">Account Holder</strong><br />@Model.AccountHolder</div>
-            <div class="col-6"><strong class="text-body">Bank</strong><br />@Model.BankName</div>
-            <div class="col-6"><strong class="text-body">Account Number</strong><br />••• ••• @Model.LastFourDigits</div>
+    <div class="row gy-2 mb-4">
+        <div class="col-6">
+            <div class="text-muted small">Account Holder</div>
+            <div>@Model.AccountHolder</div>
+        </div>
+        <div class="col-6">
+            <div class="text-muted small">Bank</div>
+            <div>@Model.BankName</div>
+        </div>
+        <div class="col-6">
+            <div class="text-muted small">Account Number</div>
+            <div class="font-monospace">••• ••• @Model.LastFourDigits</div>
         </div>
     </div>
 
