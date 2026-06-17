@@ -186,6 +186,10 @@ namespace Hearthly.Controllers
                 await photo.CopyToAsync(stream);
                 staffMember.PhotoPath = $"/uploads/staff/{fileName}";
             }
+            else
+            {
+                staffMember.PhotoPath = existing.PhotoPath;
+            }
 
             if (!ModelState.IsValid)
                 return View(staffMember);
