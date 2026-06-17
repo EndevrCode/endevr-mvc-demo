@@ -25,24 +25,24 @@
     // helper lambdas for icon name & color
     Func<Hearthly.Data.ServiceType, string> GetIcon = st => st switch
     {
-        Hearthly.Data.ServiceType.Electrician => "lightning-charge-fill",
-        Hearthly.Data.ServiceType.Plumber => "moisture",
+        Hearthly.Data.ServiceType.Electrician => "bolt",
+        Hearthly.Data.ServiceType.Plumber => "droplet",
         Hearthly.Data.ServiceType.Lawyer => "briefcase",
-        Hearthly.Data.ServiceType.Doctor => "lungs",
+        Hearthly.Data.ServiceType.Doctor => "stethoscope",
         Hearthly.Data.ServiceType.Handyman => "wrench",
         Hearthly.Data.ServiceType.MedicalAid => "hospital",
-        Hearthly.Data.ServiceType.Cellphone => "phone",
-        Hearthly.Data.ServiceType.Insurance => "shield-check",
-        Hearthly.Data.ServiceType.Cleaner => "universal-access",
-        Hearthly.Data.ServiceType.Dentist => "emoji-smile",
-        Hearthly.Data.ServiceType.Therapist => "person-hearts",
-        Hearthly.Data.ServiceType.Builder => "building",
-        Hearthly.Data.ServiceType.ISP => "router",
-        Hearthly.Data.ServiceType.Towing => "truck-flatbed",
+        Hearthly.Data.ServiceType.Cellphone => "mobile",
+        Hearthly.Data.ServiceType.Insurance => "shield",
+        Hearthly.Data.ServiceType.Cleaner => "broom",
+        Hearthly.Data.ServiceType.Dentist => "tooth",
+        Hearthly.Data.ServiceType.Therapist => "brain",
+        Hearthly.Data.ServiceType.Builder => "helmet-safety",
+        Hearthly.Data.ServiceType.ISP => "wifi",
+        Hearthly.Data.ServiceType.Towing => "truck",
         Hearthly.Data.ServiceType.Mechanic => "gear",
-        Hearthly.Data.ServiceType.Painter => "paint-bucket",
-        Hearthly.Data.ServiceType.Solar => "sunrise",
-        _ => "tools"
+        Hearthly.Data.ServiceType.Painter => "paint-roller",
+        Hearthly.Data.ServiceType.Solar => "sun",
+        _ => "screwdriver-wrench"
     };
 
     Func<Hearthly.Data.ServiceType, string> GetColor = st => st switch
@@ -70,7 +70,7 @@
 <div class="mb-4 d-flex justify-content-between align-items-center">
     <h2 class="mb-0"><i class="fa-light fa-address-book me-2"></i>Service Contacts</h2>
     <a asp-action="Create" asp-route-familyId="@familyId" class="btn btn-primary btn-sm">
-        <i class="bi bi-patch-plus me-1"></i> Add Contact
+        <i class="fa-light fa-circle-plus me-1"></i> Add Contact
     </a>
 </div>
 
@@ -80,7 +80,7 @@
         <i class="fa-light fa-phone-slash fa-3x text-muted mb-3 d-block"></i>
         <p class="text-muted mb-2">No service contacts added yet.</p>
         <a asp-action="Create" asp-route-familyId="@familyId" class="btn btn-primary btn-sm">
-            <i class="bi bi-patch-plus me-1"></i> Add First Contact
+            <i class="fa-light fa-circle-plus me-1"></i> Add First Contact
         </a>
     </div>
 }
@@ -93,7 +93,7 @@
                 <div class="row g-0">
                     <!-- Icon column -->
                     <div class="col-3 d-flex justify-content-center justify-content-md-start align-items-center pe-0 py-4">
-                        <i class="bi bi-@GetIcon(contact.ServiceType) @GetColor(contact.ServiceType) service-icon"></i>
+                        <i class="fa-light fa-@GetIcon(contact.ServiceType) @GetColor(contact.ServiceType) service-icon"></i>
                     </div>
                     <!-- Details column -->
                     <div class="col">
@@ -114,7 +114,7 @@
                         <div class="card-footer bg-transparent border-0 text-center">
                             <a href="tel:@contact.ContactNumber"
                                class="btn btn-outline-primary">
-                                <i class="bi bi-telephone-outbound"></i> Call
+                                <i class="fa-light fa-phone-arrow-up-right"></i> Call
                             </a>
                         </div>
                     </div>
