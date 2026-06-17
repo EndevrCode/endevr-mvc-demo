@@ -1,52 +1,52 @@
-﻿using System.Security.Cryptography;
-using System.Text;
+using System.Security.Cryptography;
 
 public static class EncryptionHelper
 {
-    // Used for generating and encrypting per-user keys
-    public static byte[] GenerateKey()
-    {
-        using var aes = Aes.Create();
-        aes.GenerateKey();
-        return aes.Key;
-    }
+    private const int NonceSize = 12;
+    private const int TagSize   = 16;
 
     public static byte[] EncryptData(byte[] data, byte[] key)
     {
-        using var aes = Aes.Create();
-        aes.Key = key;
-        aes.GenerateIV();
+        var nonce      = new byte[NonceSize];
+        var ciphertext = new byte[data.Length];
+        var tag        = new byte[TagSize];
 
-        using var encryptor = aes.CreateEncryptor();
-        byte[] encrypted = encryptor.TransformFinalBlock(data, 0, data.Length);
+        RandomNumberGenerator.Fill(nonce);
 
-        byte[] result = new byte[aes.IV.Length + encrypted.Length];
-        Buffer.BlockCopy(aes.IV, 0, result, 0, aes.IV.Length);
-        Buffer.BlockCopy(encrypted, 0, result, aes.IV.Length, encrypted.Length);
+        using var aes = new AesGcm(key, TagSize);
+        aes.Encrypt(nonce, data, ciphertext, tag);
+
+        // Layout: [nonce(12)] [tag(16)] [ciphertext]
+        var result = new byte[NonceSize + TagSize + ciphertext.Length];
+        nonce.CopyTo(result.AsSpan(0));
+        tag.CopyTo(result.AsSpan(NonceSize));
+        ciphertext.CopyTo(result.AsSpan(NonceSize + TagSize));
         return result;
     }
 
     public static byte[] DecryptData(byte[] encryptedData, byte[] key)
     {
-        using var aes = Aes.Create();
-        aes.Key = key;
+        var nonce      = encryptedData[..NonceSize];
+        var tag        = encryptedData[NonceSize..(NonceSize + TagSize)];
+        var ciphertext = encryptedData[(NonceSize + TagSize)..];
+        var plaintext  = new byte[ciphertext.Length];
 
-        byte[] iv = new byte[aes.BlockSize / 8];
-        byte[] cipherText = new byte[encryptedData.Length - iv.Length];
+        using var aes = new AesGcm(key, TagSize);
+        aes.Decrypt(nonce, ciphertext, tag, plaintext);
+        return plaintext;
+    }
 
-        Buffer.BlockCopy(encryptedData, 0, iv, 0, iv.Length);
-        Buffer.BlockCopy(encryptedData, iv.Length, cipherText, 0, cipherText.Length);
-
-        aes.IV = iv;
-        using var decryptor = aes.CreateDecryptor();
-        return decryptor.TransformFinalBlock(cipherText, 0, cipherText.Length);
+    public static byte[] GenerateKey()
+    {
+        var key = new byte[32];
+        RandomNumberGenerator.Fill(key);
+        return key;
     }
 
     public static byte[] GenerateRandomKey(int size)
     {
-        using var rng = RandomNumberGenerator.Create();
         var key = new byte[size];
-        rng.GetBytes(key);
+        RandomNumberGenerator.Fill(key);
         return key;
     }
 }

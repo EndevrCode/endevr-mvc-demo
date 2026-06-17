@@ -42,6 +42,15 @@ builder.Services.AddDataProtection()
     .SetApplicationName("HearthlyVault")
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(Directory.GetCurrentDirectory(), "Keys")));
 
+builder.Services.AddFido2(options =>
+{
+    options.ServerDomain = builder.Configuration["Fido2:ServerDomain"] ?? "localhost";
+    options.ServerName   = builder.Configuration["Fido2:ServerName"]   ?? "Hearthly";
+    options.Origins      = new HashSet<string>(
+        builder.Configuration.GetSection("Fido2:Origins").Get<string[]>() ?? ["https://localhost:7000"]);
+    options.TimestampDriftTolerance = 300_000;
+});
+
 builder.Services.AddSession(options =>
 {
     options.IdleTimeout = TimeSpan.FromMinutes(30);

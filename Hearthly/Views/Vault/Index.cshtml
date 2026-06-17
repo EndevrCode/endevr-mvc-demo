@@ -1,5 +1,7 @@
 @{
     ViewData["Title"] = "Vault";
+    var biometricCount = (int)(ViewBag.BiometricCount ?? 0);
+    var hasSessionKey  = (bool)(ViewBag.HasSessionVaultKey ?? false);
 }
 
 <div class="mb-4 d-flex justify-content-between align-items-center">
@@ -67,39 +69,32 @@
 <div class="glass-card p-4 mb-4">
     <h5 class="mb-3"><i class="fa-light fa-folder-open me-2"></i>Upload a Secure File</h5>
 
-    <div class="mb-3">
-        <input type="file" id="vaultFileInput" class="form-control" />
-    </div>
-    <button type="button" class="btn btn-success rounded-pill px-4" onclick="promptUpload()">
-        <i class="fa-light fa-shield-check me-1"></i> Encrypt &amp; Upload
-    </button>
-
-    @* Hidden upload form — PIN injected by JS just before submit *@
-    <form id="uploadForm" asp-action="Upload" method="post" enctype="multipart/form-data" class="d-none">
+    <form id="uploadForm" asp-action="Upload" method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
-        <input type="file" name="file" id="uploadFormFile" />
-        <input type="hidden" name="pin" id="uploadPin" />
+        <div class="mb-3">
+            <input type="file" name="file" id="vaultFileInput" class="form-control" />
+        </div>
+        <button type="button" class="btn btn-success rounded-pill px-4" onclick="submitUpload()">
+            <i class="fa-light fa-shield-check me-1"></i> Encrypt &amp; Upload
+        </button>
     </form>
 </div>
 
-@* ── Hidden download form (reused per file) *@
+@* ── Hidden download / delete forms ─────────────────── *@
 <form id="downloadForm" asp-action="Download" method="post" class="d-none">
     @Html.AntiForgeryToken()
-    <input type="hidden" name="id"  id="downloadId" />
-    <input type="hidden" name="pin" id="downloadPin" />
+    <input type="hidden" name="id" id="downloadId" />
 </form>
 
-@* ── Hidden delete form *@
 <form id="deleteForm" asp-action="DeleteFile" method="post" class="d-none">
     @Html.AntiForgeryToken()
-    <input type="hidden" name="id"  id="deleteId" />
-    <input type="hidden" name="pin" id="deletePin" />
+    <input type="hidden" name="id" id="deleteId" />
 </form>
 
 @* ── Uploaded files list ─────────────────────────────── *@
 @if (ViewData["UserFiles"] is List<Hearthly.Data.Vault.VaultFile> userFiles && userFiles.Any())
 {
-    <div class="glass-card p-4">
+    <div class="glass-card p-4 mb-4">
         <h5 class="mb-3"><i class="fa-light fa-folder-closed me-2"></i>Your Uploaded Files</h5>
         <div class="table-responsive">
             <table class="table table-sm align-middle">
@@ -119,12 +114,12 @@
                             <td class="text-end">
                                 <button type="button"
                                         class="btn btn-sm btn-outline-primary rounded-pill me-1"
-                                        onclick="promptDownload('@file.Id')">
+                                        onclick="submitDownload('@file.Id')">
                                     <i class="fa-light fa-cloud-arrow-down"></i>
                                 </button>
                                 <button type="button"
                                         class="btn btn-sm btn-outline-danger rounded-pill"
-                                        onclick="promptDelete('@file.Id', '@Html.Encode(file.OriginalFileName)')">
+                                        onclick="confirmDelete('@file.Id', '@Html.Encode(file.OriginalFileName)')">
                                     <i class="fa-light fa-trash"></i>
                                 </button>
                             </td>
@@ -137,8 +132,56 @@
 }
 else
 {
-    <p class="text-muted small">No files uploaded yet.</p>
+    <div class="glass-card p-4 mb-4 text-center text-muted">
+        <i class="fa-light fa-folder-open fa-2x mb-2 d-block"></i>
+        No encrypted files uploaded yet.
+    </div>
 }
+
+@* ── Biometric authentication management ─────────────── *@
+<div class="glass-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0"><i class="fa-light fa-fingerprint me-2"></i>Biometric Authentication</h5>
+        @if (biometricCount > 0)
+        {
+            <span class="badge bg-success rounded-pill">@biometricCount registered</span>
+        }
+    </div>
+
+    @if (!hasSessionKey)
+    {
+        <div class="alert alert-warning small mb-3">
+            <i class="fa-light fa-triangle-exclamation me-1"></i>
+            Re-lock and unlock the vault with your PIN once to enable biometric registration.
+        </div>
+    }
+
+    <p class="text-muted small mb-3">
+        Register this device's Face ID or fingerprint to unlock the vault without typing your PIN.
+        Your vault PIN is still required for the first unlock each session.
+    </p>
+
+    @if (biometricCount == 0)
+    {
+        <button type="button" class="btn btn-primary rounded-pill px-4"
+                onclick="registerBiometric()" @(hasSessionKey ? "" : "disabled")>
+            <i class="fa-light fa-fingerprint me-2"></i>Register This Device
+        </button>
+    }
+    else
+    {
+        <div class="d-flex gap-2 flex-wrap">
+            <button type="button" class="btn btn-outline-primary rounded-pill px-4"
+                    onclick="registerBiometric()" @(hasSessionKey ? "" : "disabled")>
+                <i class="fa-light fa-plus me-1"></i>Add Another Device
+            </button>
+            <button type="button" class="btn btn-outline-danger rounded-pill px-4"
+                    onclick="removeAllBiometrics()">
+                <i class="fa-light fa-trash me-1"></i>Remove All Biometrics
+            </button>
+        </div>
+    }
+</div>
 
 @if (TempData["ShowVaultPinWarning"] != null)
 {
@@ -147,7 +190,7 @@ else
             Swal.fire({
                 title: "Vault PIN Set",
                 icon: "info",
-                html: "Your Vault PIN has been successfully set.<br><br><strong>Please keep it safe.</strong><br>If lost, you will need to contact support and provide identifying documentation to reset it.",
+                html: "Your Vault PIN has been successfully set.<br><br><strong>Please keep it safe.</strong><br>If lost, you will need to contact support.",
                 confirmButtonText: "Understood"
             });
         });
@@ -156,48 +199,22 @@ else
 
 @section Scripts {
 <script>
-async function promptPin(titleText) {
-    const { value: pin, isConfirmed } = await Swal.fire({
-        title: titleText,
-        input: 'password',
-        inputLabel: 'Enter your Vault PIN',
-        inputAttributes: { inputmode: 'numeric', maxlength: '6', autocomplete: 'off' },
-        inputPlaceholder: '••••••',
-        showCancelButton: true,
-        confirmButtonText: 'Confirm',
-        cancelButtonText: 'Cancel',
-        inputValidator: v => !v && 'PIN is required'
-    });
-    if (!isConfirmed) return null;
-    return pin ?? null;
-}
-
-async function promptUpload() {
-    const fileInput = document.getElementById('vaultFileInput');
-    if (!fileInput.files.length) {
-        Swal.fire({ title: 'No file selected', text: 'Please choose a file to upload.', icon: 'warning', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });
+function submitUpload() {
+    const fi = document.getElementById('vaultFileInput');
+    if (!fi.files.length) {
+        Swal.fire({ title: 'No file selected', text: 'Please choose a file first.', icon: 'warning', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });
         return;
     }
-    const pin = await promptPin('Encrypt & Upload');
-    if (!pin) return;
-
-    const dt = new DataTransfer();
-    dt.items.add(fileInput.files[0]);
-    document.getElementById('uploadFormFile').files = dt.files;
-    document.getElementById('uploadPin').value = pin;
     document.getElementById('uploadForm').submit();
 }
 
-async function promptDownload(fileId) {
-    const pin = await promptPin('Download File');
-    if (!pin) return;
-    document.getElementById('downloadId').value  = fileId;
-    document.getElementById('downloadPin').value = pin;
+function submitDownload(fileId) {
+    document.getElementById('downloadId').value = fileId;
     document.getElementById('downloadForm').submit();
 }
 
-async function promptDelete(fileId, fileName) {
-    const confirm = await Swal.fire({
+async function confirmDelete(fileId, fileName) {
+    const { isConfirmed } = await Swal.fire({
         title: 'Delete file?',
         html: `<span class="text-break">${fileName}</span><br><small class="text-muted">This cannot be undone.</small>`,
         icon: 'warning',
@@ -206,13 +223,104 @@ async function promptDelete(fileId, fileName) {
         confirmButtonColor: '#dc3545',
         cancelButtonText: 'Cancel'
     });
-    if (!confirm.isConfirmed) return;
-
-    const pin = await promptPin('Confirm with PIN');
-    if (!pin) return;
-    document.getElementById('deleteId').value  = fileId;
-    document.getElementById('deletePin').value = pin;
+    if (!isConfirmed) return;
+    document.getElementById('deleteId').value = fileId;
     document.getElementById('deleteForm').submit();
+}
+
+// ── Biometric helpers ──────────────────────────────────────────────────────
+
+function base64UrlDecode(b64url) {
+    const b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
+    const bin = atob(b64);
+    return Uint8Array.from(bin, c => c.charCodeAt(0)).buffer;
+}
+
+function base64UrlEncode(buf) {
+    const arr  = new Uint8Array(buf);
+    let binary = '';
+    arr.forEach(b => binary += String.fromCharCode(b));
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+const csrf = document.querySelector('#uploadForm input[name="__RequestVerificationToken"]').value;
+
+async function registerBiometric() {
+    try {
+        // 1. Get registration options
+        const optRes = await fetch('/Vault/BiometricRegisterOptions', {
+            method: 'POST',
+            headers: { 'RequestVerificationToken': csrf }
+        });
+        const options = await optRes.json();
+        if (options.success === false) throw new Error(options.error ?? 'Failed to get registration options.');
+
+        // 2. Prepare for WebAuthn
+        options.challenge = base64UrlDecode(options.challenge);
+        options.user.id   = base64UrlDecode(options.user.id);
+        options.excludeCredentials = (options.excludeCredentials ?? []).map(c => ({
+            ...c, id: base64UrlDecode(c.id)
+        }));
+
+        // 3. Prompt biometric
+        Swal.fire({ title: 'Follow your device prompt…', text: 'Use Face ID or your fingerprint when prompted.', icon: 'info', showConfirmButton: false, allowOutsideClick: false });
+        const cred = await navigator.credentials.create({ publicKey: options });
+        Swal.close();
+
+        // 4. Send to server
+        const payload = {
+            id:    cred.id,
+            rawId: base64UrlEncode(cred.rawId),
+            type:  cred.type,
+            response: {
+                attestationObject: base64UrlEncode(cred.response.attestationObject),
+                clientDataJSON:    base64UrlEncode(cred.response.clientDataJSON)
+            }
+        };
+
+        const completeRes = await fetch('/Vault/BiometricRegisterComplete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': csrf },
+            body: JSON.stringify(payload)
+        });
+        const result = await completeRes.json();
+
+        if (result.success) {
+            Swal.fire({ title: 'Biometric registered!', text: 'You can now unlock the vault with Face ID or your fingerprint.', icon: 'success', confirmButtonText: 'Great' })
+                .then(() => location.reload());
+        } else {
+            throw new Error(result.error ?? 'Registration failed.');
+        }
+    } catch (err) {
+        Swal.close();
+        if (err.name === 'NotAllowedError') {
+            Swal.fire({ title: 'Cancelled', text: 'Biometric registration was cancelled.', icon: 'warning', confirmButtonText: 'OK' });
+        } else {
+            Swal.fire({ title: 'Registration failed', text: err.message, icon: 'error', confirmButtonText: 'OK' });
+        }
+    }
+}
+
+async function removeAllBiometrics() {
+    const { isConfirmed } = await Swal.fire({
+        title: 'Remove all biometrics?',
+        text: 'All registered devices will need to re-enrol. You can still unlock with your PIN.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Remove All',
+        confirmButtonColor: '#dc3545'
+    });
+    if (!isConfirmed) return;
+
+    const res = await fetch('/Vault/BiometricRemoveAll', {
+        method: 'POST',
+        headers: { 'RequestVerificationToken': csrf }
+    });
+    const data = await res.json();
+    if (data.success) {
+        Swal.fire({ title: 'Removed', icon: 'success', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false })
+            .then(() => location.reload());
+    }
 }
 
 @if (TempData["UploadSuccess"] != null)
