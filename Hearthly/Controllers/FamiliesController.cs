@@ -389,5 +389,82 @@ namespace Hearthly.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
+        // GET: Families/Invites/{id}
+        [HttpGet]
+        public async Task<IActionResult> Invites(Guid? id)
+        {
+            if (id == null) return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            var isAdmin = await _context.FamilyMembers.AnyAsync(m =>
+                m.FamilyId == id.Value && m.UserId == userId &&
+                m.Role == IdentityRoles.Admin && m.IsAccepted);
+            if (!isAdmin) return Forbid();
+
+            var invites = await _context.FamilyInvites
+                .Where(i => i.FamilyId == id.Value)
+                .OrderByDescending(i => i.CreatedAt)
+                .ToListAsync();
+
+            ViewData["FamilyId"] = id.Value;
+            return View(invites);
+        }
+
+        // POST: Families/Revoke
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Revoke(Guid token)
+        {
+            var invite = await _context.FamilyInvites.FirstOrDefaultAsync(i => i.Token == token);
+            if (invite == null) return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            var isAdmin = await _context.FamilyMembers.AnyAsync(m =>
+                m.FamilyId == invite.FamilyId && m.UserId == userId &&
+                m.Role == IdentityRoles.Admin && m.IsAccepted);
+            if (!isAdmin) return Forbid();
+
+            _context.FamilyInvites.Remove(invite);
+            await _context.SaveChangesAsync();
+
+            TempData["StatusMessage"] = "Invite revoked.";
+            return RedirectToAction(nameof(Invites), new { id = invite.FamilyId });
+        }
+
+        // POST: Families/Resend
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> Resend(Guid token)
+        {
+            var invite = await _context.FamilyInvites.FirstOrDefaultAsync(i => i.Token == token);
+            if (invite == null) return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            var isAdmin = await _context.FamilyMembers.AnyAsync(m =>
+                m.FamilyId == invite.FamilyId && m.UserId == userId &&
+                m.Role == IdentityRoles.Admin && m.IsAccepted);
+            if (!isAdmin) return Forbid();
+
+            var email = invite.InvitedEmail;
+            var familyId = invite.FamilyId;
+            _context.FamilyInvites.Remove(invite);
+
+            var newToken = Guid.NewGuid();
+            var now = DateTime.UtcNow;
+            var expiry = now.AddDays(7);
+            _context.FamilyInvites.Add(new FamilyInvite
+            {
+                Token = newToken,
+                FamilyId = familyId,
+                InvitedEmail = email,
+                CreatedAt = now,
+                ExpiresAt = expiry
+            });
+            await _context.SaveChangesAsync();
+
+            ViewData["InviteToken"] = newToken;
+            ViewData["InviteEmail"] = email;
+            ViewData["InviteExpires"] = expiry;
+            return View("InviteResult");
+        }
+
     }
 }
