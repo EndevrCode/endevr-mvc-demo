@@ -92,52 +92,17 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script src="/js/background-sync.js"></script>
     <script>
         const select = document.getElementById('utilityTypeSelect');
         const elec   = document.getElementById('electricityFields');
         const gas    = document.getElementById('gasFields');
 
         function toggleExtras() {
-            elec.style.display = 'none';
-            gas.style.display  = 'none';
-            if (select.value === 'Electricity') elec.style.display = 'block';
-            if (select.value === 'Gas') gas.style.display = 'block';
+            elec.style.display = select.value === 'Electricity' ? 'block' : 'none';
+            gas.style.display  = select.value === 'Gas'         ? 'block' : 'none';
         }
 
         select.addEventListener('change', toggleExtras);
         toggleExtras();
-
-        document.getElementById("utilityForm").addEventListener("submit", async function (e) {
-            if (!navigator.onLine) {
-                e.preventDefault();
-
-                const form = e.target;
-                const formData = new FormData(form);
-                const plain = {};
-                formData.forEach((v, k) => {
-                    if (plain[k]) {
-                        if (!Array.isArray(plain[k])) plain[k] = [plain[k]];
-                        plain[k].push(v);
-                    } else {
-                        plain[k] = v;
-                    }
-                });
-
-                const db = await getDb();
-                const tx = db.transaction('utilityQueue', 'readwrite');
-                await tx.objectStore('utilityQueue').add(plain);
-                await tx.done;
-
-                if ('serviceWorker' in navigator && 'SyncManager' in window) {
-                    const reg = await navigator.serviceWorker.ready;
-                    await reg.sync.register('sync-utility');
-                }
-
-                Swal.fire({ title: "Saved Offline", text: "Your utility record will sync when back online.", icon: "info", timer: 2500, showConfirmButton: false });
-                form.reset();
-                toggleExtras();
-            }
-        });
     </script>
 }

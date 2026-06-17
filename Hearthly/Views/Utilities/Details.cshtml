@@ -22,13 +22,10 @@
             <div class="fw-semibold">R @Model.AmountPaid.ToString("N2")</div>
         </div>
 
-        @if (Model.PurchaseDate.HasValue)
-        {
-            <div class="col-6">
-                <div class="text-muted small">Purchase Date</div>
-                <div>@Model.PurchaseDate.Value.ToString("dd MMMM yyyy")</div>
-            </div>
-        }
+        <div class="col-6">
+            <div class="text-muted small">Purchase Date</div>
+            <div>@Model.PurchaseDate.ToString("dd MMMM yyyy")</div>
+        </div>
 
         @if (!string.IsNullOrWhiteSpace(Model.PurchasedFrom))
         {

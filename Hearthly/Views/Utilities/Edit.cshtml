@@ -26,8 +26,8 @@
             <label asp-for="Type" class="form-label fw-semibold">Type</label>
             <select asp-for="Type" class="form-select" id="utilityTypeSelect">
                 <option value="">-- Select Type --</option>
-                <option value="Gas" selected="(Model.Type == Hearthly.Data.UtilityType.Gas)">Gas</option>
-                <option value="Electricity" selected="(Model.Type == Hearthly.Data.UtilityType.Electricity)">Electricity</option>
+                <option value="Gas">Gas</option>
+                <option value="Electricity">Electricity</option>
             </select>
             <span asp-validation-for="Type" class="text-danger small"></span>
         </div>

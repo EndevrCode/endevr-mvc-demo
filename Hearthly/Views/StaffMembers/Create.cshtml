@@ -145,7 +145,6 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script src="/js/background-sync.js"></script>
     <script>
         function previewImage(event) {
             const reader = new FileReader();
@@ -168,37 +167,6 @@
             const isSA = this.value === "South Africa";
             document.getElementById("idField").style.display = isSA ? "block" : "none";
             document.getElementById("passportField").style.display = isSA ? "none" : "block";
-        });
-
-        document.getElementById("staffForm").addEventListener("submit", async function (e) {
-            if (!navigator.onLine) {
-                e.preventDefault();
-
-                const form = e.target;
-                const formData = new FormData(form);
-                const plain = {};
-                formData.forEach((v, k) => {
-                    if (plain[k]) {
-                        if (!Array.isArray(plain[k])) plain[k] = [plain[k]];
-                        plain[k].push(v);
-                    } else {
-                        plain[k] = v;
-                    }
-                });
-
-                const db = await getDb();
-                const tx = db.transaction('staffQueue', 'readwrite');
-                await tx.objectStore('staffQueue').add(plain);
-                await tx.done;
-
-                if ('serviceWorker' in navigator && 'SyncManager' in window) {
-                    const reg = await navigator.serviceWorker.ready;
-                    await reg.sync.register('sync-staff');
-                }
-
-                Swal.fire({ title: "Saved Offline", text: "Will sync when back online.", icon: "info", timer: 2500, showConfirmButton: false });
-                form.reset();
-            }
         });
     </script>
 }

@@ -5,7 +5,9 @@
     var familyId = ViewData["FamilyId"] as Guid? ?? Guid.Empty;
 }
 
-<h2 class="mb-4"><i class="fa-light fa-file-invoice-dollar me-2"></i>Edit Bill</h2>
+<div class="mb-4">
+    <h2 class="mb-0"><i class="fa-light fa-file-invoice-dollar me-2"></i>Edit Bill</h2>
+</div>
 
 <div class="glass-card p-4" style="max-width:560px;">
     <form asp-action="Edit" asp-route-id="@Model.Id" asp-route-familyId="@familyId" method="post">
