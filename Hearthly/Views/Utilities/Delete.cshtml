@@ -22,10 +22,7 @@
                 <text>&bull; @Model.PurchasedFrom</text>
             }
         </p>
-        @if (Model.PurchaseDate.HasValue)
-        {
-            <p class="text-muted small mb-0">@Model.PurchaseDate.Value.ToString("dd MMMM yyyy")</p>
-        }
+        <p class="text-muted small mb-0">@Model.PurchaseDate.ToString("dd MMMM yyyy")</p>
     </div>
 
     <p class="text-muted text-center small mb-4">
