@@ -362,17 +362,25 @@ namespace Hearthly.Controllers
                                        && i.ExpiresAt > DateTime.UtcNow);
             if (invite == null) return NotFound();
 
-            _context.FamilyMembers.Add(new FamilyMember
-            {
-                FamilyId = invite.FamilyId,
-                UserId = user.Id,
-                Role = IdentityRoles.Member,
-                IsAccepted = true,
-                JoinedAt = DateTime.UtcNow
-            });
+            if (!string.Equals(invite.InvitedEmail, user.Email, StringComparison.OrdinalIgnoreCase))
+                return Forbid();
 
-            _context.FamilyInvites.Remove(invite);
-            await _context.SaveChangesAsync();
+            var alreadyMember = await _context.FamilyMembers
+                .AnyAsync(m => m.FamilyId == invite.FamilyId && m.UserId == user.Id && m.IsAccepted);
+            if (!alreadyMember)
+            {
+                _context.FamilyMembers.Add(new FamilyMember
+                {
+                    FamilyId = invite.FamilyId,
+                    UserId = user.Id,
+                    Role = IdentityRoles.Member,
+                    IsAccepted = true,
+                    JoinedAt = DateTime.UtcNow
+                });
+                _context.FamilyInvites.Remove(invite);
+                await _context.SaveChangesAsync();
+            }
+
             return RedirectToAction(nameof(Index));
         }
     }

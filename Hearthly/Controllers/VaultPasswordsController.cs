@@ -32,6 +32,7 @@ namespace Hearthly.Controllers
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
             var passwords = await _context.VaultPasswords
                 .Where(p => p.UserId == user.Id)
                 .OrderByDescending(p => p.CreatedAt)
