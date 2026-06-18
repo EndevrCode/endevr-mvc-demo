@@ -212,6 +212,13 @@ public class VaultController : BaseController
             return RedirectToAction("Index");
         }
 
+        const long maxFileSize = 20 * 1024 * 1024; // 20 MB
+        if (file.Length > maxFileSize)
+        {
+            TempData["UploadError"] = "File is too large. Maximum upload size is 20 MB.";
+            return RedirectToAction("Index");
+        }
+
         var user = await _userManager.GetUserAsync(User);
         if (user == null)
         {

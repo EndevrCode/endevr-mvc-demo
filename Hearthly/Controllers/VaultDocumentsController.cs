@@ -73,6 +73,13 @@ namespace Hearthly.Controllers
                 return RedirectToAction(nameof(Index), filter.HasValue ? new { filter } : null);
             }
 
+            const long maxFileSize = 20 * 1024 * 1024; // 20 MB
+            if (file.Length > maxFileSize)
+            {
+                TempData["UploadError"] = "File is too large. Maximum upload size is 20 MB.";
+                return RedirectToAction(nameof(Index), filter.HasValue ? new { filter } : null);
+            }
+
             if (string.IsNullOrWhiteSpace(title))
             {
                 TempData["UploadError"] = "Please provide a document title.";

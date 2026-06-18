@@ -84,12 +84,13 @@
             </div>
             <div class="col-12">
                 <label class="form-label fw-semibold">File</label>
-                <input type="file" name="file" class="form-control" required />
+                <input type="file" name="file" id="docFileInput" class="form-control" required />
+                <div class="form-text text-muted">Maximum file size: 20 MB</div>
             </div>
         </div>
 
         <div class="mt-3">
-            <button type="button" class="btn btn-primary rounded-pill px-4" onclick="submitUpload()">
+            <button type="button" id="docUploadBtn" class="btn btn-primary rounded-pill px-4" onclick="submitUpload()">
                 <i class="fa-light fa-shield-check me-1"></i> Encrypt &amp; Upload
             </button>
         </div>
@@ -201,6 +202,13 @@ else
                 Swal.fire({ title: 'No file selected', text: 'Please choose a file to upload.', icon: 'warning' });
                 return;
             }
+            if (file.size > 20 * 1024 * 1024) {
+                Swal.fire({ title: 'File too large', text: 'Maximum upload size is 20 MB.', icon: 'error', confirmButtonText: 'OK' });
+                return;
+            }
+            const btn = document.getElementById('docUploadBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-light fa-spinner fa-spin me-1"></i> Uploading…';
             form.submit();
         }
 

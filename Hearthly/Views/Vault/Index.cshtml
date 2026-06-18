@@ -2,6 +2,26 @@
     ViewData["Title"] = "Vault";
     var biometricCount = (int)(ViewBag.BiometricCount ?? 0);
     var hasSessionKey  = (bool)(ViewBag.HasSessionVaultKey ?? false);
+
+    string FileIcon(string ct) => ct switch
+    {
+        "application/pdf"                                                                        => "fa-file-pdf",
+        "image/jpeg" or "image/jpg" or "image/png" or "image/gif" or "image/webp"
+            or "image/svg+xml" or "image/bmp" or "image/tiff"                                   => "fa-file-image",
+        "video/mp4" or "video/quicktime" or "video/x-msvideo" or "video/webm"                   => "fa-file-video",
+        "audio/mpeg" or "audio/mp4" or "audio/ogg" or "audio/wav" or "audio/webm"               => "fa-file-audio",
+        "application/zip" or "application/x-zip-compressed"
+            or "application/x-rar-compressed" or "application/x-7z-compressed"                  => "fa-file-zipper",
+        "text/plain"                                                                             => "fa-file-lines",
+        "text/csv"                                                                               => "fa-file-csv",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            or "application/msword"                                                              => "fa-file-word",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            or "application/vnd.ms-excel"                                                        => "fa-file-excel",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+            or "application/vnd.ms-powerpoint"                                                   => "fa-file-powerpoint",
+        _                                                                                        => "fa-file"
+    };
 }
 
 <div class="mb-4 d-flex justify-content-between align-items-center">
@@ -72,9 +92,11 @@
     <form id="uploadForm" asp-action="Upload" method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
         <div class="mb-3">
-            <input type="file" name="file" id="vaultFileInput" class="form-control" />
+            <input type="file" name="file" id="vaultFileInput" class="form-control" onchange="showFileSize(this)" />
+            <div id="fileSizeHint" class="form-text d-none"></div>
+            <div class="form-text text-muted">Maximum file size: 20 MB</div>
         </div>
-        <button type="button" class="btn btn-success rounded-pill px-4" onclick="submitUpload()">
+        <button type="button" id="uploadBtn" class="btn btn-success rounded-pill px-4" onclick="submitUpload()">
             <i class="fa-light fa-shield-check me-1"></i> Encrypt &amp; Upload
         </button>
     </form>
@@ -109,7 +131,10 @@
                     @foreach (var file in userFiles)
                     {
                         <tr>
-                            <td class="text-break">@file.OriginalFileName</td>
+                            <td>
+                                <i class="fa-light @FileIcon(file.ContentType) me-2 text-primary flex-shrink-0"></i>
+                                <span class="text-break">@file.OriginalFileName</span>
+                            </td>
                             <td class="text-muted small">@file.UploadedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")</td>
                             <td class="text-end">
                                 <button type="button"
@@ -201,12 +226,31 @@ else
 
 @section Scripts {
 <script>
+function showFileSize(input) {
+    const hint = document.getElementById('fileSizeHint');
+    if (input.files.length) {
+        const mb = (input.files[0].size / 1024 / 1024).toFixed(2);
+        hint.textContent = `Selected: ${input.files[0].name} (${mb} MB)`;
+        hint.classList.remove('d-none');
+        hint.className = 'form-text ' + (input.files[0].size > 20 * 1024 * 1024 ? 'text-danger' : 'text-muted');
+    } else {
+        hint.classList.add('d-none');
+    }
+}
+
 function submitUpload() {
     const fi = document.getElementById('vaultFileInput');
     if (!fi.files.length) {
         Swal.fire({ title: 'No file selected', text: 'Please choose a file first.', icon: 'warning', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });
         return;
     }
+    if (fi.files[0].size > 20 * 1024 * 1024) {
+        Swal.fire({ title: 'File too large', text: 'Maximum upload size is 20 MB.', icon: 'error', confirmButtonText: 'OK' });
+        return;
+    }
+    const btn = document.getElementById('uploadBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-light fa-spinner fa-spin me-1"></i> Uploading…';
     document.getElementById('uploadForm').submit();
 }
 
