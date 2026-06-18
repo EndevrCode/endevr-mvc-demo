@@ -178,6 +178,7 @@ namespace Hearthly.Controllers
             }
 
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
             var password = await _context.VaultPasswords
                 .FirstOrDefaultAsync(p => p.Id == id && p.UserId == user.Id);
 
@@ -208,6 +209,7 @@ namespace Hearthly.Controllers
             }
 
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
             var existing = await _context.VaultPasswords
                 .FirstOrDefaultAsync(p => p.Id == id && p.UserId == user.Id);
 
