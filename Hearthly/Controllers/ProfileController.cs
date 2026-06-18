@@ -81,10 +81,24 @@ namespace Hearthly.Controllers
 
             if (photo is { Length: > 0 })
             {
+                var allowedExts = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                var ext = Path.GetExtension(photo.FileName).ToLowerInvariant();
+                if (!allowedExts.Contains(ext))
+                {
+                    ModelState.AddModelError(nameof(photo), "Only JPG, PNG, GIF, and WebP images are allowed.");
+                    return View(profile);
+                }
+
+                const long maxSize = 5 * 1024 * 1024; // 5 MB
+                if (photo.Length > maxSize)
+                {
+                    ModelState.AddModelError(nameof(photo), "Photo must be 5 MB or smaller.");
+                    return View(profile);
+                }
+
                 var uploads = Path.Combine(_env.WebRootPath, "images", "profiles");
                 Directory.CreateDirectory(uploads);
 
-                var ext = Path.GetExtension(photo.FileName);
                 var fileName = profile.UserId + ext;
                 var path = Path.Combine(uploads, fileName);
 

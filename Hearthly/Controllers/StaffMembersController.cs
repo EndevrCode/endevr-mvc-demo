@@ -148,7 +148,16 @@ namespace Hearthly.Controllers
 
             if (photo != null && photo.Length > 0)
             {
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(photo.FileName)}";
+                var allowedExts = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                var photoExt = Path.GetExtension(photo.FileName).ToLowerInvariant();
+                if (!allowedExts.Contains(photoExt))
+                {
+                    ModelState.AddModelError(nameof(photo), "Only JPG, PNG, GIF, and WebP images are allowed.");
+                    ViewData["FamilyId"] = staffMember.FamilyId;
+                    return View(staffMember);
+                }
+
+                var fileName = $"{Guid.NewGuid()}{photoExt}";
                 var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "staff");
                 Directory.CreateDirectory(folder);
                 var filePath = Path.Combine(folder, fileName);
@@ -214,7 +223,15 @@ namespace Hearthly.Controllers
 
             if (photo != null && photo.Length > 0)
             {
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(photo.FileName)}";
+                var allowedExts = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                var photoExt = Path.GetExtension(photo.FileName).ToLowerInvariant();
+                if (!allowedExts.Contains(photoExt))
+                {
+                    ModelState.AddModelError(nameof(photo), "Only JPG, PNG, GIF, and WebP images are allowed.");
+                    return View(staffMember);
+                }
+
+                var fileName = $"{Guid.NewGuid()}{photoExt}";
                 var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "staff");
                 Directory.CreateDirectory(uploads);
                 var filePath = Path.Combine(uploads, fileName);
