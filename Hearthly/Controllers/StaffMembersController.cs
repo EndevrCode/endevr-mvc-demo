@@ -159,18 +159,21 @@ namespace Hearthly.Controllers
 
             staffMember.WorkDays = string.Join(",", WorkDays);
 
-            // Check for existing (duplicate sync)
             var exists = await _context.StaffMembers.AnyAsync(s =>
                 s.FamilyId == staffMember.FamilyId &&
                 s.PreferredName == staffMember.PreferredName &&
                 s.ContactNumber == staffMember.ContactNumber);
 
-            if (!exists)
+            if (exists)
             {
-                EncryptSensitiveFields(staffMember);
-                _context.Add(staffMember);
-                await _context.SaveChangesAsync();
+                ModelState.AddModelError("", "A staff member with this preferred name and contact number already exists.");
+                ViewData["FamilyId"] = staffMember.FamilyId;
+                return View(staffMember);
             }
+
+            EncryptSensitiveFields(staffMember);
+            _context.Add(staffMember);
+            await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index), new { familyId = staffMember.FamilyId });
         }
