@@ -93,6 +93,20 @@ public class VaultController : BaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ValidatePin(string pin)
     {
+        const int maxAttempts    = 5;
+        const int lockoutMinutes = 15;
+        const string attemptsKey = "VaultPinAttempts";
+        const string lockoutKey  = "VaultPinLockedUntil";
+
+        // Check lockout
+        var lockedUntilStr = HttpContext.Session.GetString(lockoutKey);
+        if (lockedUntilStr != null && DateTime.TryParse(lockedUntilStr, out var lockedUntil) && lockedUntil > DateTime.UtcNow)
+        {
+            var remaining = (int)Math.Ceiling((lockedUntil - DateTime.UtcNow).TotalMinutes);
+            TempData["Error"] = $"Too many failed attempts. Try again in {remaining} minute(s).";
+            return RedirectToAction("EnterPin");
+        }
+
         var user = await _userManager.GetUserAsync(User);
         if (user == null || user.VaultPinHash == null)
             return RedirectToAction("Index");
@@ -102,6 +116,9 @@ public class VaultController : BaseController
 
         if (result == PasswordVerificationResult.Success)
         {
+            HttpContext.Session.Remove(attemptsKey);
+            HttpContext.Session.Remove(lockoutKey);
+
             // Derive and cache vault key for the session lifetime
             if (user.EncryptedVaultKey != null && user.VaultKeySalt != null)
             {
@@ -122,7 +139,22 @@ public class VaultController : BaseController
             return RedirectToAction("Index");
         }
 
-        TempData["Error"] = "Invalid PIN.";
+        // Increment failure counter
+        var attemptsStr = HttpContext.Session.GetString(attemptsKey);
+        var attempts = attemptsStr != null && int.TryParse(attemptsStr, out var n) ? n + 1 : 1;
+        HttpContext.Session.SetString(attemptsKey, attempts.ToString());
+
+        if (attempts >= maxAttempts)
+        {
+            HttpContext.Session.SetString(lockoutKey, DateTime.UtcNow.AddMinutes(lockoutMinutes).ToString());
+            HttpContext.Session.Remove(attemptsKey);
+            TempData["Error"] = $"Too many failed attempts. Vault locked for {lockoutMinutes} minutes.";
+        }
+        else
+        {
+            TempData["Error"] = $"Invalid PIN. {maxAttempts - attempts} attempt(s) remaining.";
+        }
+
         return RedirectToAction("EnterPin");
     }
 
