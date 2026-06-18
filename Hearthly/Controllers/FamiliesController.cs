@@ -312,6 +312,9 @@ namespace Hearthly.Controllers
                 m.Role == IdentityRoles.Admin && m.IsAccepted);
             if (!isAdmin) return Forbid();
 
+            if (newRole != IdentityRoles.Admin && newRole != IdentityRoles.Member)
+                return BadRequest("Invalid role.");
+
             var member = await _context.FamilyMembers
                 .FirstOrDefaultAsync(m => m.FamilyId == familyId && m.UserId == userId && m.IsAccepted);
             if (member == null) return NotFound();
@@ -354,6 +357,22 @@ namespace Hearthly.Controllers
 
             // Check if the current user is removing themselves
             bool isSelf = currentUserId == userId;
+
+            // Non-self removals require admin privileges
+            if (!isSelf)
+            {
+                var isAdmin = await _context.FamilyMembers.AnyAsync(m =>
+                    m.FamilyId == id && m.UserId == currentUserId &&
+                    m.Role == IdentityRoles.Admin && m.IsAccepted);
+                if (!isAdmin) return Forbid();
+            }
+            else
+            {
+                // Self-removal: verify the current user is actually a member
+                var isMember = await _context.FamilyMembers.AnyAsync(m =>
+                    m.FamilyId == id && m.UserId == currentUserId && m.IsAccepted);
+                if (!isMember) return Forbid();
+            }
 
             // Count accepted members
             var totalAccepted = await _context.FamilyMembers

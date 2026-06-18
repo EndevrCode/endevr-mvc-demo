@@ -39,6 +39,18 @@ namespace Hearthly.Controllers
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null) return NotFound();
 
+            // Only allow viewing another user's profile if they share a family
+            if (!string.Equals(userId, currentUserId, StringComparison.OrdinalIgnoreCase))
+            {
+                var shareFamily = await _context.FamilyMembers
+                    .Where(m => m.UserId == currentUserId && m.IsAccepted)
+                    .Select(m => m.FamilyId)
+                    .AnyAsync(fid => _context.FamilyMembers
+                        .Any(m2 => m2.FamilyId == fid && m2.UserId == userId && m2.IsAccepted));
+
+                if (!shareFamily) return Forbid();
+            }
+
             var profile = await _context.UserProfiles
                                  .FirstOrDefaultAsync(p => p.UserId == userId)
                           ?? new UserProfile { UserId = userId };
