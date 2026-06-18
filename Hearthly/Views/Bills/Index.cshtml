@@ -161,7 +161,7 @@ async function markPaid(btn, billId) {
         if (data.success) {
             if (data.nextBillCreated) {
                 await Swal.fire({
-                    title: 'Bill paid!',
+                    titleText: 'Bill paid!',
                     text: 'Next month\'s bill has been created automatically.',
                     icon: 'success',
                     timer: 2000,
@@ -171,7 +171,7 @@ async function markPaid(btn, billId) {
                 });
             } else {
                 await Swal.fire({
-                    title: data.isPaid ? 'Marked as paid' : 'Moved to outstanding',
+                    titleText: data.isPaid ? 'Marked as paid' : 'Moved to outstanding',
                     icon: 'success',
                     timer: 1000,
                     showConfirmButton: false,
