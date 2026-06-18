@@ -130,7 +130,7 @@ else
         document.addEventListener('DOMContentLoaded', () => {
             @if (!string.IsNullOrEmpty(statusMsg))
             {
-                <text>Swal.fire({ title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(statusMsg)), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
+                <text>Swal.fire({ titleText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(statusMsg)), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
             }
         });
     </script>

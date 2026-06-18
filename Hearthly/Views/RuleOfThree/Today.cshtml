@@ -3,10 +3,10 @@
 @{
     var readOnly = ViewData["ReadOnly"] as bool? == true;
     ViewData["Title"] = "Today's Rule of 3";
-    var hasEntry = Model != null && Model.Id != Guid.Empty;
     Layout = "_Layout";
     var familyId = ViewData["FamilyId"];
-    var allTasksDone = Model.Tasks != null && Model.Tasks.Count == 6 && Model.Tasks.All(t => t.IsDone);
+    var tasks = Model.Tasks ?? new List<Hearthly.Data.RuleOfThree.RuleOfThreeTask>();
+    var allTasksDone = tasks.Count == 6 && tasks.All(t => t.IsDone);
 }
 
 <div class="mb-4 d-flex justify-content-between align-items-center">
@@ -53,13 +53,16 @@
     </div>
 }
 
-<form asp-action="Submit" method="post">
+<form asp-action="Submit" method="post" @(readOnly ? "onsubmit=\"return false;\"" : "")>
     @Html.AntiForgeryToken()
     <input type="hidden" asp-for="Date" />
     <input type="hidden" asp-for="UserId" />
     <input type="hidden" asp-for="Id" />
     <input type="hidden" name="familyId" value="@familyId" />
-    <div asp-validation-summary="All" class="alert alert-danger"></div>
+    @if (!readOnly)
+    {
+        <div asp-validation-summary="All" class="alert alert-danger"></div>
+    }
 
     <!-- Main Project -->
     <div class="glass-card p-4 mb-3">
@@ -78,7 +81,7 @@
         </label>
         @for (int i = 0; i < 3; i++)
         {
-            var task = Model.Tasks.ElementAtOrDefault(i);
+            var task = tasks.ElementAtOrDefault(i);
             <div class="input-group mb-2">
                 <div class="input-group-text">
                     <input type="checkbox"
@@ -108,7 +111,7 @@
         @for (int i = 0; i < 3; i++)
         {
             var index = i + 3;
-            var task = Model.Tasks.ElementAtOrDefault(index);
+            var task = tasks.ElementAtOrDefault(index);
             <div class="input-group mb-2">
                 <div class="input-group-text">
                     <input type="checkbox"

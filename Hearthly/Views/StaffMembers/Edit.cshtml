@@ -62,13 +62,16 @@
         <span asp-validation-for="Nationality" class="text-danger"></span>
     </div>
 
-    <div class="mb-3" id="idField">
+    @{
+        var isSANat = string.IsNullOrEmpty(Model.Nationality) || Model.Nationality == "South Africa";
+    }
+    <div class="mb-3" id="idField" style="@(isSANat ? "" : "display:none;")">
         <label asp-for="IdNumber" class="form-label"></label>
         <input asp-for="IdNumber" class="form-control" />
         <span asp-validation-for="IdNumber" class="text-danger"></span>
     </div>
 
-    <div class="mb-3" id="passportField">
+    <div class="mb-3" id="passportField" style="@(isSANat ? "display:none;" : "")">
         <label asp-for="PassportNumber" class="form-label"></label>
         <input asp-for="PassportNumber" class="form-control" />
         <span asp-validation-for="PassportNumber" class="text-danger"></span>

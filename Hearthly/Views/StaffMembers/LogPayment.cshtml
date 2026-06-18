@@ -96,7 +96,7 @@
             <button type="submit" class="btn btn-success rounded-pill px-4 flex-grow-1">
                 <i class="fa-light fa-check me-1"></i> Save Payment
             </button>
-            <a asp-action="Details" asp-route-id="@Model.StaffMemberId" class="btn btn-outline-secondary rounded-pill px-4 flex-grow-1">
+            <a asp-action="Details" asp-route-id="@Model.StaffMemberId" asp-route-familyId="@staffMember?.FamilyId" class="btn btn-outline-secondary rounded-pill px-4 flex-grow-1">
                 <i class="fa-light fa-arrow-left me-1"></i> Cancel
             </a>
         </div>

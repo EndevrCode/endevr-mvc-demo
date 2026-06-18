@@ -57,11 +57,11 @@
         <div class="row g-3 mb-3">
             <div class="col-auto">
                 <div class="form-check mt-2">
-                    <input asp-for="IsPaid" class="form-check-input" />
+                    <input asp-for="IsPaid" id="IsPaid" class="form-check-input" onchange="togglePaidDate()" />
                     <label asp-for="IsPaid" class="form-check-label">Paid</label>
                 </div>
             </div>
-            <div class="col">
+            <div class="col" id="paidDateField">
                 <label asp-for="PaidDate" class="form-label"></label>
                 <input asp-for="PaidDate" class="form-control" type="date" />
             </div>
@@ -88,4 +88,11 @@
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+        function togglePaidDate() {
+            var checked = document.getElementById('IsPaid').checked;
+            document.getElementById('paidDateField').style.display = checked ? '' : 'none';
+        }
+        togglePaidDate();
+    </script>
 }
