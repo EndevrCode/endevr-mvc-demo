@@ -20,6 +20,7 @@ namespace Hearthly.Controllers
         private async Task<bool> IsFamilyMember(Guid familyId)
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return false;
             return await _context.FamilyMembers
                 .AnyAsync(m => m.FamilyId == familyId && m.UserId == user.Id && m.IsAccepted);
         }

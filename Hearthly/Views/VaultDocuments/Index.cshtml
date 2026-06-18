@@ -185,7 +185,7 @@ else
             }
             @if (!string.IsNullOrEmpty(_actionOk))
             {
-                <text>Swal.fire({ title: '@Html.Raw(_actionOk)', icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
+                <text>Swal.fire({ title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_actionOk)), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
             }
         });
 
