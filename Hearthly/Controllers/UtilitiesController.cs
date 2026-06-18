@@ -195,7 +195,7 @@ namespace Hearthly.Controllers
                 if (prevDate.HasValue)
                 {
                     daysBetween = (u.PurchaseDate - prevDate.Value).Days;
-                    if (u.TotalUnits.HasValue)
+                    if (u.TotalUnits.HasValue && daysBetween.Value > 0)
                         avgDaily = u.TotalUnits.Value / daysBetween.Value;
                 }
 

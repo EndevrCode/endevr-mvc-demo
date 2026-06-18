@@ -195,7 +195,7 @@
 
 <!-- Action Buttons -->
 <div class="d-flex justify-content-center flex-wrap gap-2 mt-4 mb-4">
-    <a asp-action="Edit" asp-route-id="@pet.Id" class="btn btn-outline-primary rounded-pill px-4">
+    <a asp-action="Edit" asp-route-id="@pet.Id" asp-route-familyId="@pet.FamilyId" class="btn btn-outline-primary rounded-pill px-4">
         <i class="fa-light fa-pen-to-square me-1"></i> Edit
     </a>
     <a asp-action="Index" asp-route-familyId="@pet.FamilyId" class="btn btn-outline-secondary rounded-pill px-4">
@@ -245,7 +245,7 @@
                     if (small) small.textContent = 'Last: ' + data.dateStr;
                     btn.classList.remove('btn-outline-secondary');
                     btn.classList.add('btn-outline-success');
-                    Swal.fire({ title: careType + ' logged!', icon: 'success', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+                    Swal.fire({ titleText: careType + ' logged!', icon: 'success', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
                 } else {
                     btn.disabled = false;
                     Swal.fire({ title: 'Error', text: data.message ?? 'Could not log care.', icon: 'error', confirmButtonText: 'OK' });

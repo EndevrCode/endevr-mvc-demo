@@ -143,16 +143,16 @@
         <div class="row gy-3">
             <div class="col-4 text-center">
                 <div class="text-muted small">Estimated</div>
-                <div class="fw-semibold">R @totalMonthly.ToString("N0")</div>
+                <div class="fw-semibold">R @totalMonthly.ToString("N2")</div>
             </div>
             <div class="col-4 text-center">
                 <div class="text-muted small">Paid</div>
-                <div class="fw-semibold text-success">R @paidThisMonth.ToString("N0")</div>
+                <div class="fw-semibold text-success">R @paidThisMonth.ToString("N2")</div>
             </div>
             <div class="col-4 text-center">
                 <div class="text-muted small">Outstanding</div>
                 <div class="fw-semibold @(outstanding > 0 ? "text-warning" : "text-success")">
-                    R @outstanding.ToString("N0")
+                    R @outstanding.ToString("N2")
                 </div>
             </div>
         </div>
@@ -195,7 +195,7 @@
         {
             <text>
         document.addEventListener('DOMContentLoaded', () =>
-            Swal.fire({ title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(statusMsg)), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false }));
+            Swal.fire({ titleText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(statusMsg)), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false }));
             </text>
         }
 
