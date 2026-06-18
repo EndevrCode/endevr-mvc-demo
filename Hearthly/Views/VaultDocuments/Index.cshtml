@@ -173,7 +173,7 @@ else
         document.addEventListener('DOMContentLoaded', () => {
             @if (!string.IsNullOrEmpty(_uploadOk))
             {
-                <text>Swal.fire({ title: '@Html.Raw(_uploadOk)', icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
+                <text>Swal.fire({ title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_uploadOk)), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
             }
             @if (!string.IsNullOrEmpty(_uploadErr))
             {
