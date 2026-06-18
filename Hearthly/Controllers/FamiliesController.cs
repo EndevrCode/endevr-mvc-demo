@@ -107,6 +107,7 @@ namespace Hearthly.Controllers
         public async Task<IActionResult> Create(string name)
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
 
             // Prevent accidental background sync duplication
             var exists = await _context.Families.AnyAsync(f =>

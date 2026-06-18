@@ -20,14 +20,21 @@ namespace Hearthly.Controllers
 
         public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            if (User.Identity.IsAuthenticated)
+            if (User.Identity?.IsAuthenticated == true)
             {
                 var user = await _userManager.GetUserAsync(User);
-                var settings = await _context.UserAppSettings
-                    .FirstOrDefaultAsync(s => s.UserId == user.Id);
-
-                ViewData["ThemeMode"] = settings?.ThemeMode ?? "system";
-                ViewData["FontSize"] = settings?.FontSize ?? "medium";
+                if (user != null)
+                {
+                    var settings = await _context.UserAppSettings
+                        .FirstOrDefaultAsync(s => s.UserId == user.Id);
+                    ViewData["ThemeMode"] = settings?.ThemeMode ?? "system";
+                    ViewData["FontSize"] = settings?.FontSize ?? "medium";
+                }
+                else
+                {
+                    ViewData["ThemeMode"] = "system";
+                    ViewData["FontSize"] = "medium";
+                }
             }
             else
             {
