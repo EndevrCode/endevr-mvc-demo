@@ -47,6 +47,10 @@ namespace Hearthly.Controllers
             if (!familyId.HasValue)
                 return View(new List<Pet>());
 
+            var allowed = await GetAllowedFamilyIdsAsync();
+            if (!allowed.Contains(familyId.Value))
+                return Forbid();
+
             var pets = await _context.Pets
                                      .Where(p => p.FamilyId == familyId.Value)
                                      .ToListAsync();

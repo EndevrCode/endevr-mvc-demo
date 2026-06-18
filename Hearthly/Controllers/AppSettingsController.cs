@@ -19,6 +19,7 @@ namespace Hearthly.Controllers
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
 
             var settings = await _context.UserAppSettings
                 .FirstOrDefaultAsync(s => s.UserId == user.Id);
@@ -41,6 +42,7 @@ namespace Hearthly.Controllers
                 return View(model);
 
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
 
             var settings = await _context.UserAppSettings
                 .FirstOrDefaultAsync(s => s.UserId == user.Id);

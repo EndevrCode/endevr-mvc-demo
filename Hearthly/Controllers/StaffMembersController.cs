@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,12 +11,39 @@ namespace Hearthly.Controllers
     [Authorize]
     public class StaffMembersController : BaseController
     {
+        private readonly IDataProtector _protector;
 
         public StaffMembersController(
             ApplicationDbContext context,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IDataProtectionProvider provider)
             : base(context, userManager)
         {
+            _protector = provider.CreateProtector("StaffMemberProtector");
+        }
+
+        private string? Encrypt(string? value) =>
+            string.IsNullOrEmpty(value) ? value : _protector.Protect(value);
+
+        private string? Decrypt(string? value)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+            try { return _protector.Unprotect(value); }
+            catch { return value; } // legacy plaintext fallback
+        }
+
+        private void DecryptSensitiveFields(StaffMember s)
+        {
+            s.IdNumber = Decrypt(s.IdNumber);
+            s.PassportNumber = Decrypt(s.PassportNumber);
+            s.AccountNumber = Decrypt(s.AccountNumber);
+        }
+
+        private void EncryptSensitiveFields(StaffMember s)
+        {
+            s.IdNumber = Encrypt(s.IdNumber);
+            s.PassportNumber = Encrypt(s.PassportNumber);
+            s.AccountNumber = Encrypt(s.AccountNumber);
         }
 
         private async Task<Guid?> GetUserFamilyIdAsync()
@@ -68,6 +96,8 @@ namespace Hearthly.Controllers
 
             if (!await IsUserInFamily(staffMember.FamilyId))
                 return Forbid();
+
+            DecryptSensitiveFields(staffMember);
 
             // Month-to-date payment summary
             var now = DateTime.Today;
@@ -137,6 +167,7 @@ namespace Hearthly.Controllers
 
             if (!exists)
             {
+                EncryptSensitiveFields(staffMember);
                 _context.Add(staffMember);
                 await _context.SaveChangesAsync();
             }
@@ -154,6 +185,8 @@ namespace Hearthly.Controllers
 
             if (!await IsUserInFamily(staffMember.FamilyId))
                 return Forbid();
+
+            DecryptSensitiveFields(staffMember);
 
             return View(staffMember);
         }
@@ -196,6 +229,7 @@ namespace Hearthly.Controllers
 
             try
             {
+                EncryptSensitiveFields(staffMember);
                 _context.Update(staffMember);
                 await _context.SaveChangesAsync();
             }

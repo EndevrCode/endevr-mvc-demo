@@ -51,6 +51,14 @@ namespace Hearthly.Controllers
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+            if (familyId.HasValue)
+            {
+                var isMember = await _context.FamilyMembers
+                    .AnyAsync(fm => fm.FamilyId == familyId.Value && fm.UserId == userId && fm.IsAccepted);
+                if (!isMember)
+                    return Forbid();
+            }
+
             var existing = await _context.RuleOfThreeEntries
                 .Include(e => e.Tasks)
                 .FirstOrDefaultAsync(e => e.UserId == userId && e.Date == model.Date && e.FamilyId == familyId);
