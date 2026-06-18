@@ -122,6 +122,16 @@ namespace Hearthly.Controllers
                 return RedirectToAction(nameof(Create));
             }
 
+            var allowedExts = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                { ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".txt", ".csv",
+                  ".jpg", ".jpeg", ".png", ".gif", ".webp", ".zip" };
+            var fileExt = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExts.Contains(fileExt))
+            {
+                TempData["Error"] = "File type not allowed. Upload PDF, Office documents, images, text, CSV, or ZIP files.";
+                return RedirectToAction(nameof(Create));
+            }
+
             const long maxFileSize = 20 * 1024 * 1024; // 20 MB
             if (file.Length > maxFileSize)
             {
@@ -129,11 +139,11 @@ namespace Hearthly.Controllers
                 return RedirectToAction(nameof(Create));
             }
 
-            var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "vault");
+            var uploadsFolder = Path.Combine(_env.ContentRootPath, "SecureVault", "VaultFiles");
             if (!Directory.Exists(uploadsFolder))
                 Directory.CreateDirectory(uploadsFolder);
 
-            var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
+            var uniqueFileName = $"{Guid.NewGuid()}{fileExt}";
             var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
             using (var stream = new FileStream(filePath, FileMode.Create))
@@ -145,10 +155,10 @@ namespace Hearthly.Controllers
             {
                 UserId = user.Id,
                 Section = VaultSection.Passwords,
-                Title = file.FileName,
+                Title = Path.GetFileNameWithoutExtension(file.FileName),
                 PasswordType = PasswordType.Other,
                 CreatedAt = DateTime.UtcNow,
-                FilePath = $"/uploads/vault/{uniqueFileName}"
+                FilePath = uniqueFileName
             };
 
             _context.VaultPasswords.Add(vaultPassword);
@@ -157,23 +167,6 @@ namespace Hearthly.Controllers
             TempData["Success"] = "Password document uploaded successfully.";
             return RedirectToAction(nameof(Index));
         }
-
-        [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> VerifyPin([FromBody] PinVerifyRequest request)
-        {
-            if (string.IsNullOrWhiteSpace(request?.Pin))
-                return Json(new { success = false });
-
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null || string.IsNullOrEmpty(user.VaultPinHash))
-                return Json(new { success = false });
-
-            var hasher = new PasswordHasher<ApplicationUser>();
-            var result = hasher.VerifyHashedPassword(user, user.VaultPinHash, request.Pin);
-            return Json(new { success = result == PasswordVerificationResult.Success });
-        }
-
-        public class PinVerifyRequest { public string? Pin { get; set; } }
 
         [HttpGet]
         public async Task<IActionResult> Edit(Guid id)
@@ -249,12 +242,6 @@ namespace Hearthly.Controllers
             return RedirectToAction("Index");
         }
 
-        private bool IsPinConfirmedRecently()
-        {
-            var lastConfirmed = HttpContext.Session.GetString("VaultPinConfirmed");
-            return lastConfirmed != null && DateTime.TryParse(lastConfirmed, out var confirmedTime) && confirmedTime > DateTime.UtcNow.AddMinutes(-5);
-        }
-
         [HttpPost, ValidateAntiForgeryToken]
         public IActionResult MarkPinConfirmed()
         {
@@ -285,12 +272,17 @@ namespace Hearthly.Controllers
             if (entry == null || string.IsNullOrEmpty(entry.FilePath))
                 return NotFound();
 
-            var absolutePath = Path.Combine(_env.WebRootPath, entry.FilePath.TrimStart('/'));
+            string absolutePath;
+            if (entry.FilePath.StartsWith('/') || entry.FilePath.StartsWith('\\'))
+                absolutePath = Path.Combine(_env.WebRootPath, entry.FilePath.TrimStart('/', '\\'));
+            else
+                absolutePath = Path.Combine(_env.ContentRootPath, "SecureVault", "VaultFiles", entry.FilePath);
+
             if (!System.IO.File.Exists(absolutePath))
                 return NotFound();
 
             var contentType = "application/octet-stream";
-            var fileName = Path.GetFileName(absolutePath);
+            var fileName = entry.Title + Path.GetExtension(absolutePath);
             return PhysicalFile(absolutePath, contentType, fileName);
         }
 
