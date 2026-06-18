@@ -12,7 +12,7 @@
     <form id="familyForm" asp-action="Create" method="post">
         @Html.AntiForgeryToken()
 
-        <div asp-validation-summary="All" class="alert alert-danger"></div>
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
         <div class="mb-3">
             <label asp-for="Name" class="form-label fw-semibold"></label>

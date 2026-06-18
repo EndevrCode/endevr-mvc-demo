@@ -12,7 +12,7 @@
 <form asp-action="Edit" method="post" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
 
-    <div asp-validation-summary="All" class="alert alert-danger"></div>
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
     <input type="hidden" asp-for="Pet.Id" />
 
     <div class="row gx-3 gy-3">
