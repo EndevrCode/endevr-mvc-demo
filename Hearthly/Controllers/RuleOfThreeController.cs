@@ -156,7 +156,8 @@ namespace Hearthly.Controllers
         public async Task<IActionResult> Dashboard(Guid? familyId = null)
         {
             var user = await _userManager.GetUserAsync(User);
-            var userId = user?.Id;
+            if (user == null) return Challenge();
+            var userId = user.Id;
 
             // Auto-redirect if the user belongs to only one family
             if (!familyId.HasValue)
