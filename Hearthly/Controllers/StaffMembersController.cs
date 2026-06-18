@@ -325,6 +325,8 @@ namespace Hearthly.Controllers
             if (!await IsUserInFamily(payment.StaffMember.FamilyId))
                 return Forbid();
 
+            DecryptSensitiveFields(payment.StaffMember);
+
             return View(payment);
         }
 
