@@ -291,7 +291,7 @@
                 const data = await res.json();
                 if (data.success) {
                     bootstrap.Modal.getInstance(document.getElementById('assignModal')).hide();
-                    Swal.fire({ icon: 'success', title: data.assigneeName ? `Assigned to ${data.assigneeName}` : 'Unassigned', toast: true, position: 'top-end', timer: 1800, showConfirmButton: false });
+                    Swal.fire({ icon: 'success', titleText: data.assigneeName ? `Assigned to ${data.assigneeName}` : 'Unassigned', toast: true, position: 'top-end', timer: 1800, showConfirmButton: false });
                 }
             } catch {}
         }
@@ -307,7 +307,7 @@
                 ? `<span class="badge bg-secondary"><i class="fa-light fa-calendar me-1"></i>${chore.dueDateDisplay}</span>`
                 : '';
             const assignee = chore.assigneeName
-                ? `<span class="badge bg-primary"><i class="fa-light fa-user me-1"></i>${chore.assigneeName}</span>`
+                ? `<span class="badge bg-primary"><i class="fa-light fa-user me-1"></i>${escHtml(chore.assigneeName)}</span>`
                 : '';
 
             el.innerHTML = `

@@ -93,13 +93,22 @@ namespace Hearthly.Controllers
             if (!string.IsNullOrWhiteSpace(dueDate) && DateTime.TryParse(dueDate, out var d))
                 parsedDue = d.Date;
 
+            // Validate assignee is a member of this family
+            string? validatedAssigneeId = null;
+            if (!string.IsNullOrWhiteSpace(assignedToUserId))
+            {
+                var assigneeIsMember = await _context.FamilyMembers
+                    .AnyAsync(m => m.FamilyId == familyId && m.UserId == assignedToUserId && m.IsAccepted);
+                if (assigneeIsMember) validatedAssigneeId = assignedToUserId;
+            }
+
             var chore = new FamilyChore
             {
                 Id = Guid.NewGuid(),
                 FamilyId = familyId,
                 Title = title.Trim()[..Math.Min(title.Trim().Length, 200)],
                 Description = description?.Trim(),
-                AssignedToUserId = string.IsNullOrWhiteSpace(assignedToUserId) ? null : assignedToUserId,
+                AssignedToUserId = validatedAssigneeId,
                 DueDate = parsedDue,
                 CreatedByUserId = user.Id,
                 CreatedAt = DateTime.UtcNow
@@ -191,7 +200,17 @@ namespace Hearthly.Controllers
                 .AnyAsync(m => m.FamilyId == chore.FamilyId && m.UserId == user.Id && m.IsAccepted);
             if (!isMember) return Json(new { success = false });
 
-            chore.AssignedToUserId = string.IsNullOrWhiteSpace(assignedToUserId) ? null : assignedToUserId;
+            if (string.IsNullOrWhiteSpace(assignedToUserId))
+            {
+                chore.AssignedToUserId = null;
+            }
+            else
+            {
+                var assigneeIsMember = await _context.FamilyMembers
+                    .AnyAsync(m => m.FamilyId == chore.FamilyId && m.UserId == assignedToUserId && m.IsAccepted);
+                if (!assigneeIsMember) return Json(new { success = false, message = "Assignee is not a family member." });
+                chore.AssignedToUserId = assignedToUserId;
+            }
             await _context.SaveChangesAsync();
 
             string? assigneeName = null;
