@@ -157,6 +157,14 @@ namespace Hearthly.Controllers
                     return View(staffMember);
                 }
 
+                const long maxPhotoSize = 5 * 1024 * 1024;
+                if (photo.Length > maxPhotoSize)
+                {
+                    ModelState.AddModelError(nameof(photo), "Photo must be 5 MB or smaller.");
+                    ViewData["FamilyId"] = staffMember.FamilyId;
+                    return View(staffMember);
+                }
+
                 var fileName = $"{Guid.NewGuid()}{photoExt}";
                 var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "staff");
                 Directory.CreateDirectory(folder);
@@ -228,6 +236,13 @@ namespace Hearthly.Controllers
                 if (!allowedExts.Contains(photoExt))
                 {
                     ModelState.AddModelError(nameof(photo), "Only JPG, PNG, GIF, and WebP images are allowed.");
+                    return View(staffMember);
+                }
+
+                const long maxPhotoSize = 5 * 1024 * 1024;
+                if (photo.Length > maxPhotoSize)
+                {
+                    ModelState.AddModelError(nameof(photo), "Photo must be 5 MB or smaller.");
                     return View(staffMember);
                 }
 
