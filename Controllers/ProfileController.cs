@@ -1,9 +1,9 @@
-using Hearthly.Models;
+using Nestled.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Hearthly.Controllers;
+namespace Nestled.Controllers;
 
 [Authorize]
 public class ProfileController : Controller

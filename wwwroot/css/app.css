@@ -1,5 +1,5 @@
 /* =========================================
-   HEARTHLY — Main Stylesheet
+   NESTLED — Main Stylesheet
    ========================================= */
 
 /* CSS Custom Properties */
@@ -121,13 +121,13 @@ body {
   overflow-x: hidden;
 }
 
-.hearthly-app.has-nav #page-content {
+.nestled-app.has-nav #page-content {
   padding-top: calc(var(--header-height) + 8px);
   padding-bottom: calc(var(--bottom-nav-height) + var(--safe-area-bottom) + 16px);
   min-height: 100dvh;
 }
 
-.hearthly-app.no-nav {
+.nestled-app.no-nav {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   min-height: 100dvh;
   display: flex;
@@ -966,7 +966,7 @@ body {
 }
 
 @media (min-width: 1024px) {
-  .hearthly-app.has-nav #page-content {
+  .nestled-app.has-nav #page-content {
     max-width: 768px;
     margin: 0 auto;
   }

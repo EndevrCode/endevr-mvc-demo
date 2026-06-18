@@ -1,7 +1,7 @@
-@model List<Hearthly.Models.UtilityAccount>
+@model List<Nestled.Models.UtilityAccount>
 @{
     ViewData["Title"] = "Utilities";
-    var families = ViewBag.Families as List<Hearthly.Models.Family> ?? new();
+    var families = ViewBag.Families as List<Nestled.Models.Family> ?? new();
 }
 <div class="page-section">
     <div class="page-header">
@@ -15,17 +15,17 @@
         @foreach (var account in Model)
         {
             var icon = account.UtilityType switch {
-                Hearthly.Models.UtilityType.Electricity => "fa-bolt",
-                Hearthly.Models.UtilityType.Gas => "fa-fire-flame-curved",
-                Hearthly.Models.UtilityType.Water => "fa-droplet",
-                Hearthly.Models.UtilityType.Internet => "fa-wifi",
+                Nestled.Models.UtilityType.Electricity => "fa-bolt",
+                Nestled.Models.UtilityType.Gas => "fa-fire-flame-curved",
+                Nestled.Models.UtilityType.Water => "fa-droplet",
+                Nestled.Models.UtilityType.Internet => "fa-wifi",
                 _ => "fa-plug"
             };
             var color = account.UtilityType switch {
-                Hearthly.Models.UtilityType.Electricity => "#eab308",
-                Hearthly.Models.UtilityType.Gas => "#f97316",
-                Hearthly.Models.UtilityType.Water => "#06b6d4",
-                Hearthly.Models.UtilityType.Internet => "#6C63FF",
+                Nestled.Models.UtilityType.Electricity => "#eab308",
+                Nestled.Models.UtilityType.Gas => "#f97316",
+                Nestled.Models.UtilityType.Water => "#06b6d4",
+                Nestled.Models.UtilityType.Internet => "#6C63FF",
                 _ => "#64748b"
             };
             <div class="glass-card mb-4">
@@ -85,7 +85,7 @@
             <div class="form-group">
                 <label class="form-label-glass">Type</label>
                 <select name="UtilityType" class="form-control-glass" required>
-                    @foreach (var t in Enum.GetValues<Hearthly.Models.UtilityType>())
+                    @foreach (var t in Enum.GetValues<Nestled.Models.UtilityType>())
                     {
                         <option value="@((int)t)">@t</option>
                     }

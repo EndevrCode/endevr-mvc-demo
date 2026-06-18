@@ -1,4 +1,4 @@
-namespace Hearthly.Models;
+namespace Nestled.Models;
 
 public enum DocumentCategory { Personal, Legal, HousePlans, Medical, Financial, Other }
 

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace Hearthly.Controllers;
+namespace Nestled.Controllers;
 
 public class HomeController : Controller
 {

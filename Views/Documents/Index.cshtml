@@ -1,7 +1,7 @@
-@model List<Hearthly.Models.VaultDocument>
+@model List<Nestled.Models.VaultDocument>
 @{
     ViewData["Title"] = "Documents";
-    var families = ViewBag.Families as List<Hearthly.Models.Family> ?? new();
+    var families = ViewBag.Families as List<Nestled.Models.Family> ?? new();
 }
 <div class="page-section">
     <div class="page-header">
@@ -14,7 +14,7 @@
         <a href="/Vault" style="color:var(--text-muted);font-size:0.85rem;text-decoration:none;"><i class="fa-solid fa-arrow-left"></i> Back to Vault</a>
     </div>
 
-    @foreach (var category in Enum.GetValues<Hearthly.Models.DocumentCategory>())
+    @foreach (var category in Enum.GetValues<Nestled.Models.DocumentCategory>())
     {
         var docs = Model.Where(d => d.Category == category).ToList();
         if (!docs.Any()) continue;
@@ -69,7 +69,7 @@
             <div class="form-group">
                 <label class="form-label-glass">Category</label>
                 <select name="Category" class="form-control-glass" required>
-                    @foreach (var c in Enum.GetValues<Hearthly.Models.DocumentCategory>())
+                    @foreach (var c in Enum.GetValues<Nestled.Models.DocumentCategory>())
                     {
                         <option value="@((int)c)">@c</option>
                     }

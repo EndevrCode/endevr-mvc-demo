@@ -1,0 +1,69 @@
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Nestled.Data.RuleOfThree;
+using Nestled.Data.Shopping;
+using Nestled.Data.Vault;
+
+
+namespace Nestled.Data
+{
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
+
+        public DbSet<UserProfile> UserProfiles { get; set; }
+        public DbSet<Family> Families { get; set; }
+        public DbSet<FamilyMember> FamilyMembers { get; set; }
+        public DbSet<FamilyInvite> FamilyInvites { get; set; }
+        public DbSet<Pet> Pets { get; set; }
+        public DbSet<Utility> Utilities { get; set; }
+        public DbSet<StaffMember> StaffMembers { get; set; } = default!;
+        public DbSet<ServiceContact> ServiceContacts { get; set; } = default!;
+        public DbSet<EmergencyContact> EmergencyContacts { get; set; } = default!;
+        public DbSet<RuleOfThreeEntry> RuleOfThreeEntries { get; set; }
+        public DbSet<RuleOfThreeTask> RuleOfThreeTasks { get; set; }
+        public DbSet<UserAppSettings> UserAppSettings { get; set; }
+        public DbSet<Nestled.Data.Vault.VaultFile> VaultFiles { get; set; } = default!;
+        public DbSet<VaultPassword> VaultPasswords { get; set; }
+        public DbSet<Nestled.Data.Vault.VaultDocument> VaultDocuments { get; set; } = default!;
+        public DbSet<VaultBankAccount> VaultBankAccounts { get; set; }
+        public DbSet<FamilyLocation> FamilyLocations { get; set; } = default!;
+        public DbSet<FamilyPlace> FamilyPlaces { get; set; } = default!;
+        public DbSet<Bill> Bills { get; set; } = default!;
+        public DbSet<ShoppingList> ShoppingLists { get; set; } = default!;
+        public DbSet<ShoppingItem> ShoppingItems { get; set; } = default!;
+        public DbSet<Nestled.Data.Vault.VaultBiometricCredential> VaultBiometricCredentials { get; set; } = default!;
+        public DbSet<FamilyCalendarEvent> FamilyCalendarEvents { get; set; } = default!;
+        public DbSet<HealthProfile> HealthProfiles { get; set; } = default!;
+        public DbSet<FamilyChore> FamilyChores { get; set; } = default!;
+        public DbSet<StaffPayment> StaffPayments { get; set; } = default!;
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+
+            // Configure composite PK for FamilyMember, non‑clustered
+            builder.Entity<FamilyMember>(entity =>
+            {
+                entity.HasKey(fm => new { fm.FamilyId, fm.UserId })
+                      .IsClustered(false);
+
+                entity.HasOne(fm => fm.Family)
+                      .WithMany(f => f.Members)
+                      .HasForeignKey(fm => fm.FamilyId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(fm => fm.User)
+                      .WithMany(u => u.FamilyMemberships)
+                      .HasForeignKey(fm => fm.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // Emergency contacts are seeded via EF migrations (InsertData)
+        }
+    }
+}
+

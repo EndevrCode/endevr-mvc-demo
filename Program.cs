@@ -1,5 +1,5 @@
-using Hearthly.Data;
-using Hearthly.Models;
+using Nestled.Data;
+using Nestled.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 

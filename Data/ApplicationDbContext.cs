@@ -1,8 +1,8 @@
-using Hearthly.Models;
+using Nestled.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace Hearthly.Data;
+namespace Nestled.Data;
 
 public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
 {

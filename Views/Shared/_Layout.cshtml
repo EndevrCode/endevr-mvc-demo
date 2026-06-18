@@ -6,10 +6,10 @@
     <meta name="theme-color" content="#6C63FF" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Hearthly" />
+    <meta name="apple-mobile-web-app-title" content="Nestled" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="description" content="Hearthly — Your family, all in one place" />
-    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — " : "")Hearthly</title>
+    <meta name="description" content="Nestled — Your family, all in one place" />
+    <title>@(ViewData["Title"] != null ? ViewData["Title"] + " — " : "")Nestled</title>
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/images/icon-192.png" />
     <link rel="icon" type="image/png" href="/images/icon-192.png" />
@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="stylesheet" href="/css/app.css" />
 </head>
-<body class="hearthly-app @(ViewData["HideNav"] != null ? "no-nav" : "has-nav")">
+<body class="nestled-app @(ViewData["HideNav"] != null ? "no-nav" : "has-nav")">
 
     @if (ViewData["HideNav"] == null && User.Identity?.IsAuthenticated == true)
     {
@@ -92,7 +92,7 @@
             </button>
             <a href="/Dashboard" class="app-logo">
                 <span class="logo-icon"><i class="fa-solid fa-house-heart"></i></span>
-                <span class="logo-text">Hearthly</span>
+                <span class="logo-text">Nestled</span>
             </a>
             <a href="/Profile" class="header-avatar" aria-label="Profile">
                 @if (ViewBag.CurrentUser?.PhotoPath != null)

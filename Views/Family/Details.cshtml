@@ -1,8 +1,8 @@
-@model Hearthly.Models.Family
+@model Nestled.Models.Family
 @{
     ViewData["Title"] = Model.Name;
-    var myRole = ViewBag.MyRole as Hearthly.Models.FamilyRole?;
-    var isAdmin = myRole == Hearthly.Models.FamilyRole.Admin;
+    var myRole = ViewBag.MyRole as Nestled.Models.FamilyRole?;
+    var isAdmin = myRole == Nestled.Models.FamilyRole.Admin;
     var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 }
 <div class="page-section">
@@ -32,7 +32,7 @@
                     <div class="list-item-subtitle">Joined @member.JoinedAt.ToString("MMM yyyy")</div>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px;">
-                    @if (member.Role == Hearthly.Models.FamilyRole.Admin)
+                    @if (member.Role == Nestled.Models.FamilyRole.Admin)
                     {
                         <span class="badge-pill badge-primary">Admin</span>
                     }
@@ -56,11 +56,11 @@
         }
     </div>
 
-    @if (Model.Invitations.Any(i => i.Status == Hearthly.Models.InvitationStatus.Pending))
+    @if (Model.Invitations.Any(i => i.Status == Nestled.Models.InvitationStatus.Pending))
     {
         <div class="glass-card mb-4">
             <div class="section-title"><i class="fa-solid fa-envelope"></i> Pending Invitations</div>
-            @foreach (var inv in Model.Invitations.Where(i => i.Status == Hearthly.Models.InvitationStatus.Pending))
+            @foreach (var inv in Model.Invitations.Where(i => i.Status == Nestled.Models.InvitationStatus.Pending))
             {
                 <div class="list-item">
                     <div class="list-item-icon" style="background:rgba(108,99,255,0.1);color:var(--primary);"><i class="fa-solid fa-envelope"></i></div>

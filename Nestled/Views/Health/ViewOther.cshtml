@@ -1,0 +1,123 @@
+@model Nestled.Data.HealthProfile
+@{
+    ViewData["Title"] = $"{ViewBag.ProfileName}'s Health";
+    string personName = ViewBag.ProfileName ?? "Member";
+    var hasData = !string.IsNullOrWhiteSpace(Model.BloodType)
+               || !string.IsNullOrWhiteSpace(Model.Allergies)
+               || !string.IsNullOrWhiteSpace(Model.CurrentMedications)
+               || !string.IsNullOrWhiteSpace(Model.VaccinationNotes)
+               || !string.IsNullOrWhiteSpace(Model.MedicalAidName)
+               || !string.IsNullOrWhiteSpace(Model.DoctorName)
+               || !string.IsNullOrWhiteSpace(Model.EmergencyNotes);
+}
+
+<div class="mb-4">
+    <h2 class="mb-0">
+        <i class="fa-light fa-heart-pulse me-2"></i>@personName's Health
+    </h2>
+</div>
+
+@if (!hasData)
+{
+    <div class="glass-card text-center py-5">
+        <i class="fa-light fa-heart-pulse fa-3x text-muted mb-3 d-block"></i>
+        <p class="text-muted mb-0">@personName hasn't added health information yet.</p>
+    </div>
+}
+else
+{
+    @if (!string.IsNullOrWhiteSpace(Model.EmergencyNotes))
+    {
+        <div class="glass-card p-4 mb-3 border border-danger border-opacity-50">
+            <h6 class="fw-semibold text-danger mb-2">
+                <i class="fa-light fa-triangle-exclamation me-1"></i> Emergency Medical Notes
+            </h6>
+            <p class="mb-0">@Model.EmergencyNotes</p>
+        </div>
+    }
+
+    <div class="glass-card p-4 mb-3">
+        <h6 class="fw-semibold mb-3"><i class="fa-light fa-droplet me-2 text-danger"></i>Basic Info</h6>
+        <div class="row gy-3">
+            <div class="col-md-6">
+                <small class="text-muted d-block">Blood Type</small>
+                <strong>@(Model.BloodType ?? "—")</strong>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.Allergies))
+            {
+                <div class="col-12">
+                    <small class="text-muted d-block">Allergies</small>
+                    <div>@Model.Allergies</div>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.CurrentMedications))
+    {
+        <div class="glass-card p-4 mb-3">
+            <h6 class="fw-semibold mb-3"><i class="fa-light fa-pills me-2 text-primary"></i>Current Medications</h6>
+            <div>@Model.CurrentMedications</div>
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.VaccinationNotes))
+    {
+        <div class="glass-card p-4 mb-3">
+            <h6 class="fw-semibold mb-3"><i class="fa-light fa-syringe me-2 text-success"></i>Vaccinations</h6>
+            <div>@Model.VaccinationNotes</div>
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.MedicalAidName) || !string.IsNullOrWhiteSpace(Model.MedicalAidNumber))
+    {
+        <div class="glass-card p-4 mb-3">
+            <h6 class="fw-semibold mb-3"><i class="fa-light fa-shield-halved me-2 text-info"></i>Medical Aid</h6>
+            <div class="row gy-2">
+                @if (!string.IsNullOrWhiteSpace(Model.MedicalAidName))
+                {
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Provider</small>
+                        <div>@Model.MedicalAidName</div>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.MedicalAidNumber))
+                {
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Member Number</small>
+                        <div>@Model.MedicalAidNumber</div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.DoctorName) || !string.IsNullOrWhiteSpace(Model.DoctorPhone))
+    {
+        <div class="glass-card p-4 mb-3">
+            <h6 class="fw-semibold mb-3"><i class="fa-light fa-user-doctor me-2"></i>Doctor / GP</h6>
+            <div class="row gy-2">
+                @if (!string.IsNullOrWhiteSpace(Model.DoctorName))
+                {
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Name</small>
+                        <div>@Model.DoctorName</div>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.DoctorPhone))
+                {
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Phone</small>
+                        <a href="tel:@Model.DoctorPhone">@Model.DoctorPhone</a>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}
+
+<div class="mt-4">
+    <a href="javascript:history.back()" class="btn btn-outline-secondary rounded-pill px-4">
+        <i class="fa-light fa-arrow-left me-1"></i> Back
+    </a>
+</div>

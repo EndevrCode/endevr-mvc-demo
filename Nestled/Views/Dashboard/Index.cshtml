@@ -1,0 +1,551 @@
+@model Nestled.Data.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+    var families = Model.Families;
+    var pending  = Model.PendingInvites;
+}
+
+<div class="mb-4">
+    <h2 class="mb-0"><i class="fa-light fa-grid me-2"></i>Dashboard</h2>
+</div>
+
+@* ── Summary chips ─────────────────────────────────── *@
+<div class="d-flex flex-wrap gap-3 mb-4">
+    <div class="glass-card px-3 py-2 text-center" style="min-width:110px;">
+        <div class="fs-4 fw-bold">@families.Count</div>
+        <small class="text-muted">Famil@(families.Count == 1 ? "y" : "ies")</small>
+    </div>
+    <div class="glass-card px-3 py-2 text-center" style="min-width:110px;">
+        <div class="fs-4 fw-bold">@families.Sum(f => f.Members.Count)</div>
+        <small class="text-muted">Members</small>
+    </div>
+    <div class="glass-card px-3 py-2 text-center" style="min-width:110px;">
+        <div class="fs-4 fw-bold">@families.Sum(f => f.Pets.Count)</div>
+        <small class="text-muted">Pets</small>
+    </div>
+    @if (pending.Any())
+    {
+        <div class="glass-card px-3 py-2 text-center border border-warning" style="min-width:110px;">
+            <div class="fs-4 fw-bold text-warning">@pending.Count</div>
+            <small class="text-muted">Invite@(pending.Count == 1 ? "" : "s")</small>
+        </div>
+    }
+    @if (Model.UnpaidBillsCount > 0)
+    {
+        <a href="#bills-section" class="glass-card px-3 py-2 text-center text-decoration-none @(Model.OverdueBills.Any() ? "border border-danger" : "border border-warning")" style="min-width:130px;">
+            <div class="fs-4 fw-bold @(Model.OverdueBills.Any() ? "text-danger" : "text-warning")">
+                R @Model.UnpaidBillsTotal.ToString("N2")
+            </div>
+            <small class="text-muted">@Model.UnpaidBillsCount unpaid bill@(Model.UnpaidBillsCount == 1 ? "" : "s")</small>
+        </a>
+    }
+    @if (Model.PendingChoresCount > 0)
+    {
+        <a asp-controller="Chores" asp-action="Index" class="glass-card px-3 py-2 text-center text-decoration-none" style="min-width:110px;">
+            <div class="fs-4 fw-bold text-primary">@Model.PendingChoresCount</div>
+            <small class="text-muted">chore@(Model.PendingChoresCount == 1 ? "" : "s") to do</small>
+        </a>
+    }
+    @if (Model.StaffCount > 0)
+    {
+        <a asp-controller="StaffMembers" asp-action="Index" class="glass-card px-3 py-2 text-center text-decoration-none" style="min-width:140px;">
+            <div class="fs-4 fw-bold">R @Model.EstimatedMonthlyPayroll.ToString("N2")</div>
+            <small class="text-muted">payroll est. (@Model.StaffCount staff)</small>
+        </a>
+    }
+    @if (Model.UtilityReminders.Any())
+    {
+        <a href="#utility-reminders" class="glass-card px-3 py-2 text-center text-decoration-none border border-info border-opacity-50" style="min-width:110px;">
+            <div class="fs-4 fw-bold text-info">@Model.UtilityReminders.Count</div>
+            <small class="text-muted">utilit@(Model.UtilityReminders.Count == 1 ? "y" : "ies") due</small>
+        </a>
+    }
+</div>
+
+@* ── Pending invites ───────────────────────────────── *@
+@if (pending.Any())
+{
+    <h5 class="mb-2"><i class="fa-light fa-envelope me-1 text-warning"></i>Family Invites Waiting for You</h5>
+    <div class="d-flex flex-column gap-2 mb-4">
+        @foreach (var inv in pending)
+        {
+            <div class="glass-card p-3 d-flex align-items-center justify-content-between gap-3 border border-warning border-opacity-50">
+                <div>
+                    <strong>@inv.Family.Name</strong>
+                    <div class="small text-muted">Invited @inv.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</div>
+                </div>
+                <form asp-action="AcceptInvite" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="token" value="@inv.Token" />
+                    <button type="submit" class="btn btn-warning btn-sm rounded-pill px-3">
+                        <i class="fa-light fa-check me-1"></i> Accept
+                    </button>
+                </form>
+            </div>
+        }
+    </div>
+}
+
+@* ── Overdue bills alert ───────────────────────────── *@
+@if (Model.OverdueBills.Any())
+{
+    <div id="bills-section" class="mb-4">
+        <h5 class="mb-2"><i class="fa-light fa-triangle-exclamation me-1 text-danger"></i>Overdue Bills</h5>
+        <div class="d-flex flex-column gap-2">
+            @foreach (var bill in Model.OverdueBills)
+            {
+                var days = (int)(DateTime.Today - bill.DueDate.Date).TotalDays;
+                <div class="glass-card p-3 d-flex align-items-center justify-content-between border border-danger border-opacity-50">
+                    <div>
+                        <strong>@bill.Name</strong>
+                        @if (!string.IsNullOrWhiteSpace(bill.Category))
+                        {
+                            <span class="badge bg-secondary ms-2">@bill.Category</span>
+                        }
+                        <div class="small text-danger">@days day@(days == 1 ? "" : "s") overdue</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold">R @bill.Amount.ToString("N2")</div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@* ── Upcoming birthdays ────────────────────────────── *@
+@if (Model.UpcomingBirthdays.Any())
+{
+    <div class="mb-4">
+        <h5 class="mb-2"><i class="fa-light fa-cake-candles me-1 text-info"></i>Upcoming Birthdays</h5>
+        <div class="d-flex flex-column gap-2">
+            @foreach (var b in Model.UpcomingBirthdays)
+            {
+                <div class="glass-card p-3 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
+                             style="width:36px;height:36px;background:rgba(99,102,241,.15);">
+                            @if (b.IsPet)
+                            {
+                                <i class="fa-light fa-paw text-info"></i>
+                            }
+                            else
+                            {
+                                <i class="fa-light fa-cake-candles text-info"></i>
+                            }
+                        </div>
+                        <div>
+                            <div class="fw-semibold">@b.Name</div>
+                            <div class="text-muted small">@b.NextBirthday.ToString("dd MMMM")</div>
+                        </div>
+                    </div>
+                    <span class="badge @(b.DaysUntil == 0 ? "bg-info" : b.DaysUntil <= 3 ? "bg-primary" : "bg-secondary")">
+                        @(b.DaysUntil == 0 ? "Today!" : b.DaysUntil == 1 ? "Tomorrow" : $"In {b.DaysUntil} days")
+                    </span>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@* ── Pet care reminders ────────────────────────────── *@
+@if (Model.PetCareReminders.Any())
+{
+    <div class="mb-4">
+        <h5 class="mb-2"><i class="fa-light fa-paw me-1 text-warning"></i>Pet Care Overdue</h5>
+        <div class="d-flex flex-column gap-2">
+            @foreach (var r in Model.PetCareReminders.Take(5))
+            {
+                <div class="glass-card p-3 d-flex align-items-center justify-content-between border border-warning border-opacity-25">
+                    <div>
+                        <strong>@r.PetName</strong>
+                        <span class="text-muted ms-1">— @r.CareType</span>
+                        <div class="text-muted small">
+                            @(r.NeverRecorded ? "Never recorded" : $"Last: {r.LastDate:dd MMM yyyy}")
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <span class="badge bg-warning text-dark">@r.DaysOverdue d overdue</span>
+                        <div class="mt-1">
+                            <a asp-controller="Pets" asp-action="Details" asp-route-id="@r.PetId"
+                               class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                                <i class="fa-light fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@* ── Utility purchase reminders ────────────────────── *@
+@if (Model.UtilityReminders.Any())
+{
+    <div id="utility-reminders" class="mb-4">
+        <h5 class="mb-2"><i class="fa-light fa-screwdriver-wrench me-1 text-info"></i>Utilities Due</h5>
+        <div class="d-flex flex-column gap-2">
+            @foreach (var r in Model.UtilityReminders)
+            {
+                var icon = r.UtilityType == "Electricity" ? "fa-bolt text-warning" : "fa-fire text-danger";
+                <div class="glass-card p-3 d-flex align-items-center justify-content-between border border-info border-opacity-25">
+                    <div>
+                        <strong><i class="fa-light @icon me-1"></i>@r.UtilityType</strong>
+                        @if (Model.Families.Count > 1)
+                        {
+                            <span class="text-muted ms-1 small">· @r.FamilyName</span>
+                        }
+                        <div class="text-muted small">
+                            Last purchase @r.DaysAgo day@(r.DaysAgo == 1 ? "" : "s") ago
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <a asp-controller="Utilities" asp-action="Index" asp-route-familyId="@r.FamilyId"
+                           class="btn btn-sm btn-outline-info rounded-pill px-3">
+                            <i class="fa-light fa-plus me-1"></i> Buy Now
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@* ── Upcoming bills ────────────────────────────────── *@
+@if (Model.UpcomingBills.Any())
+{
+    <div class="mb-4">
+        <h5 class="mb-2"><i class="fa-light fa-calendar-clock me-1 text-warning"></i>Upcoming Bills</h5>
+        <div class="d-flex flex-column gap-2">
+            @foreach (var bill in Model.UpcomingBills)
+            {
+                var daysLeft = (int)(bill.DueDate.Date - DateTime.Today).TotalDays;
+                var urgency = daysLeft == 0 ? "border-warning" : daysLeft <= 3 ? "border-warning border-opacity-75" : "border-opacity-25";
+                <div class="glass-card p-3 d-flex align-items-center justify-content-between border border-warning @urgency">
+                    <div>
+                        <strong>@bill.Name</strong>
+                        @if (!string.IsNullOrWhiteSpace(bill.Category))
+                        {
+                            <span class="badge bg-secondary ms-2">@bill.Category</span>
+                        }
+                        <div class="small text-warning">
+                            @(daysLeft == 0 ? "Due today" : $"Due in {daysLeft} day{(daysLeft == 1 ? "" : "s")}")
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold">R @bill.Amount.ToString("N2")</div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@* ── My Families ───────────────────────────────────── *@
+<h5 class="mb-2"><i class="fa-light fa-people-group me-1"></i>My Families</h5>
+@if (!families.Any())
+{
+    <div class="glass-card text-center py-4 mb-4">
+        <p class="text-muted mb-2">You're not in any families yet.</p>
+        <a asp-controller="Families" asp-action="Create" class="btn btn-primary btn-sm rounded-pill px-3">
+            <i class="fa-light fa-plus me-1"></i> Create a Family
+        </a>
+    </div>
+}
+else
+{
+    <div class="d-flex flex-column gap-3 mb-4">
+        @foreach (var f in families)
+        {
+            <div class="glass-card p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="mb-0 fw-semibold">@f.Family.Name</h6>
+                    <a asp-controller="Families" asp-action="Details" asp-route-id="@f.Family.Id"
+                       class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                        <i class="fa-light fa-arrow-right"></i>
+                    </a>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach (var m in f.Members.Take(6))
+                    {
+                        <div class="text-center" style="width:48px;" title="@(m.PreferredName ?? m.Email)">
+                            @if (!string.IsNullOrWhiteSpace(m.PhotoPath))
+                            {
+                                <img src="@m.PhotoPath" class="rounded-circle" width="40" height="40"
+                                     style="object-fit:cover;" alt="@m.PreferredName" />
+                            }
+                            else
+                            {
+                                <div class="rounded-circle d-flex align-items-center justify-content-center bg-secondary text-white"
+                                     style="width:40px;height:40px;font-size:14px;">
+                                    @((m.PreferredName ?? m.Email ?? "?").Substring(0, 1).ToUpper())
+                                </div>
+                            }
+                        </div>
+                    }
+                    @if (f.Members.Count > 6)
+                    {
+                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-secondary text-white"
+                             style="width:40px;height:40px;font-size:12px;" title="@(f.Members.Count - 6) more">
+                            +@(f.Members.Count - 6)
+                        </div>
+                    }
+                </div>
+                <div class="mt-2 small text-muted">
+                    @f.Members.Count member@(f.Members.Count == 1 ? "" : "s")
+                    @if (f.Pets.Any())
+                    {
+                        <span class="ms-2">· @f.Pets.Count pet@(f.Pets.Count == 1 ? "" : "s")</span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@* ── Calendar ──────────────────────────────────────── *@
+<div class="mb-2 d-flex justify-content-between align-items-center">
+    <h5 class="mb-0"><i class="fa-light fa-calendar me-1"></i>Birthdays &amp; Events</h5>
+    @if (families.Any())
+    {
+        <button type="button" class="btn btn-primary btn-sm rounded-pill px-3" onclick="openAddEventModal(null)">
+            <i class="fa-light fa-plus me-1"></i> Add Event
+        </button>
+    }
+</div>
+<div class="glass-card p-3 mb-4">
+    <div id="calendar"></div>
+</div>
+
+@Html.AntiForgeryToken()
+
+<!-- Add Event Modal -->
+<div class="modal fade" id="addEventModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold mx-auto">
+                    <i class="fa-light fa-calendar-plus me-2"></i>Add Calendar Event
+                </h5>
+                <button type="button" class="btn-close position-absolute end-0 me-3" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body pt-3">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Title <span class="text-danger">*</span></label>
+                    <input id="evTitle" type="text" class="form-control" placeholder="e.g. Family Braai, Doctor Appointment" maxlength="200" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Date <span class="text-danger">*</span></label>
+                    <input id="evDate" type="date" class="form-control" />
+                </div>
+                @if (families.Count > 1)
+                {
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small">Family</label>
+                        <select id="evFamily" class="form-select">
+                            @foreach (var f in families)
+                            {
+                                <option value="@f.Family.Id">@f.Family.Name</option>
+                            }
+                        </select>
+                    </div>
+                }
+                else if (families.Count == 1)
+                {
+                    <input type="hidden" id="evFamily" value="@families[0].Family.Id" />
+                }
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Description</label>
+                    <textarea id="evDescription" class="form-control" rows="2" placeholder="Optional notes" maxlength="500"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold small">Colour</label>
+                    <div class="d-flex gap-2 flex-wrap" id="colorPicker">
+                        @foreach (var c in new[] { ("#6366f1","Indigo"), ("#10b981","Green"), ("#f59e0b","Amber"), ("#ef4444","Red"), ("#3b82f6","Blue"), ("#ec4899","Pink"), ("#8b5cf6","Violet") })
+                        {
+                            <div class="color-swatch @(c.Item1 == "#6366f1" ? "selected" : "")"
+                                 data-color="@c.Item1"
+                                 title="@c.Item2"
+                                 style="width:28px;height:28px;border-radius:50%;background:@c.Item1;cursor:pointer;border:3px solid transparent;"
+                                 onclick="selectColor(this, '@c.Item1')">
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary rounded-pill flex-grow-1" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary rounded-pill flex-grow-1" onclick="submitAddEvent()">
+                    <i class="fa-light fa-plus me-1"></i> Add Event
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Detail Modal -->
+<div class="modal fade" id="eventDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content glass-card">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold mx-auto" id="evDetailTitle"></h5>
+                <button type="button" class="btn-close position-absolute end-0 me-3" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center pt-2">
+                <p class="text-muted small mb-1" id="evDetailDate"></p>
+                <p class="small mb-0" id="evDetailDesc"></p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center" id="evDetailFooter">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-danger rounded-pill px-4 d-none" id="evDetailDeleteBtn" onclick="deleteCalendarEvent()">
+                    <i class="fa-light fa-trash me-1"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" />
+    <style>
+        .color-swatch.selected { border-color: #fff !important; box-shadow: 0 0 0 2px rgba(255,255,255,.5); }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script>
+        const _csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+        const _families = @Html.Raw(Model.FamiliesJson);
+        let _selectedColor = '#6366f1';
+        let _calendar;
+        let _activeEventId = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const calendarEl = document.getElementById('calendar');
+            _calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                height: 'auto',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'listWeek'
+                },
+                events: @Html.Raw(Model.EventsJson),
+                dayMaxEventRows: true,
+                eventDisplay: 'block',
+                dateClick: function (info) {
+                    openAddEventModal(info.dateStr);
+                },
+                eventClick: function (info) {
+                    const ev = info.event;
+                    const type = ev.extendedProps?.type;
+                    _activeEventId = type === 'custom' ? ev.id : null;
+
+                    document.getElementById('evDetailTitle').textContent = ev.title;
+                    document.getElementById('evDetailDate').textContent = new Date(ev.start).toLocaleDateString('en-ZA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    document.getElementById('evDetailDesc').textContent = ev.extendedProps?.description ?? '';
+
+                    const deleteBtn = document.getElementById('evDetailDeleteBtn');
+                    if (type === 'custom') {
+                        deleteBtn.classList.remove('d-none');
+                    } else {
+                        deleteBtn.classList.add('d-none');
+                    }
+
+                    new bootstrap.Modal(document.getElementById('eventDetailModal')).show();
+                }
+            });
+            _calendar.render();
+        });
+
+        function openAddEventModal(dateStr) {
+            if (!_families || _families.length === 0) return;
+            document.getElementById('evTitle').value = '';
+            document.getElementById('evDate').value = dateStr ?? new Date().toISOString().split('T')[0];
+            document.getElementById('evDescription').value = '';
+            resetColorSwatches('#6366f1');
+            new bootstrap.Modal(document.getElementById('addEventModal')).show();
+        }
+
+        function selectColor(el, color) {
+            document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+            el.classList.add('selected');
+            _selectedColor = color;
+        }
+
+        function resetColorSwatches(color) {
+            _selectedColor = color;
+            document.querySelectorAll('.color-swatch').forEach(s => {
+                s.classList.toggle('selected', s.dataset.color === color);
+            });
+        }
+
+        function submitAddEvent() {
+            const title = document.getElementById('evTitle').value.trim();
+            const date = document.getElementById('evDate').value;
+            const desc = document.getElementById('evDescription').value.trim();
+            const familyEl = document.getElementById('evFamily');
+            const familyId = familyEl ? familyEl.value : '';
+
+            if (!title) { Swal.fire({ icon: 'warning', titleText: 'Title required', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false }); return; }
+            if (!date) { Swal.fire({ icon: 'warning', titleText: 'Date required', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false }); return; }
+
+            const form = new URLSearchParams();
+            form.append('familyId', familyId);
+            form.append('title', title);
+            form.append('description', desc);
+            form.append('date', date);
+            form.append('color', _selectedColor);
+            form.append('__RequestVerificationToken', _csrfToken);
+
+            fetch('/FamilyCalendarEvents/Create', { method: 'POST', body: form })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        bootstrap.Modal.getInstance(document.getElementById('addEventModal')).hide();
+                        _calendar.addEvent(data.ev);
+                        Swal.fire({ icon: 'success', titleText: 'Event added!', toast: true, position: 'top-end', timer: 1800, showConfirmButton: false });
+                    } else {
+                        Swal.fire({ icon: 'error', titleText: data.message ?? 'Error', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });
+                    }
+                })
+                .catch(() => Swal.fire({ icon: 'error', titleText: 'Network error', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false }));
+        }
+
+        function deleteCalendarEvent() {
+            if (!_activeEventId) return;
+            Swal.fire({
+                titleText: 'Delete event?',
+                text: 'This will remove the event from the calendar.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Delete',
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then(r => {
+                if (!r.isConfirmed) return;
+
+                const form = new URLSearchParams();
+                form.append('id', _activeEventId);
+                form.append('__RequestVerificationToken', _csrfToken);
+
+                fetch('/FamilyCalendarEvents/Delete/' + _activeEventId, { method: 'POST', body: form })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            bootstrap.Modal.getInstance(document.getElementById('eventDetailModal')).hide();
+                            const ev = _calendar.getEventById(_activeEventId);
+                            if (ev) ev.remove();
+                            Swal.fire({ icon: 'success', titleText: 'Event removed', toast: true, position: 'top-end', timer: 1800, showConfirmButton: false });
+                            _activeEventId = null;
+                        } else {
+                            Swal.fire({ icon: 'error', titleText: data.message ?? 'Error deleting event.', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });
+                        }
+                    });
+            });
+        }
+    </script>
+}

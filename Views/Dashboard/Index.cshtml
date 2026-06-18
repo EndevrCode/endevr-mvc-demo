@@ -1,11 +1,11 @@
-@model Hearthly.Models.ApplicationUser
+@model Nestled.Models.ApplicationUser
 @{
     ViewData["Title"] = "Dashboard";
-    var families = ViewBag.Families as List<Hearthly.Models.Family> ?? new();
-    var birthdays = ViewBag.UpcomingBirthdays as List<Hearthly.Models.ApplicationUser> ?? new();
-    var invites = ViewBag.PendingInvites as List<Hearthly.Models.FamilyInvitation> ?? new();
-    var bills = ViewBag.UnpaidBills as List<Hearthly.Models.Bill> ?? new();
-    var petReminders = ViewBag.PetCareReminders as List<Hearthly.Models.PetCareRecord> ?? new();
+    var families = ViewBag.Families as List<Nestled.Models.Family> ?? new();
+    var birthdays = ViewBag.UpcomingBirthdays as List<Nestled.Models.ApplicationUser> ?? new();
+    var invites = ViewBag.PendingInvites as List<Nestled.Models.FamilyInvitation> ?? new();
+    var bills = ViewBag.UnpaidBills as List<Nestled.Models.Bill> ?? new();
+    var petReminders = ViewBag.PetCareReminders as List<Nestled.Models.PetCareRecord> ?? new();
     var today = DateOnly.FromDateTime(DateTime.Today);
 }
 
@@ -149,7 +149,7 @@
                         </div>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px;">
-                        @if (myRole == Hearthly.Models.FamilyRole.Admin)
+                        @if (myRole == Nestled.Models.FamilyRole.Admin)
                         {
                             <span class="badge-pill badge-primary">Admin</span>
                         }

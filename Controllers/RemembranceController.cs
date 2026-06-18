@@ -1,11 +1,11 @@
-using Hearthly.Data;
+using Nestled.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Hearthly.Models;
+using Nestled.Models;
 
-namespace Hearthly.Controllers;
+namespace Nestled.Controllers;
 
 [Authorize]
 public class RemembranceController : Controller

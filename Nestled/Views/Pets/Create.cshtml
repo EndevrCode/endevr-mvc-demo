@@ -1,0 +1,165 @@
+@model Nestled.ViewModels.PetCreateViewModel
+
+@{
+    ViewData["Title"] = "Create New Pet";
+}
+
+<div class="mb-4">
+    <h2 class="mb-0"><i class="fa-light fa-paw me-2"></i>Create New Pet</h2>
+</div>
+
+<div class="glass-card p-4">
+<form id="petForm" asp-action="Create" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+    <div class="row gx-3 gy-3">
+
+        <!-- Pet Name / Species -->
+        <div class="col-md-6">
+            <label asp-for="Name" class="form-label fw-semibold"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger small"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="Species" class="form-label fw-semibold"></label>
+            <input asp-for="Species" class="form-control" />
+            <span asp-validation-for="Species" class="text-danger small"></span>
+        </div>
+
+        <!-- Breed / Photo -->
+        <div class="col-md-6">
+            <label asp-for="Breed" class="form-label fw-semibold"></label>
+            <input asp-for="Breed" class="form-control" />
+            <span asp-validation-for="Breed" class="text-danger small"></span>
+        </div>
+        <div class="col-md-6 text-center">
+            <label for="PhotoFile" class="form-label fw-semibold d-block">Pet Photo</label>
+            <div class="text-muted small mb-2">No photo currently set</div>
+            <input type="file" name="PhotoFile" id="PhotoFile" class="form-control" accept="image/*" />
+        </div>
+
+        <!-- Family Dropdown -->
+        <div class="col-md-6">
+            <label asp-for="FamilyId" class="form-label fw-semibold">Family</label>
+            <select asp-for="FamilyId" class="form-select">
+                <option value="">-- select family --</option>
+                @foreach (var f in ViewBag.FamilyList as List<Nestled.Data.Family>)
+                {
+                    <option value="@f.Id">@($"{f.Name} Family")</option>
+                }
+            </select>
+            <span asp-validation-for="FamilyId" class="text-danger small"></span>
+        </div>
+
+        <!-- Birth Date -->
+        <div class="col-md-6">
+            <label asp-for="BirthDate" class="form-label fw-semibold"></label>
+            <input asp-for="BirthDate" class="form-control" type="date" />
+            <span asp-validation-for="BirthDate" class="text-danger small"></span>
+        </div>
+
+        <!-- Weight -->
+        <div class="col-md-6">
+            <label asp-for="LastWeightKg" class="form-label fw-semibold"></label>
+            <input asp-for="LastWeightKg" class="form-control" placeholder="e.g. 12.5" step="0.1" data-val="false" />
+            <span asp-validation-for="LastWeightKg" class="text-danger small"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="LastWeighedDate" class="form-label fw-semibold"></label>
+            <input asp-for="LastWeighedDate" type="date" class="form-control" />
+            <span asp-validation-for="LastWeighedDate" class="text-danger small"></span>
+        </div>
+
+        <!-- Health Dates -->
+        <div class="col-md-6">
+            <label asp-for="LastDewormingDate" class="form-label fw-semibold"></label>
+            <input asp-for="LastDewormingDate" class="form-control" type="date" />
+            <span asp-validation-for="LastDewormingDate" class="text-danger small"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="LastTickFleaDate" class="form-label fw-semibold"></label>
+            <input asp-for="LastTickFleaDate" class="form-control" type="date" />
+            <span asp-validation-for="LastTickFleaDate" class="text-danger small"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="LastGroomingDate" class="form-label fw-semibold"></label>
+            <input asp-for="LastGroomingDate" class="form-control" type="date" />
+            <span asp-validation-for="LastGroomingDate" class="text-danger small"></span>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="LastCheckupDate" class="form-label fw-semibold"></label>
+            <input asp-for="LastCheckupDate" class="form-control" type="date" />
+            <span asp-validation-for="LastCheckupDate" class="text-danger small"></span>
+        </div>
+
+        <!-- Options -->
+        <div class="col-12">
+            <h5 class="fw-semibold mt-2 mb-3">Options</h5>
+            <div class="row gx-3 gy-3">
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <input asp-for="HasInsurance" class="form-check-input" id="HasInsurance" />
+                        <label asp-for="HasInsurance" class="form-check-label"></label>
+                    </div>
+                </div>
+                <div class="col-md-8" id="insuranceNumberDiv" style="display:none;">
+                    <label asp-for="InsuranceNumber" class="form-label fw-semibold"></label>
+                    <input asp-for="InsuranceNumber" class="form-control" />
+                    <span asp-validation-for="InsuranceNumber" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <input asp-for="IsMicrochipped" class="form-check-input" id="IsMicrochipped" />
+                        <label asp-for="IsMicrochipped" class="form-check-label"></label>
+                    </div>
+                </div>
+                <div class="col-md-8" id="microchipNumberDiv" style="display:none;">
+                    <label asp-for="MicrochipNumber" class="form-label fw-semibold"></label>
+                    <input asp-for="MicrochipNumber" class="form-control" />
+                    <span asp-validation-for="MicrochipNumber" class="text-danger small"></span>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-check">
+                        <input asp-for="IsDeceased" class="form-check-input" id="IsDeceased" />
+                        <label asp-for="IsDeceased" class="form-check-label"></label>
+                    </div>
+                </div>
+                <div class="col-md-8" id="deathDateDiv" style="display:none;">
+                    <label asp-for="DateOfDeath" class="form-label fw-semibold"></label>
+                    <input asp-for="DateOfDeath" class="form-control" type="date" />
+                    <span asp-validation-for="DateOfDeath" class="text-danger small"></span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <a asp-action="Index" asp-route-familyId="@Model.FamilyId" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="fa-light fa-arrow-left me-1"></i> Cancel
+        </a>
+        <button type="submit" class="btn btn-primary rounded-pill px-4">
+            <i class="fa-light fa-paw me-1"></i> Save Pet
+        </button>
+    </div>
+</form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('HasInsurance').addEventListener('change', e => {
+            document.getElementById('insuranceNumberDiv').style.display = e.target.checked ? 'block' : 'none';
+        });
+        document.getElementById('IsMicrochipped').addEventListener('change', e => {
+            document.getElementById('microchipNumberDiv').style.display = e.target.checked ? 'block' : 'none';
+        });
+        document.getElementById('IsDeceased').addEventListener('change', e => {
+            document.getElementById('deathDateDiv').style.display = e.target.checked ? 'block' : 'none';
+        });
+    </script>
+}

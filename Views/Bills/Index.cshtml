@@ -1,7 +1,7 @@
-@model List<Hearthly.Models.Bill>
+@model List<Nestled.Models.Bill>
 @{
     ViewData["Title"] = "Bills";
-    var families = ViewBag.Families as List<Hearthly.Models.Family> ?? new();
+    var families = ViewBag.Families as List<Nestled.Models.Family> ?? new();
     var unpaid = Model.Where(b => !b.IsPaid).ToList();
     var paid = Model.Where(b => b.IsPaid).ToList();
 }

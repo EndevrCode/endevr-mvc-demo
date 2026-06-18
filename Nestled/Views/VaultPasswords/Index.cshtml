@@ -1,0 +1,241 @@
+﻿@model IEnumerable<Nestled.Data.Vault.VaultPassword>
+@using Nestled.Data.Vault
+
+@{
+    ViewData["Title"] = "My Saved Passwords";
+}
+
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Xsrf
+<input type="hidden" name="__RequestVerificationToken" value="@Xsrf.GetAndStoreTokens(Context).RequestToken" />
+
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <h2 class="mb-0"><i class="fa-light fa-lock-keyhole me-2"></i>Saved Passwords</h2>
+    <a asp-action="Create" class="btn btn-primary btn-sm rounded-pill px-3">
+        <i class="fa-light fa-plus me-1"></i> Add New
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="glass-card text-center py-5">
+        <i class="fa-light fa-lock-keyhole fa-3x text-muted mb-3 d-block"></i>
+        <p class="text-muted mb-3">No passwords saved yet.</p>
+        <a asp-action="Create" class="btn btn-outline-primary rounded-pill px-4">Add your first one</a>
+    </div>
+}
+else
+{
+    <div class="d-flex flex-column gap-3">
+        @foreach (var item in Model.OrderByDescending(p => p.CreatedAt))
+        {
+            <div class="glass-card p-3 d-flex align-items-center gap-3">
+                <div class="flex-shrink-0 d-flex align-items-center justify-content-center rounded"
+                     style="width:40px;height:40px;background:rgba(255,255,255,.06);">
+                    <i class="fa-light fa-lock fs-5 text-muted"></i>
+                </div>
+                <div class="flex-grow-1 min-width-0">
+                    <div class="fw-semibold">@item.Title</div>
+                    <span class="badge bg-secondary small">@item.PasswordType</span>
+                </div>
+                <div class="d-flex gap-2 flex-shrink-0">
+                    <button type="button"
+                            class="btn btn-sm btn-outline-secondary rounded-pill px-3"
+                            title="View"
+                            data-entry-id="@item.Id"
+                            onclick="promptVaultPin(this.dataset.entryId)">
+                        <i class="fa-light fa-eye"></i>
+                    </button>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-primary rounded-pill px-3"
+                            title="Edit"
+                            data-entry-id="@item.Id"
+                            onclick="promptEditPin(this.dataset.entryId)">
+                        <i class="fa-light fa-pen"></i>
+                    </button>
+                    <button type="button"
+                            class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                            title="Delete"
+                            data-entry-id="@item.Id"
+                            onclick="promptDeletePin(this.dataset.entryId)">
+                        <i class="fa-light fa-trash"></i>
+                    </button>
+                    @if (!string.IsNullOrEmpty(item.FilePath))
+                    {
+                        <a class="btn btn-sm btn-outline-success rounded-pill px-3" title="Download"
+                           href="@Url.Action("Download", "VaultPasswords", new { id = item.Id })">
+                            <i class="fa-light fa-cloud-arrow-down"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- Password Reveal Modal -->
+<div class="modal fade" id="passwordDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h5 class="modal-title mx-auto fw-bold"><i class="fa-light fa-lock-keyhole me-2"></i>Password Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <p><strong>Username:</strong> <span id="modalUsername" class="text-info"></span></p>
+                <p>
+                    <strong>Password:</strong>
+                    <span id="modalPassword">••••••••</span>
+                    <button id="togglePasswordBtn" type="button" class="btn btn-sm btn-outline-secondary ms-2">
+                        <i class="fa-light fa-eye"></i>
+                    </button>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vault PIN Prompt Modal -->
+<div class="modal fade" id="vaultPinModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h5 class="modal-title mx-auto fw-bold">Enter your Vault PIN</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <input id="vaultPinInput" type="password" class="form-control mb-3 text-center" maxlength="6" placeholder="••••••" />
+                <button class="btn btn-primary rounded-pill w-100 mb-2" onclick="confirmPin()">Unlock</button>
+                <button class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        window.passwordToReveal = '';
+        window.usernameToReveal = '';
+        window.passwordShown = false;
+        window.viewIdToOpen = null;
+        window.editIdToOpen = null;
+        window.deleteIdToConfirm = null;
+
+        function getToken() {
+            return document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        }
+
+        function openPinModal() {
+            document.getElementById('vaultPinInput').value = '';
+            document.getElementById('modalPassword').textContent = '••••••••';
+            document.getElementById('togglePasswordBtn').innerHTML = '<i class="fa-light fa-eye"></i>';
+            window.passwordShown = false;
+            new bootstrap.Modal(document.getElementById('vaultPinModal')).show();
+        }
+
+        window.promptVaultPin = function (entryId) {
+            window.viewIdToOpen = entryId;
+            window.editIdToOpen = null;
+            window.deleteIdToConfirm = null;
+            openPinModal();
+        };
+
+        window.promptEditPin = function (id) {
+            window.editIdToOpen = id;
+            window.viewIdToOpen = null;
+            window.deleteIdToConfirm = null;
+            openPinModal();
+        };
+
+        window.promptDeletePin = function (id) {
+            window.deleteIdToConfirm = id;
+            window.viewIdToOpen = null;
+            window.editIdToOpen = null;
+            openPinModal();
+        };
+
+        window.confirmPin = async function () {
+            const pin = document.getElementById('vaultPinInput').value;
+            if (!pin) return;
+
+            const token = getToken();
+
+            try {
+                const res = await fetch('/Vault/ValidatePinAjax', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+                    body: JSON.stringify({ pin })
+                });
+                const result = await res.json();
+
+                if (!res.ok || !result.success) {
+                    const msg = result.locked
+                        ? (result.message || 'Vault locked. Try again later.')
+                        : result.attemptsLeft != null
+                            ? `Incorrect PIN. ${result.attemptsLeft} attempt(s) remaining.`
+                            : 'Incorrect PIN.';
+                    Swal.fire({ titleText: result.locked ? 'Vault Locked' : 'Incorrect PIN', text: msg, icon: 'error', confirmButtonText: 'OK' });
+                    return;
+                }
+
+                bootstrap.Modal.getInstance(document.getElementById('vaultPinModal')).hide();
+
+                // Mark PIN confirmed in session for gated endpoints
+                await fetch('/VaultPasswords/MarkPinConfirmed', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': token },
+                    body: JSON.stringify({})
+                });
+
+                if (window.editIdToOpen) {
+                    window.location.href = `/VaultPasswords/Edit/${window.editIdToOpen}`;
+                } else if (window.deleteIdToConfirm) {
+                    const delRes = await fetch(`/VaultPasswords/Delete/${window.deleteIdToConfirm}`, {
+                        method: 'POST',
+                        headers: { 'RequestVerificationToken': token }
+                    });
+                    const delResult = await delRes.json();
+                    if (delResult.success) {
+                        window.location.reload();
+                    } else {
+                        Swal.fire({ titleText: 'Error', text: delResult.message || 'Could not delete entry.', icon: 'error' });
+                    }
+                } else if (window.viewIdToOpen) {
+                    // Fetch credentials via PIN-gated endpoint
+                    const credRes = await fetch(`/VaultPasswords/GetPassword/${window.viewIdToOpen}`, {
+                        method: 'POST',
+                        headers: { 'RequestVerificationToken': token }
+                    });
+                    const cred = await credRes.json();
+                    if (cred.success) {
+                        window.usernameToReveal = cred.username || '';
+                        window.passwordToReveal = cred.password || '';
+                        document.getElementById('modalUsername').textContent = window.usernameToReveal;
+                        document.getElementById('modalPassword').textContent = '••••••••';
+                        window.passwordShown = false;
+                        new bootstrap.Modal(document.getElementById('passwordDetailsModal')).show();
+                    } else {
+                        Swal.fire({ titleText: 'Error', text: cred.message || 'Could not load credentials.', icon: 'error' });
+                    }
+                }
+            } catch {
+                Swal.fire({ titleText: 'Error', text: 'Something went wrong.', icon: 'error' });
+            }
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById('togglePasswordBtn')?.addEventListener('click', () => {
+                window.passwordShown = !window.passwordShown;
+                document.getElementById('modalPassword').textContent =
+                    window.passwordShown ? window.passwordToReveal : '••••••••';
+                document.getElementById('togglePasswordBtn').innerHTML =
+                    window.passwordShown ? '<i class="fa-light fa-eye-slash"></i>' : '<i class="fa-light fa-eye"></i>';
+            });
+
+            document.getElementById('vaultPinInput')?.addEventListener('keydown', e => {
+                if (e.key === 'Enter') window.confirmPin();
+            });
+        });
+    </script>
+}
+

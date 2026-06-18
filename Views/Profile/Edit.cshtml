@@ -1,4 +1,4 @@
-@model Hearthly.Models.ApplicationUser
+@model Nestled.Models.ApplicationUser
 @{
     ViewData["Title"] = "Edit Profile";
 }
@@ -66,26 +66,26 @@
             <div class="form-group">
                 <label class="form-label-glass">Theme</label>
                 <div class="theme-switcher">
-                    <button type="button" class="theme-btn @(Model?.ThemeMode == Hearthly.Models.ThemeMode.System ? "active" : "")" onclick="setTheme('system'); document.querySelector('[name=themeMode]').value='0';">
+                    <button type="button" class="theme-btn @(Model?.ThemeMode == Nestled.Models.ThemeMode.System ? "active" : "")" onclick="setTheme('system'); document.querySelector('[name=themeMode]').value='0';">
                         <i class="fa-solid fa-circle-half-stroke"></i> System
                     </button>
-                    <button type="button" class="theme-btn @(Model?.ThemeMode == Hearthly.Models.ThemeMode.Light ? "active" : "")" onclick="setTheme('light'); document.querySelector('[name=themeMode]').value='1';">
+                    <button type="button" class="theme-btn @(Model?.ThemeMode == Nestled.Models.ThemeMode.Light ? "active" : "")" onclick="setTheme('light'); document.querySelector('[name=themeMode]').value='1';">
                         <i class="fa-solid fa-sun"></i> Light
                     </button>
-                    <button type="button" class="theme-btn @(Model?.ThemeMode == Hearthly.Models.ThemeMode.Dark ? "active" : "")" onclick="setTheme('dark'); document.querySelector('[name=themeMode]').value='2';">
+                    <button type="button" class="theme-btn @(Model?.ThemeMode == Nestled.Models.ThemeMode.Dark ? "active" : "")" onclick="setTheme('dark'); document.querySelector('[name=themeMode]').value='2';">
                         <i class="fa-solid fa-moon"></i> Dark
                     </button>
                 </div>
-                <input type="hidden" name="themeMode" value="@((int)(Model?.ThemeMode ?? Hearthly.Models.ThemeMode.System))" />
+                <input type="hidden" name="themeMode" value="@((int)(Model?.ThemeMode ?? Nestled.Models.ThemeMode.System))" />
             </div>
             <div class="form-group">
                 <label class="form-label-glass">Text Size</label>
                 <div class="d-flex gap-2">
-                    <button type="button" class="font-btn @(Model?.FontSize == Hearthly.Models.FontSize.Small ? "active" : "")" onclick="setFontSize('small'); document.querySelector('[name=fontSize]').value='0';">A-</button>
-                    <button type="button" class="font-btn @(Model?.FontSize == Hearthly.Models.FontSize.Medium || Model?.FontSize == null ? "active" : "")" onclick="setFontSize('medium'); document.querySelector('[name=fontSize]').value='1';">A</button>
-                    <button type="button" class="font-btn @(Model?.FontSize == Hearthly.Models.FontSize.Large ? "active" : "")" onclick="setFontSize('large'); document.querySelector('[name=fontSize]').value='2';">A+</button>
+                    <button type="button" class="font-btn @(Model?.FontSize == Nestled.Models.FontSize.Small ? "active" : "")" onclick="setFontSize('small'); document.querySelector('[name=fontSize]').value='0';">A-</button>
+                    <button type="button" class="font-btn @(Model?.FontSize == Nestled.Models.FontSize.Medium || Model?.FontSize == null ? "active" : "")" onclick="setFontSize('medium'); document.querySelector('[name=fontSize]').value='1';">A</button>
+                    <button type="button" class="font-btn @(Model?.FontSize == Nestled.Models.FontSize.Large ? "active" : "")" onclick="setFontSize('large'); document.querySelector('[name=fontSize]').value='2';">A+</button>
                 </div>
-                <input type="hidden" name="fontSize" value="@((int)(Model?.FontSize ?? Hearthly.Models.FontSize.Medium))" />
+                <input type="hidden" name="fontSize" value="@((int)(Model?.FontSize ?? Nestled.Models.FontSize.Medium))" />
             </div>
         </div>
 

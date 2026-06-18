@@ -1,11 +1,11 @@
-using Hearthly.Data;
-using Hearthly.Models;
+using Nestled.Data;
+using Nestled.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Hearthly.Controllers;
+namespace Nestled.Controllers;
 
 [Authorize]
 public class BankingController : Controller

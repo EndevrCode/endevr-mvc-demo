@@ -1,5 +1,5 @@
-/* Hearthly Service Worker */
-const CACHE_NAME = 'hearthly-v1';
+/* Nestled Service Worker */
+const CACHE_NAME = 'nestled-v1';
 const STATIC_ASSETS = [
   '/',
   '/css/app.css',

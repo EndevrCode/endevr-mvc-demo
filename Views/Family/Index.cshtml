@@ -1,4 +1,4 @@
-@model List<Hearthly.Models.Family>
+@model List<Nestled.Models.Family>
 @{
     ViewData["Title"] = "Families";
     var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
@@ -29,7 +29,7 @@
                         </div>
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;">
-                        @if (myRole == Hearthly.Models.FamilyRole.Admin)
+                        @if (myRole == Nestled.Models.FamilyRole.Admin)
                         {
                             <span class="badge-pill badge-primary">Admin</span>
                         }

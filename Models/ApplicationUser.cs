@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace Hearthly.Models;
+namespace Nestled.Models;
 
 public enum ThemeMode { System, Light, Dark }
 public enum FontSize { Small, Medium, Large }

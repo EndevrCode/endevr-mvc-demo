@@ -1,0 +1,380 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Nestled.Data;
+using Nestled.Data.Vault;
+using Nestled.Models.Vault;
+using System.Security.Claims;
+
+namespace Nestled.Controllers
+{
+    [Authorize]
+    public class VaultBankAccountsController : BaseController
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IDataProtector _protector;
+        private readonly IWebHostEnvironment _env;
+        private readonly ILogger<VaultBankAccountsController> _logger;
+
+        public VaultBankAccountsController(
+    ApplicationDbContext context,
+    UserManager<ApplicationUser> userManager,
+    ILogger<VaultBankAccountsController> logger,
+    IDataProtectionProvider provider,
+    IWebHostEnvironment env)
+    : base(context, userManager)
+        {
+            _context = context;
+            _userManager = userManager;
+            _logger = logger;
+            _protector = provider.CreateProtector("VaultBankAccountProtector");
+            _env = env;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var accounts = await _context.VaultBankAccounts
+                .Where(v => v.UserId == user.Id)
+                .ToListAsync();
+
+            // Only prepare last 4 digits for display; full number is served via PIN-gated AJAX
+            foreach (var account in accounts)
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(account.AccountNumber))
+                    {
+                        var decrypted = _protector.Unprotect(account.AccountNumber);
+                        account.AccountNumber = null; // never expose full number in HTML
+                        ViewData[$"Last4_{account.Id}"] = decrypted.Length >= 4
+                            ? decrypted[^4..]
+                            : decrypted;
+                    }
+                }
+                catch
+                {
+                    account.AccountNumber = null;
+                    ViewData[$"Last4_{account.Id}"] = "[Err]";
+                }
+            }
+
+            return View(accounts);
+        }
+
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(VaultBankAccount model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            if (ModelState.IsValid)
+            {
+                model.UserId = user.Id;
+                model.CreatedAt = DateTime.UtcNow;
+
+                if (!string.IsNullOrEmpty(model.AccountNumber))
+                {
+                    model.AccountNumber = _protector.Protect(model.AccountNumber);
+                }
+
+                _context.VaultBankAccounts.Add(model);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("VaultBankAccount created successfully for user {UserId}", user.Id);
+                return RedirectToAction(nameof(Index));
+            }
+
+            foreach (var entry in ModelState)
+            {
+                foreach (var error in entry.Value.Errors)
+                {
+                    _logger.LogWarning("ModelState error for {Field}: {Error}", entry.Key, error.ErrorMessage);
+                }
+            }
+
+            return View(model);
+        }
+
+        public async Task<IActionResult> Details(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var account = await _context.VaultBankAccounts
+                .FirstOrDefaultAsync(v => v.Id == id && v.UserId == user.Id);
+
+            if (account == null)
+            {
+                return NotFound();
+            }
+
+            try
+            {
+                if (!string.IsNullOrEmpty(account.AccountNumber))
+                {
+                    account.AccountNumber = _protector.Unprotect(account.AccountNumber);
+                }
+            }
+            catch
+            {
+                account.AccountNumber = "[Decryption Failed]";
+            }
+
+            return View(account);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var account = await _context.VaultBankAccounts
+                .FirstOrDefaultAsync(v => v.Id == id && v.UserId == user.Id);
+
+            if (account == null)
+            {
+                TempData["Error"] = "Bank account not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            _context.VaultBankAccounts.Remove(account);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Bank account deleted successfully.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> LinkCard(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var account = await _context.VaultBankAccounts
+                .FirstOrDefaultAsync(a => a.Id == id && a.UserId == user.Id);
+
+            if (account == null)
+                return NotFound();
+
+            var decrypted = string.Empty;
+            try
+            {
+                decrypted = _protector.Unprotect(account.AccountNumber);
+            }
+            catch
+            {
+                decrypted = "[Decryption Failed]";
+            }
+
+            var vm = new LinkCardViewModel
+            {
+                AccountId = account.Id,
+                AccountHolder = account.AccountHolder,
+                BankName = account.BankName.ToString(),
+                LastFourDigits = decrypted.Length >= 4 ? decrypted[^4..] : decrypted
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LinkCard(LinkCardViewModel model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var account = await _context.VaultBankAccounts
+                .FirstOrDefaultAsync(a => a.Id == model.AccountId && a.UserId == user.Id);
+
+            if (account == null)
+                return NotFound();
+
+            var allowedExts = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".webp" };
+            const long maxCardSize = 5 * 1024 * 1024; // 5 MB
+
+            string uploadFolder = Path.Combine(_env.ContentRootPath, "SecureVault", "CardImages");
+
+            if (!Directory.Exists(uploadFolder))
+                Directory.CreateDirectory(uploadFolder);
+
+            if (model.CardFront != null)
+            {
+                var ext = Path.GetExtension(model.CardFront.FileName).ToLowerInvariant();
+                if (!allowedExts.Contains(ext))
+                {
+                    ModelState.AddModelError("CardFront", "Only JPG, PNG, and WebP images are allowed.");
+                    return View(model);
+                }
+                if (model.CardFront.Length > maxCardSize)
+                {
+                    ModelState.AddModelError("CardFront", "Card front image must be 5 MB or smaller.");
+                    return View(model);
+                }
+                var fileName = $"card_front_{Guid.NewGuid()}{ext}";
+                var filePath = Path.Combine(uploadFolder, fileName);
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await model.CardFront.CopyToAsync(stream);
+                account.CardFrontPath = fileName;
+            }
+
+            if (model.CardBack != null)
+            {
+                var ext = Path.GetExtension(model.CardBack.FileName).ToLowerInvariant();
+                if (!allowedExts.Contains(ext))
+                {
+                    ModelState.AddModelError("CardBack", "Only JPG, PNG, and WebP images are allowed.");
+                    return View(model);
+                }
+                if (model.CardBack.Length > maxCardSize)
+                {
+                    ModelState.AddModelError("CardBack", "Card back image must be 5 MB or smaller.");
+                    return View(model);
+                }
+                var fileName = $"card_back_{Guid.NewGuid()}{ext}";
+                var filePath = Path.Combine(uploadFolder, fileName);
+                using var stream = new FileStream(filePath, FileMode.Create);
+                await model.CardBack.CopyToAsync(stream);
+                account.CardBackPath = fileName;
+            }
+
+            _context.Update(account);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Card linked successfully.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> GetAccountNumber(int id)
+        {
+            if (!IsPinConfirmedRecently())
+                return Json(new { success = false, message = "PIN confirmation required." });
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Json(new { success = false, message = "Not authenticated." });
+
+            var account = await _context.VaultBankAccounts
+                .FirstOrDefaultAsync(a => a.Id == id && a.UserId == user.Id);
+
+            if (account == null)
+                return Json(new { success = false, message = "Account not found." });
+
+            try
+            {
+                var decrypted = _protector.Unprotect(account.AccountNumber);
+                return Json(new { success = true, accountNumber = decrypted });
+            }
+            catch
+            {
+                return Json(new { success = false, message = "Decryption failed." });
+            }
+        }
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> UnlinkCard(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var account = await _context.VaultBankAccounts
+                .FirstOrDefaultAsync(a => a.Id == id && a.UserId == user.Id);
+
+            if (account == null)
+            {
+                TempData["Error"] = "Bank account not found.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Delete card image files from secure storage
+            try
+            {
+                var cardFolder = Path.Combine(_env.ContentRootPath, "SecureVault", "CardImages");
+
+                if (!string.IsNullOrEmpty(account.CardFrontPath))
+                {
+                    var frontPath = Path.Combine(cardFolder, Path.GetFileName(account.CardFrontPath));
+                    if (System.IO.File.Exists(frontPath))
+                        System.IO.File.Delete(frontPath);
+                }
+
+                if (!string.IsNullOrEmpty(account.CardBackPath))
+                {
+                    var backPath = Path.Combine(cardFolder, Path.GetFileName(account.CardBackPath));
+                    if (System.IO.File.Exists(backPath))
+                        System.IO.File.Delete(backPath);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("Could not delete card images: {Message}", ex.Message);
+            }
+
+            account.CardFrontPath = null;
+            account.CardBackPath = null;
+
+            _context.Update(account);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Linked card removed.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCardImage(int id, string side)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
+
+            var account = await _context.VaultBankAccounts
+                .FirstOrDefaultAsync(a => a.Id == id && a.UserId == user.Id);
+
+            if (account == null)
+                return NotFound();
+
+            if (!IsPinConfirmedRecently())
+            {
+                return Unauthorized("Vault PIN not confirmed.");
+            }
+
+            string? filePath = side.ToLower() switch
+            {
+                "front" => account.CardFrontPath,
+                "back" => account.CardBackPath,
+                _ => null
+            };
+
+            if (string.IsNullOrEmpty(filePath))
+                return NotFound();
+
+            var absolutePath = Path.Combine(_env.ContentRootPath, "SecureVault", "CardImages", Path.GetFileName(filePath));
+
+            if (!System.IO.File.Exists(absolutePath))
+                return NotFound();
+
+            var mimeType = Path.GetExtension(absolutePath).ToLowerInvariant() switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png"            => "image/png",
+                ".webp"           => "image/webp",
+                _                 => "application/octet-stream"
+            };
+            return PhysicalFile(absolutePath, mimeType);
+        }
+    }
+}

@@ -1,4 +1,4 @@
-namespace Hearthly.Models;
+namespace Nestled.Models;
 
 public enum UtilityType { Electricity, Gas, Water, Internet, Other }
 

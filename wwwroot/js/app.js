@@ -1,10 +1,10 @@
 /* =========================================
-   HEARTHLY — Main JavaScript
+   NESTLED — Main JavaScript
    ========================================= */
 
 // ---- Theme Management ----
-const THEME_KEY = 'hearthly-theme';
-const FONT_KEY  = 'hearthly-fontsize';
+const THEME_KEY = 'nestled-theme';
+const FONT_KEY  = 'nestled-fontsize';
 
 function setTheme(theme) {
   localStorage.setItem(THEME_KEY, theme);

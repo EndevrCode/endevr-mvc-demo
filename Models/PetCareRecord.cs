@@ -1,4 +1,4 @@
-namespace Hearthly.Models;
+namespace Nestled.Models;
 
 public enum CareType { Grooming, Deworming, TickFlea, Checkup, Vaccination, Other }
 
