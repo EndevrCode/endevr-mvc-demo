@@ -204,10 +204,10 @@
                     document.getElementById('choreAssignee').value = '';
                     document.getElementById('emptyState')?.remove();
                 } else {
-                    Swal.fire({ icon: 'error', title: data.message ?? 'Error', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+                    Swal.fire({ icon: 'error', titleText: data.message ?? 'Error', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
                 }
             } catch {
-                Swal.fire({ icon: 'error', title: 'Network error', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+                Swal.fire({ icon: 'error', titleText: 'Network error', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
             }
         });
 
@@ -256,7 +256,7 @@
         // ── Delete chore ──────────────────────────────────────────────────────
         async function deleteChore(id, btn) {
             const confirmed = await Swal.fire({
-                title: 'Delete chore?',
+                titleText: 'Delete chore?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonText: 'Delete',

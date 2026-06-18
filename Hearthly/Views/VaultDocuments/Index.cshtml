@@ -178,11 +178,11 @@ else
             }
             @if (!string.IsNullOrEmpty(_uploadErr))
             {
-                <text>Swal.fire({ title: 'Upload failed', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_uploadErr)), icon: 'error', confirmButtonText: 'OK' });</text>
+                <text>Swal.fire({ titleText: 'Upload failed', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_uploadErr)), icon: 'error', confirmButtonText: 'OK' });</text>
             }
             @if (!string.IsNullOrEmpty(_actionErr))
             {
-                <text>Swal.fire({ title: 'Error', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_actionErr)), icon: 'error', confirmButtonText: 'OK' });</text>
+                <text>Swal.fire({ titleText: 'Error', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_actionErr)), icon: 'error', confirmButtonText: 'OK' });</text>
             }
             @if (!string.IsNullOrEmpty(_actionOk))
             {
@@ -195,15 +195,15 @@ else
             const title = form.querySelector('input[name="title"]').value.trim();
             const file  = form.querySelector('input[name="file"]').files[0];
             if (!title) {
-                Swal.fire({ title: 'Missing title', text: 'Please enter a document title.', icon: 'warning' });
+                Swal.fire({ titleText: 'Missing title', text: 'Please enter a document title.', icon: 'warning' });
                 return;
             }
             if (!file) {
-                Swal.fire({ title: 'No file selected', text: 'Please choose a file to upload.', icon: 'warning' });
+                Swal.fire({ titleText: 'No file selected', text: 'Please choose a file to upload.', icon: 'warning' });
                 return;
             }
             if (file.size > 20 * 1024 * 1024) {
-                Swal.fire({ title: 'File too large', text: 'Maximum upload size is 20 MB.', icon: 'error', confirmButtonText: 'OK' });
+                Swal.fire({ titleText: 'File too large', text: 'Maximum upload size is 20 MB.', icon: 'error', confirmButtonText: 'OK' });
                 return;
             }
             const btn = document.getElementById('docUploadBtn');
@@ -224,7 +224,7 @@ else
 
         async function confirmDelete(docId, title) {
             const { isConfirmed } = await Swal.fire({
-                title: 'Delete document?',
+                titleText: 'Delete document?',
                 html: `<strong>${escapeHtml(title)}</strong><br><small class="text-muted">This cannot be undone.</small>`,
                 icon: 'warning',
                 showCancelButton: true,

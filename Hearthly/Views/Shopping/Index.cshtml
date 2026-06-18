@@ -297,7 +297,7 @@ function updateProgress(listId) {
 
     // Done celebration
     if (total > 0 && checked === total) {
-        Swal.fire({ title: '🎉 All done!', text: `${ul.closest('.shopping-list-card').querySelector('h5').textContent.trim()} is complete!`,
+        Swal.fire({ titleText: '🎉 All done!', text: `${ul.closest('.shopping-list-card').querySelector('h5').textContent.trim()} is complete!`,
             icon: 'success', timer: 1800, showConfirmButton: false, toast: true, position: 'top-end' });
     }
 }
@@ -315,7 +315,7 @@ function reorderItems(listId) {
 // ── Delete list ───────────────────────────────────────────────────────────────
 function confirmDeleteList(id) {
     Swal.fire({
-        title: 'Delete this list?',
+        titleText: 'Delete this list?',
         text: 'All items will be permanently removed.',
         icon: 'warning',
         showCancelButton: true,

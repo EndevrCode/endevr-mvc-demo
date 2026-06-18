@@ -45,11 +45,11 @@
         document.addEventListener('DOMContentLoaded', () => {
             @if (!string.IsNullOrEmpty(_pinSuccess))
             {
-                <text>Swal.fire({ title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_pinSuccess)), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
+                <text>Swal.fire({ titleText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_pinSuccess)), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
             }
             @if (!string.IsNullOrEmpty(_pinError))
             {
-                <text>Swal.fire({ title: 'Error', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_pinError)), icon: 'error', confirmButtonText: 'OK' });</text>
+                <text>Swal.fire({ titleText: 'Error', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_pinError)), icon: 'error', confirmButtonText: 'OK' });</text>
             }
         });
 

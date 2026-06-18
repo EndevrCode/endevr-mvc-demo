@@ -899,7 +899,7 @@ function toggleTracking() {
 
 function startTracking() {
     if (!navigator.geolocation) {
-        Swal.fire({ title: 'Not supported', text: 'Your browser does not support geolocation.', icon: 'warning', background: '#16161f', color: '#eee' });
+        Swal.fire({ titleText: 'Not supported', text: 'Your browser does not support geolocation.', icon: 'warning', background: '#16161f', color: '#eee' });
         trackingOn = false;
         return;
     }
@@ -1129,7 +1129,7 @@ function renderPlacesSheet() {
 function startAddPlace() {
     closePlacesSheet();
     Swal.fire({
-        title: 'Add a Place',
+        titleText: 'Add a Place',
         html: `
             <div style="text-align:left;display:flex;flex-direction:column;gap:10px;">
                 <div>
@@ -1214,7 +1214,7 @@ async function savePlace({ name, type, radius, lat, lng }) {
 
 async function deletePlace(id) {
     const confirmed = await Swal.fire({
-        title: 'Remove Place?',
+        titleText: 'Remove Place?',
         text: 'This place will be removed for the whole family.',
         icon: 'warning',
         background: '#16161f',

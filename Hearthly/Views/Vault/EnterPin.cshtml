@@ -93,7 +93,7 @@ async function unlockWithBiometrics() {
             window.location.href = '/Vault';
         } else if (completeData.requirePin) {
             Swal.fire({
-                title: 'PIN required',
+                titleText: 'PIN required',
                 text: 'Your session has expired. Please enter your PIN to unlock — biometrics will work for the rest of the session.',
                 icon: 'info',
                 confirmButtonText: 'OK'
@@ -103,7 +103,7 @@ async function unlockWithBiometrics() {
         }
 
     } catch (err) {
-        Swal.fire({ title: 'Biometric failed', text: err.message, icon: 'error', confirmButtonText: 'OK' });
+        Swal.fire({ titleText: 'Biometric failed', text: err.message, icon: 'error', confirmButtonText: 'OK' });
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-light fa-fingerprint me-2"></i>Use Face ID / Fingerprint';

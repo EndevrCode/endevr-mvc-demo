@@ -174,7 +174,7 @@ else
                         : result.attemptsLeft != null
                             ? `Incorrect PIN. ${result.attemptsLeft} attempt(s) remaining.`
                             : 'Incorrect PIN.';
-                    Swal.fire({ title: result.locked ? 'Vault Locked' : 'Incorrect PIN', text: msg, icon: 'error', confirmButtonText: 'OK' });
+                    Swal.fire({ titleText: result.locked ? 'Vault Locked' : 'Incorrect PIN', text: msg, icon: 'error', confirmButtonText: 'OK' });
                     return;
                 }
 
@@ -198,7 +198,7 @@ else
                     if (delResult.success) {
                         window.location.reload();
                     } else {
-                        Swal.fire({ title: 'Error', text: delResult.message || 'Could not delete entry.', icon: 'error' });
+                        Swal.fire({ titleText: 'Error', text: delResult.message || 'Could not delete entry.', icon: 'error' });
                     }
                 } else if (window.viewIdToOpen) {
                     // Fetch credentials via PIN-gated endpoint
@@ -215,11 +215,11 @@ else
                         window.passwordShown = false;
                         new bootstrap.Modal(document.getElementById('passwordDetailsModal')).show();
                     } else {
-                        Swal.fire({ title: 'Error', text: cred.message || 'Could not load credentials.', icon: 'error' });
+                        Swal.fire({ titleText: 'Error', text: cred.message || 'Could not load credentials.', icon: 'error' });
                     }
                 }
             } catch {
-                Swal.fire({ title: 'Error', text: 'Something went wrong.', icon: 'error' });
+                Swal.fire({ titleText: 'Error', text: 'Something went wrong.', icon: 'error' });
             }
         };
 

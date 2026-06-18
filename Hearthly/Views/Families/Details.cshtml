@@ -212,21 +212,21 @@ else
         @if (TempData["ErrorMessage"] is string error)
         {
             <text>
-            Swal.fire({ icon: 'error', title: 'Oops!',
+            Swal.fire({ icon: 'error', titleText: 'Oops!',
                 text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(error)) });
             </text>
         }
         @if (TempData["StatusMessage"] is string success)
         {
             <text>
-            Swal.fire({ icon: 'success', title: 'Done!',
+            Swal.fire({ icon: 'success', titleText: 'Done!',
                 text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(success)) });
             </text>
         }
         @if (TempData["SweetError"] is string msg)
         {
             <text>
-            Swal.fire({ icon: 'error', title: 'Oops!',
+            Swal.fire({ icon: 'error', titleText: 'Oops!',
                 text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(msg)) });
             </text>
         }
@@ -237,7 +237,7 @@ else
             e.preventDefault();
             Swal.fire({
                 icon: 'warning',
-                title: 'Remove member?',
+                titleText: 'Remove member?',
                 text: 'They will be removed from this family.',
                 showCancelButton: true,
                 confirmButtonText: 'Remove',
@@ -250,7 +250,7 @@ else
     function confirmDeleteFamily(url) {
         Swal.fire({
             icon: 'warning',
-            title: 'Delete family?',
+            titleText: 'Delete family?',
             text: 'This will permanently delete the family and all its data.',
             showCancelButton: true,
             confirmButtonText: 'Delete',

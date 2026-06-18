@@ -215,7 +215,7 @@ else
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             Swal.fire({
-                title: "Vault PIN Set",
+                titleText: "Vault PIN Set",
                 icon: "info",
                 html: "Your Vault PIN has been successfully set.<br><br><strong>Please keep it safe.</strong><br>If lost, you will need to contact support.",
                 confirmButtonText: "Understood"
@@ -241,11 +241,11 @@ function showFileSize(input) {
 function submitUpload() {
     const fi = document.getElementById('vaultFileInput');
     if (!fi.files.length) {
-        Swal.fire({ title: 'No file selected', text: 'Please choose a file first.', icon: 'warning', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });
+        Swal.fire({ titleText: 'No file selected', text: 'Please choose a file first.', icon: 'warning', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });
         return;
     }
     if (fi.files[0].size > 20 * 1024 * 1024) {
-        Swal.fire({ title: 'File too large', text: 'Maximum upload size is 20 MB.', icon: 'error', confirmButtonText: 'OK' });
+        Swal.fire({ titleText: 'File too large', text: 'Maximum upload size is 20 MB.', icon: 'error', confirmButtonText: 'OK' });
         return;
     }
     const btn = document.getElementById('uploadBtn');
@@ -267,7 +267,7 @@ function escapeHtml(str) {
 
 async function confirmDelete(fileId, fileName) {
     const { isConfirmed } = await Swal.fire({
-        title: 'Delete file?',
+        titleText: 'Delete file?',
         html: `<span class="text-break">${escapeHtml(fileName)}</span><br><small class="text-muted">This cannot be undone.</small>`,
         icon: 'warning',
         showCancelButton: true,
@@ -315,7 +315,7 @@ async function registerBiometric() {
         }));
 
         // 3. Prompt biometric
-        Swal.fire({ title: 'Follow your device prompt…', text: 'Use Face ID or your fingerprint when prompted.', icon: 'info', showConfirmButton: false, allowOutsideClick: false });
+        Swal.fire({ titleText: 'Follow your device prompt…', text: 'Use Face ID or your fingerprint when prompted.', icon: 'info', showConfirmButton: false, allowOutsideClick: false });
         const cred = await navigator.credentials.create({ publicKey: options });
         Swal.close();
 
@@ -338,7 +338,7 @@ async function registerBiometric() {
         const result = await completeRes.json();
 
         if (result.success) {
-            Swal.fire({ title: 'Biometric registered!', text: 'You can now unlock the vault with Face ID or your fingerprint.', icon: 'success', confirmButtonText: 'Great' })
+            Swal.fire({ titleText: 'Biometric registered!', text: 'You can now unlock the vault with Face ID or your fingerprint.', icon: 'success', confirmButtonText: 'Great' })
                 .then(() => location.reload());
         } else {
             throw new Error(result.error ?? 'Registration failed.');
@@ -346,16 +346,16 @@ async function registerBiometric() {
     } catch (err) {
         Swal.close();
         if (err.name === 'NotAllowedError') {
-            Swal.fire({ title: 'Cancelled', text: 'Biometric registration was cancelled.', icon: 'warning', confirmButtonText: 'OK' });
+            Swal.fire({ titleText: 'Cancelled', text: 'Biometric registration was cancelled.', icon: 'warning', confirmButtonText: 'OK' });
         } else {
-            Swal.fire({ title: 'Registration failed', text: err.message, icon: 'error', confirmButtonText: 'OK' });
+            Swal.fire({ titleText: 'Registration failed', text: err.message, icon: 'error', confirmButtonText: 'OK' });
         }
     }
 }
 
 async function removeAllBiometrics() {
     const { isConfirmed } = await Swal.fire({
-        title: 'Remove all biometrics?',
+        titleText: 'Remove all biometrics?',
         text: 'All registered devices will need to re-enrol. You can still unlock with your PIN.',
         icon: 'warning',
         showCancelButton: true,
@@ -370,7 +370,7 @@ async function removeAllBiometrics() {
     });
     const data = await res.json();
     if (data.success) {
-        Swal.fire({ title: 'Removed', icon: 'success', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false })
+        Swal.fire({ titleText: 'Removed', icon: 'success', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false })
             .then(() => location.reload());
     }
 }
@@ -378,13 +378,13 @@ async function removeAllBiometrics() {
 @if (TempData["UploadSuccess"] != null)
 {
     <text>
-    document.addEventListener('DOMContentLoaded', () => Swal.fire({ title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)TempData["UploadSuccess"])), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false }));
+    document.addEventListener('DOMContentLoaded', () => Swal.fire({ titleText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)TempData["UploadSuccess"])), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false }));
     </text>
 }
 @if (TempData["UploadError"] != null)
 {
     <text>
-    document.addEventListener('DOMContentLoaded', () => Swal.fire({ title: 'Upload failed', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)TempData["UploadError"])), icon: 'error', confirmButtonText: 'OK' }));
+    document.addEventListener('DOMContentLoaded', () => Swal.fire({ titleText: 'Upload failed', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)TempData["UploadError"])), icon: 'error', confirmButtonText: 'OK' }));
     </text>
 }
 </script>

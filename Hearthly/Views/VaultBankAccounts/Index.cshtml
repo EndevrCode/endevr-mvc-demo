@@ -200,7 +200,7 @@ else
                         : verifyData.attemptsLeft != null
                             ? `Incorrect PIN. ${verifyData.attemptsLeft} attempt(s) remaining.`
                             : 'Incorrect PIN.';
-                    Swal.fire({ title: verifyData.locked ? 'Vault Locked' : 'Incorrect PIN', text: msg, icon: 'error', confirmButtonText: 'OK' });
+                    Swal.fire({ titleText: verifyData.locked ? 'Vault Locked' : 'Incorrect PIN', text: msg, icon: 'error', confirmButtonText: 'OK' });
                     return;
                 }
 
@@ -229,11 +229,11 @@ else
                         window.accountShown = false;
                         new bootstrap.Modal(document.getElementById('bankDetailsModal')).show();
                     } else {
-                        Swal.fire({ title: 'Error', text: numData.message || 'Could not load account details.', icon: 'error' });
+                        Swal.fire({ titleText: 'Error', text: numData.message || 'Could not load account details.', icon: 'error' });
                     }
                 }
             } catch {
-                Swal.fire({ title: 'Error', text: 'Something went wrong.', icon: 'error' });
+                Swal.fire({ titleText: 'Error', text: 'Something went wrong.', icon: 'error' });
             }
         }
 
@@ -264,7 +264,7 @@ else
 
         function confirmUnlink() {
             Swal.fire({
-                title: 'Remove Linked Card?',
+                titleText: 'Remove Linked Card?',
                 text: "This will permanently unlink the card images from this account.",
                 icon: 'warning',
                 showCancelButton: true,
@@ -285,7 +285,7 @@ else
 
         function confirmDelete(accountId) {
             Swal.fire({
-                title: 'Delete Account?',
+                titleText: 'Delete Account?',
                 text: "This action cannot be undone.",
                 icon: 'warning',
                 showCancelButton: true,
@@ -301,11 +301,11 @@ else
         document.addEventListener("DOMContentLoaded", () => {
             @if (!string.IsNullOrEmpty(_successMsg))
             {
-                <text>Swal.fire({ title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_successMsg)), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
+                <text>Swal.fire({ titleText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_successMsg)), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
             }
             @if (!string.IsNullOrEmpty(_errorMsg))
             {
-                <text>Swal.fire({ title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_errorMsg)), icon: 'error', toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });</text>
+                <text>Swal.fire({ titleText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_errorMsg)), icon: 'error', toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });</text>
             }
 
             document.getElementById('toggleAccountBtn')?.addEventListener('click', () => {
