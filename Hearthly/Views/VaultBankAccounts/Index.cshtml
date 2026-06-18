@@ -195,7 +195,12 @@ else
                 const verifyData = await verifyRes.json();
 
                 if (!verifyData.success) {
-                    Swal.fire({ title: 'Incorrect PIN', icon: 'error', confirmButtonText: 'Try again' });
+                    const msg = verifyData.locked
+                        ? (verifyData.message || 'Vault locked. Try again later.')
+                        : verifyData.attemptsLeft != null
+                            ? `Incorrect PIN. ${verifyData.attemptsLeft} attempt(s) remaining.`
+                            : 'Incorrect PIN.';
+                    Swal.fire({ title: verifyData.locked ? 'Vault Locked' : 'Incorrect PIN', text: msg, icon: 'error', confirmButtonText: 'OK' });
                     return;
                 }
 

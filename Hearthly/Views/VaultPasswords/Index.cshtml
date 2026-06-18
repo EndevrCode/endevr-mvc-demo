@@ -169,7 +169,12 @@ else
                 const result = await res.json();
 
                 if (!res.ok || !result.success) {
-                    Swal.fire({ title: 'Incorrect PIN', icon: 'error', confirmButtonText: 'Try again' });
+                    const msg = result.locked
+                        ? (result.message || 'Vault locked. Try again later.')
+                        : result.attemptsLeft != null
+                            ? `Incorrect PIN. ${result.attemptsLeft} attempt(s) remaining.`
+                            : 'Incorrect PIN.';
+                    Swal.fire({ title: result.locked ? 'Vault Locked' : 'Incorrect PIN', text: msg, icon: 'error', confirmButtonText: 'OK' });
                     return;
                 }
 

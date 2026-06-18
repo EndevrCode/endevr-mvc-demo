@@ -480,6 +480,19 @@ public class VaultController : BaseController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ValidatePinAjax([FromBody] PinCheckRequest request)
     {
+        const int maxAttempts = 5;
+        const int lockoutMinutes = 15;
+        const string attemptsKey = "VaultPinAttempts";
+        const string lockoutKey  = "VaultPinLockedUntil";
+
+        // Check lockout
+        var lockedUntilStr = HttpContext.Session.GetString(lockoutKey);
+        if (lockedUntilStr != null && DateTime.TryParse(lockedUntilStr, out var lockedUntil) && lockedUntil > DateTime.UtcNow)
+        {
+            var remaining = (int)Math.Ceiling((lockedUntil - DateTime.UtcNow).TotalMinutes);
+            return Json(new { success = false, locked = true, message = $"Too many failed attempts. Try again in {remaining} minute(s)." });
+        }
+
         var user = await _userManager.GetUserAsync(User);
         if (user?.VaultPinHash == null)
             return Json(new { success = false });
@@ -489,11 +502,25 @@ public class VaultController : BaseController
 
         if (result == PasswordVerificationResult.Success)
         {
+            HttpContext.Session.Remove(attemptsKey);
+            HttpContext.Session.Remove(lockoutKey);
             HttpContext.Session.SetString("VaultPinConfirmed", DateTime.UtcNow.ToString());
             return Json(new { success = true });
         }
 
-        return Json(new { success = false });
+        // Increment failure counter
+        var attemptsStr = HttpContext.Session.GetString(attemptsKey);
+        var attempts = attemptsStr != null && int.TryParse(attemptsStr, out var n) ? n + 1 : 1;
+        HttpContext.Session.SetString(attemptsKey, attempts.ToString());
+
+        if (attempts >= maxAttempts)
+        {
+            HttpContext.Session.SetString(lockoutKey, DateTime.UtcNow.AddMinutes(lockoutMinutes).ToString());
+            HttpContext.Session.Remove(attemptsKey);
+            return Json(new { success = false, locked = true, message = $"Too many failed attempts. Try again in {lockoutMinutes} minutes." });
+        }
+
+        return Json(new { success = false, attemptsLeft = maxAttempts - attempts });
     }
 
     public class PinCheckRequest
