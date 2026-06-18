@@ -68,6 +68,11 @@ namespace Hearthly.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(UserProfile profile, IFormFile? photo)
         {
+            // Always use the authenticated user's ID — never trust the submitted value
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (currentUserId == null) return Challenge();
+            profile.UserId = currentUserId;
+
             ModelState.Remove(nameof(profile.User));
             ModelState.Remove(nameof(profile.PhotoPath));
 
