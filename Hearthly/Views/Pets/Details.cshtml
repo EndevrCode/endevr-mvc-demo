@@ -212,9 +212,10 @@
 
 @section Scripts {
     <script>
+        const _petName = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(pet.Name));
         function confirmDelete() {
             Swal.fire({
-                title: 'Delete @Html.Raw(pet.Name.Replace("'", "\\'"))?',
+                title: `Delete ${_petName}?`,
                 text: "This action cannot be undone.",
                 icon: 'warning',
                 showCancelButton: true,

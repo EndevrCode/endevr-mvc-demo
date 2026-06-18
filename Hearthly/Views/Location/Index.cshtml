@@ -642,15 +642,15 @@ const INITIAL_MEMBERS = [
         var name = prof?.PreferredName ?? prof?.FirstName ?? member.User?.UserName ?? "Member";
         var visible = loc?.IsVisible ?? true;
         <text>{
-            userId:   "@member.UserId",
-            name:     "@Html.Raw(name.Replace("\"","\\\""))",
-            initials: "@name[..1].ToUpper()",
-            photoPath: "@Html.Raw(prof?.PhotoPath ?? "")",
+            userId:   @Html.Raw(System.Text.Json.JsonSerializer.Serialize(member.UserId)),
+            name:     @Html.Raw(System.Text.Json.JsonSerializer.Serialize(name)),
+            initials: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(name[..1].ToUpper())),
+            photoPath:@Html.Raw(System.Text.Json.JsonSerializer.Serialize(prof?.PhotoPath ?? "")),
             lat:      @(visible && loc?.Latitude != null ? loc!.Latitude!.Value.ToString("R", System.Globalization.CultureInfo.InvariantCulture) : "null"),
             lng:      @(visible && loc?.Longitude != null ? loc!.Longitude!.Value.ToString("R", System.Globalization.CultureInfo.InvariantCulture) : "null"),
-            address:  "@Html.Raw((visible ? loc?.Address ?? "" : "").Replace("\"","\\\""))",
-            placeName:"@Html.Raw((visible ? loc?.PlaceName ?? "" : "").Replace("\"","\\\""))",
-            note:     "@Html.Raw((loc?.Note ?? "").Replace("\"","\\\""))",
+            address:  @Html.Raw(System.Text.Json.JsonSerializer.Serialize(visible ? loc?.Address ?? "" : "")),
+            placeName:@Html.Raw(System.Text.Json.JsonSerializer.Serialize(visible ? loc?.PlaceName ?? "" : "")),
+            note:     @Html.Raw(System.Text.Json.JsonSerializer.Serialize(loc?.Note ?? "")),
             battery:  @(loc?.BatteryLevel?.ToString() ?? "null"),
             charging: @((loc?.IsCharging == true).ToString().ToLower()),
             speed:    @(loc?.Speed?.ToString("R", System.Globalization.CultureInfo.InvariantCulture) ?? "null"),
@@ -664,8 +664,8 @@ const INITIAL_PLACES = [
     @foreach (var place in places!)
     {
         <text>{
-            id:          "@place.Id",
-            name:        "@Html.Raw(place.Name.Replace("\"","\\\""))",
+            id:          @Html.Raw(System.Text.Json.JsonSerializer.Serialize(place.Id.ToString())),
+            name:        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(place.Name)),
             placeType:   @((int)place.PlaceType),
             lat:         @place.Latitude.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
             lng:         @place.Longitude.ToString("R", System.Globalization.CultureInfo.InvariantCulture),
