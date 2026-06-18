@@ -214,6 +214,10 @@ namespace Hearthly.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Json(new { success = false });
 
+            var isMember = await _context.FamilyMembers
+                .AnyAsync(m => m.FamilyId == familyId && m.UserId == user.Id && m.IsAccepted);
+            if (!isMember) return Json(new { success = false, error = "Not a family member." });
+
             var location = await _context.FamilyLocations
                 .FirstOrDefaultAsync(l => l.FamilyId == familyId && l.UserId == user.Id);
 
