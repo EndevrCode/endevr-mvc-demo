@@ -208,7 +208,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             @if (!string.IsNullOrEmpty(_statusMsg))
             {
-                <text>Swal.fire({ title: '@Html.Raw(_statusMsg)', icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
+                <text>Swal.fire({ title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_statusMsg)), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
             }
         });
 

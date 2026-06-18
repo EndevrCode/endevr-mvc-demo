@@ -178,11 +178,11 @@ else
             }
             @if (!string.IsNullOrEmpty(_uploadErr))
             {
-                <text>Swal.fire({ title: 'Upload failed', text: '@Html.Raw(_uploadErr)', icon: 'error', confirmButtonText: 'OK' });</text>
+                <text>Swal.fire({ title: 'Upload failed', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_uploadErr)), icon: 'error', confirmButtonText: 'OK' });</text>
             }
             @if (!string.IsNullOrEmpty(_actionErr))
             {
-                <text>Swal.fire({ title: 'Error', text: '@Html.Raw(_actionErr)', icon: 'error', confirmButtonText: 'OK' });</text>
+                <text>Swal.fire({ title: 'Error', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_actionErr)), icon: 'error', confirmButtonText: 'OK' });</text>
             }
             @if (!string.IsNullOrEmpty(_actionOk))
             {

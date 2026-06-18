@@ -205,6 +205,9 @@ namespace Hearthly.Controllers
             if (account == null)
                 return NotFound();
 
+            var allowedExts = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".webp" };
+            const long maxCardSize = 5 * 1024 * 1024; // 5 MB
+
             string uploadFolder = Path.Combine(_env.ContentRootPath, "SecureVault", "CardImages");
 
             if (!Directory.Exists(uploadFolder))
@@ -212,7 +215,18 @@ namespace Hearthly.Controllers
 
             if (model.CardFront != null)
             {
-                var fileName = $"card_front_{Guid.NewGuid()}{Path.GetExtension(model.CardFront.FileName)}";
+                var ext = Path.GetExtension(model.CardFront.FileName).ToLowerInvariant();
+                if (!allowedExts.Contains(ext))
+                {
+                    ModelState.AddModelError("CardFront", "Only JPG, PNG, and WebP images are allowed.");
+                    return View(model);
+                }
+                if (model.CardFront.Length > maxCardSize)
+                {
+                    ModelState.AddModelError("CardFront", "Card front image must be 5 MB or smaller.");
+                    return View(model);
+                }
+                var fileName = $"card_front_{Guid.NewGuid()}{ext}";
                 var filePath = Path.Combine(uploadFolder, fileName);
                 using var stream = new FileStream(filePath, FileMode.Create);
                 await model.CardFront.CopyToAsync(stream);
@@ -221,7 +235,18 @@ namespace Hearthly.Controllers
 
             if (model.CardBack != null)
             {
-                var fileName = $"card_back_{Guid.NewGuid()}{Path.GetExtension(model.CardBack.FileName)}";
+                var ext = Path.GetExtension(model.CardBack.FileName).ToLowerInvariant();
+                if (!allowedExts.Contains(ext))
+                {
+                    ModelState.AddModelError("CardBack", "Only JPG, PNG, and WebP images are allowed.");
+                    return View(model);
+                }
+                if (model.CardBack.Length > maxCardSize)
+                {
+                    ModelState.AddModelError("CardBack", "Card back image must be 5 MB or smaller.");
+                    return View(model);
+                }
+                var fileName = $"card_back_{Guid.NewGuid()}{ext}";
                 var filePath = Path.Combine(uploadFolder, fileName);
                 using var stream = new FileStream(filePath, FileMode.Create);
                 await model.CardBack.CopyToAsync(stream);
@@ -276,19 +301,21 @@ namespace Hearthly.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // Optionally delete files from disk
+            // Delete card image files from secure storage
             try
             {
+                var cardFolder = Path.Combine(_env.ContentRootPath, "SecureVault", "CardImages");
+
                 if (!string.IsNullOrEmpty(account.CardFrontPath))
                 {
-                    var frontPath = Path.Combine(_env.WebRootPath, account.CardFrontPath.TrimStart('/'));
+                    var frontPath = Path.Combine(cardFolder, Path.GetFileName(account.CardFrontPath));
                     if (System.IO.File.Exists(frontPath))
                         System.IO.File.Delete(frontPath);
                 }
 
                 if (!string.IsNullOrEmpty(account.CardBackPath))
                 {
-                    var backPath = Path.Combine(_env.WebRootPath, account.CardBackPath.TrimStart('/'));
+                    var backPath = Path.Combine(cardFolder, Path.GetFileName(account.CardBackPath));
                     if (System.IO.File.Exists(backPath))
                         System.IO.File.Delete(backPath);
                 }
@@ -340,7 +367,13 @@ namespace Hearthly.Controllers
             if (!System.IO.File.Exists(absolutePath))
                 return NotFound();
 
-            var mimeType = "image/" + Path.GetExtension(absolutePath).TrimStart('.').ToLower();
+            var mimeType = Path.GetExtension(absolutePath).ToLowerInvariant() switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png"            => "image/png",
+                ".webp"           => "image/webp",
+                _                 => "application/octet-stream"
+            };
             return PhysicalFile(absolutePath, mimeType);
         }
     }

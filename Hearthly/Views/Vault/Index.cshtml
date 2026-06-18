@@ -378,13 +378,13 @@ async function removeAllBiometrics() {
 @if (TempData["UploadSuccess"] != null)
 {
     <text>
-    document.addEventListener('DOMContentLoaded', () => Swal.fire({ title: '@Html.Raw(TempData["UploadSuccess"])', icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false }));
+    document.addEventListener('DOMContentLoaded', () => Swal.fire({ title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)TempData["UploadSuccess"])), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false }));
     </text>
 }
 @if (TempData["UploadError"] != null)
 {
     <text>
-    document.addEventListener('DOMContentLoaded', () => Swal.fire({ title: 'Upload failed', text: '@Html.Raw(TempData["UploadError"])', icon: 'error', confirmButtonText: 'OK' }));
+    document.addEventListener('DOMContentLoaded', () => Swal.fire({ title: 'Upload failed', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize((string)TempData["UploadError"])), icon: 'error', confirmButtonText: 'OK' }));
     </text>
 }
 </script>

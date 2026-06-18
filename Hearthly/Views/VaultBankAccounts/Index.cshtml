@@ -296,11 +296,11 @@ else
         document.addEventListener("DOMContentLoaded", () => {
             @if (!string.IsNullOrEmpty(_successMsg))
             {
-                <text>Swal.fire({ title: '@Html.Raw(_successMsg)', icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
+                <text>Swal.fire({ title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_successMsg)), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
             }
             @if (!string.IsNullOrEmpty(_errorMsg))
             {
-                <text>Swal.fire({ title: '@Html.Raw(_errorMsg)', icon: 'error', toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });</text>
+                <text>Swal.fire({ title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_errorMsg)), icon: 'error', toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });</text>
             }
 
             document.getElementById('toggleAccountBtn')?.addEventListener('click', () => {

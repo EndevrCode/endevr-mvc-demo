@@ -195,7 +195,7 @@
         {
             <text>
         document.addEventListener('DOMContentLoaded', () =>
-            Swal.fire({ title: '@Html.Raw(statusMsg)', icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false }));
+            Swal.fire({ title: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(statusMsg)), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false }));
             </text>
         }
 
