@@ -34,6 +34,7 @@ namespace Hearthly.Controllers
         private async Task<List<Guid>> GetAllowedFamilyIdsAsync()
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return new List<Guid>();
             return await _context.FamilyMembers
                 .Where(fm => fm.UserId == user.Id && fm.IsAccepted)
                 .Select(fm => fm.FamilyId)

@@ -215,7 +215,7 @@
         const _petName = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(pet.Name));
         function confirmDelete() {
             Swal.fire({
-                title: `Delete ${_petName}?`,
+                titleText: `Delete ${_petName}?`,
                 text: "This action cannot be undone.",
                 icon: 'warning',
                 showCancelButton: true,
