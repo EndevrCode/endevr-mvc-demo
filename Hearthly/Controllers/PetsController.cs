@@ -75,7 +75,7 @@ namespace Hearthly.Controllers
         }
 
         // GET: Pets/Create
-        public async Task<IActionResult> Create()
+        public async Task<IActionResult> Create(Guid? familyId)
         {
             var allowed = await GetAllowedFamilyIdsAsync();
 
@@ -83,7 +83,11 @@ namespace Hearthly.Controllers
                 .Where(f => allowed.Contains(f.Id))
                 .ToListAsync();
 
-            return View(new PetCreateViewModel());
+            var model = new PetCreateViewModel();
+            if (familyId.HasValue && allowed.Contains(familyId.Value))
+                model.FamilyId = familyId.Value;
+
+            return View(model);
         }
 
         [HttpPost]
