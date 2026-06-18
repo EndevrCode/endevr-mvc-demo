@@ -38,6 +38,7 @@ namespace Hearthly.Controllers
         public async Task<IActionResult> Index()
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
 
             var accounts = await _context.VaultBankAccounts
                 .Where(v => v.UserId == user.Id)
@@ -77,6 +78,7 @@ namespace Hearthly.Controllers
         public async Task<IActionResult> Create(VaultBankAccount model)
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
 
             if (ModelState.IsValid)
             {
@@ -109,6 +111,7 @@ namespace Hearthly.Controllers
         public async Task<IActionResult> Details(int id)
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
 
             var account = await _context.VaultBankAccounts
                 .FirstOrDefaultAsync(v => v.Id == id && v.UserId == user.Id);
@@ -138,6 +141,7 @@ namespace Hearthly.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
 
             var account = await _context.VaultBankAccounts
                 .FirstOrDefaultAsync(v => v.Id == id && v.UserId == user.Id);
@@ -159,6 +163,7 @@ namespace Hearthly.Controllers
         public async Task<IActionResult> LinkCard(int id)
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
 
             var account = await _context.VaultBankAccounts
                 .FirstOrDefaultAsync(a => a.Id == id && a.UserId == user.Id);
@@ -192,6 +197,7 @@ namespace Hearthly.Controllers
         public async Task<IActionResult> LinkCard(LinkCardViewModel model)
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
 
             var account = await _context.VaultBankAccounts
                 .FirstOrDefaultAsync(a => a.Id == model.AccountId && a.UserId == user.Id);
@@ -236,6 +242,8 @@ namespace Hearthly.Controllers
                 return Json(new { success = false, message = "PIN confirmation required." });
 
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Json(new { success = false, message = "Not authenticated." });
+
             var account = await _context.VaultBankAccounts
                 .FirstOrDefaultAsync(a => a.Id == id && a.UserId == user.Id);
 
@@ -257,6 +265,7 @@ namespace Hearthly.Controllers
         public async Task<IActionResult> UnlinkCard(int id)
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
 
             var account = await _context.VaultBankAccounts
                 .FirstOrDefaultAsync(a => a.Id == id && a.UserId == user.Id);
@@ -303,6 +312,7 @@ namespace Hearthly.Controllers
         public async Task<IActionResult> GetCardImage(int id, string side)
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Challenge();
 
             var account = await _context.VaultBankAccounts
                 .FirstOrDefaultAsync(a => a.Id == id && a.UserId == user.Id);
