@@ -32,6 +32,7 @@
     <form asp-action="Delete" method="post">
         @Html.AntiForgeryToken()
         <input type="hidden" asp-for="Id" />
+        <input type="hidden" name="familyId" value="@Model.FamilyId" />
 
         <div class="d-flex justify-content-between gap-2">
             <a asp-action="Index" asp-route-familyId="@Model.FamilyId" class="btn btn-outline-secondary rounded-pill px-4 flex-grow-1">
