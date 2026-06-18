@@ -131,9 +131,17 @@ namespace Hearthly.Controllers
 
             if (model.PhotoFile != null && model.PhotoFile.Length > 0)
             {
+                var allowedExts = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                var petPhotoExt = Path.GetExtension(model.PhotoFile.FileName).ToLowerInvariant();
+                if (!allowedExts.Contains(petPhotoExt))
+                {
+                    ModelState.AddModelError("PhotoFile", "Only JPG, PNG, GIF, and WebP images are allowed.");
+                    return View(model);
+                }
+
                 var uploads = Path.Combine(_environment.WebRootPath, "images/pets");
                 Directory.CreateDirectory(uploads);
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(model.PhotoFile.FileName)}";
+                var fileName = $"{Guid.NewGuid()}{petPhotoExt}";
                 var filePath = Path.Combine(uploads, fileName);
                 using var stream = new FileStream(filePath, FileMode.Create);
                 await model.PhotoFile.CopyToAsync(stream);
@@ -220,9 +228,17 @@ namespace Hearthly.Controllers
 
             if (photoFile != null && photoFile.Length > 0)
             {
+                var allowedExts = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                var petEditPhotoExt = Path.GetExtension(photoFile.FileName).ToLowerInvariant();
+                if (!allowedExts.Contains(petEditPhotoExt))
+                {
+                    ModelState.AddModelError("PhotoFile", "Only JPG, PNG, GIF, and WebP images are allowed.");
+                    return View(model);
+                }
+
                 var uploads = Path.Combine(_environment.WebRootPath, "images/pets");
                 Directory.CreateDirectory(uploads);
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(photoFile.FileName)}";
+                var fileName = $"{Guid.NewGuid()}{petEditPhotoExt}";
                 var filePath = Path.Combine(uploads, fileName);
                 using var stream = new FileStream(filePath, FileMode.Create);
                 await photoFile.CopyToAsync(stream);
