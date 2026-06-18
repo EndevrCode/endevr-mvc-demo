@@ -1,0 +1,78 @@
+﻿@model Nestled.Data.Vault.VaultPassword
+@using Nestled.Data.Vault
+
+@{
+    ViewData["Title"] = "Create Password";
+    var passwordTypes = Enum.GetValues(typeof(PasswordType)).Cast<PasswordType>();
+}
+@{
+    var _createErr = TempData["Error"] as string;
+}
+
+<div class="mb-4">
+    <h2 class="mb-0"><i class="fa-light fa-lock-keyhole me-2"></i>Add New Password</h2>
+</div>
+
+<div class="glass-card p-4 mx-auto" style="max-width: 600px;">
+
+        <form asp-action="Create" method="post" class="needs-validation" novalidate>
+            @Html.AntiForgeryToken()
+
+            <div class="form-floating mb-3">
+                <select name="password.PasswordType" class="form-select" required>
+                    <option value="">-- Select Password Type --</option>
+                    @foreach (var type in passwordTypes)
+                    {
+                        <option value="@((int)type)">@type</option>
+                    }
+                </select>
+                <label>Password Type</label>
+                <span asp-validation-for="PasswordType" class="text-danger small"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input name="password.Title" class="form-control" placeholder="Title" required />
+                <label>Title</label>
+                <span asp-validation-for="Title" class="text-danger small"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input name="password.Username" class="form-control" placeholder="Username" required />
+                <label>Username</label>
+                <span asp-validation-for="Username" class="text-danger small"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input name="password.Password" type="password" class="form-control" placeholder="Password" required />
+                <label>Password</label>
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+
+            <div class="form-floating mb-3">
+                <textarea name="password.Notes" class="form-control" style="height: 100px;" placeholder="Optional Notes"></textarea>
+                <label>Notes</label>
+            </div>
+
+            <input type="hidden" name="password.Section" value="@((int)VaultSection.Passwords)" />
+
+            <div class="d-flex gap-2 mt-2">
+                <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+                    <i class="fa-light fa-arrow-left me-1"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary rounded-pill px-4 flex-grow-1">
+                    <i class="fa-light fa-floppy-disk me-1"></i> Save Password
+                </button>
+            </div>
+        </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    @if (!string.IsNullOrEmpty(_createErr))
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', () =>
+                Swal.fire({ titleText: 'Error', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_createErr)), icon: 'error', confirmButtonText: 'OK' }));
+        </script>
+    }
+}

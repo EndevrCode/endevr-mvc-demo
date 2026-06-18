@@ -1,0 +1,73 @@
+@model Nestled.Models.Pet
+@{
+    ViewData["Title"] = Model.Name;
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">@Model.Name</h1>
+        <a href="/Pets/Edit/@Model.Id" class="btn-ghost"><i class="fa-solid fa-pen"></i> Edit</a>
+    </div>
+    <div class="glass-card text-center mb-4" style="padding:32px;">
+        @if (!string.IsNullOrEmpty(Model.PhotoPath))
+        {
+            <img src="@Model.PhotoPath" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid var(--primary);margin-bottom:16px;" alt="@Model.Name" />
+        }
+        else
+        {
+            <div style="font-size:5rem;margin-bottom:12px;">🐾</div>
+        }
+        <h2 style="font-weight:800;color:var(--text);">@Model.Name</h2>
+        <div style="color:var(--text-secondary);margin-top:4px;">@Model.Species @(!string.IsNullOrEmpty(Model.Breed) ? $"· {Model.Breed}" : "")</div>
+        @if (Model.AgeYears.HasValue)
+        {
+            <span class="badge-pill badge-info mt-2" style="display:inline-flex;">@Model.AgeYears year@(Model.AgeYears != 1 ? "s" : "") old</span>
+        }
+    </div>
+    <div class="glass-card mb-4">
+        <div class="section-title">Details</div>
+        @if (Model.BirthDate.HasValue)
+        {
+            <div class="list-item">
+                <div class="list-item-icon" style="background:rgba(245,158,11,0.1);color:var(--warning);"><i class="fa-solid fa-cake-candles"></i></div>
+                <div class="list-item-content"><div class="list-item-subtitle">Birthday</div><div class="list-item-title">@Model.BirthDate.Value.ToString("MMMM d, yyyy")</div></div>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(Model.MicrochipNumber))
+        {
+            <div class="list-item">
+                <div class="list-item-icon" style="background:rgba(108,99,255,0.1);color:var(--primary);"><i class="fa-solid fa-microchip"></i></div>
+                <div class="list-item-content"><div class="list-item-subtitle">Microchip</div><div class="list-item-title">@Model.MicrochipNumber</div></div>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(Model.InsuranceProvider))
+        {
+            <div class="list-item">
+                <div class="list-item-icon" style="background:rgba(76,175,80,0.1);color:var(--success);"><i class="fa-solid fa-shield-heart"></i></div>
+                <div class="list-item-content"><div class="list-item-subtitle">Insurance</div><div class="list-item-title">@Model.InsuranceProvider</div></div>
+            </div>
+        }
+    </div>
+    @if (Model.CareRecords.Any())
+    {
+        <div class="glass-card mb-4">
+            <div class="section-title">Care Records</div>
+            @foreach (var record in Model.CareRecords.OrderByDescending(r => r.Date).Take(10))
+            {
+                <div class="list-item">
+                    <div class="list-item-icon" style="background:rgba(6,182,212,0.1);color:var(--info);"><i class="fa-solid fa-stethoscope"></i></div>
+                    <div class="list-item-content">
+                        <div class="list-item-title">@record.CareType</div>
+                        <div class="list-item-subtitle">@record.Date.ToString("MMM d, yyyy") @(record.NextDueDate.HasValue ? $"· Next: {record.NextDueDate.Value.ToString("MMM d, yyyy")}" : "")</div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    <form method="post" asp-action="Delete" asp-controller="Pets" style="margin-top:8px;">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Id" />
+        <button type="submit" class="btn-danger-pill w-100 justify-content-center" onclick="return confirm('Delete @Model.Name?')">
+            <i class="fa-solid fa-trash"></i> Delete Pet
+        </button>
+    </form>
+</div>

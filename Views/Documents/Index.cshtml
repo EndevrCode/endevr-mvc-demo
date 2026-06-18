@@ -1,0 +1,92 @@
+@model List<Nestled.Models.VaultDocument>
+@{
+    ViewData["Title"] = "Documents";
+    var families = ViewBag.Families as List<Nestled.Models.Family> ?? new();
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title"><i class="fa-solid fa-folder-open" style="color:#3b82f6;"></i> Documents</h1>
+        <button class="btn-primary-pill" onclick="document.getElementById('uploadModal').style.display='flex'">
+            <i class="fa-solid fa-upload"></i> Upload
+        </button>
+    </div>
+    <div style="margin-bottom:16px;">
+        <a href="/Vault" style="color:var(--text-muted);font-size:0.85rem;text-decoration:none;"><i class="fa-solid fa-arrow-left"></i> Back to Vault</a>
+    </div>
+
+    @foreach (var category in Enum.GetValues<Nestled.Models.DocumentCategory>())
+    {
+        var docs = Model.Where(d => d.Category == category).ToList();
+        if (!docs.Any()) continue;
+        <div class="section-title">@category</div>
+        @foreach (var doc in docs)
+        {
+            <div class="glass-card mb-3">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:44px;height:44px;border-radius:12px;background:rgba(59,130,246,0.1);display:flex;align-items:center;justify-content:center;color:#3b82f6;font-size:1.2rem;flex-shrink:0;">
+                        <i class="fa-solid fa-file"></i>
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@doc.Title</div>
+                        <div style="color:var(--text-secondary);font-size:0.8rem;">@doc.FileSizeDisplay · @doc.CreatedAt.ToString("MMM d, yyyy")</div>
+                    </div>
+                    <div style="display:flex;gap:6px;">
+                        <a href="/Documents/Download/@doc.Id" class="btn-ghost" style="padding:6px 10px;"><i class="fa-solid fa-download"></i></a>
+                        <form method="post" asp-action="Delete" asp-controller="Documents" style="display:inline;">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@doc.Id" />
+                            <button type="submit" class="btn-ghost" style="padding:6px 10px;color:var(--danger);" onclick="return confirm('Delete document?')">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="glass-card text-center" style="padding:48px 20px;">
+            <div style="font-size:3.5rem;margin-bottom:12px;">📁</div>
+            <div style="font-weight:700;color:var(--text);margin-bottom:8px;">No documents</div>
+            <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:20px;">Upload IDs, contracts, house plans and more</p>
+        </div>
+    }
+</div>
+
+<div id="uploadModal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
+    <div class="glass-card" style="width:100%;max-width:480px;border-radius:24px 24px 0 0;padding:24px;">
+        <div style="font-weight:700;font-size:1.1rem;color:var(--text);margin-bottom:16px;">Upload Document</div>
+        <form method="post" asp-action="Upload" asp-controller="Documents" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div class="form-group">
+                <label class="form-label-glass">Family</label>
+                <select name="familyId" class="form-control-glass" required>
+                    @foreach (var f in families) { <option value="@f.Id">@f.Name</option> }
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Category</label>
+                <select name="Category" class="form-control-glass" required>
+                    @foreach (var c in Enum.GetValues<Nestled.Models.DocumentCategory>())
+                    {
+                        <option value="@((int)c)">@c</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Title</label>
+                <input type="text" name="Title" class="form-control-glass" placeholder="e.g. Passport - Jane" required />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">File</label>
+                <input type="file" name="file" class="form-control-glass" required />
+            </div>
+            <div style="display:flex;gap:12px;">
+                <button type="button" class="btn-ghost flex-1" onclick="document.getElementById('uploadModal').style.display='none'">Cancel</button>
+                <button type="submit" class="btn-primary-pill flex-1 justify-content-center"><i class="fa-solid fa-upload"></i> Upload</button>
+            </div>
+        </form>
+    </div>
+</div>

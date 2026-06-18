@@ -1,0 +1,30 @@
+@{
+    ViewData["Title"] = "Select a Family to Begin";
+    Layout = "_Layout";
+}
+
+@await Component.InvokeAsync("FamilySelector")
+
+<div class="glass-card p-4 mt-4">
+    <h4 class="mb-3">
+        <i class="fa-light fa-lightbulb text-primary me-2"></i>Welcome to the Rule of Three's
+    </h4>
+
+    <p class="mb-3">
+        The <strong>Rule of Three's</strong> is a simple, powerful planning method to help you stay focused and productive.
+        Each day, you set:
+    </p>
+    <ul class="mb-3">
+        <li><strong>1 Main Project</strong> — Your highest priority task of the day</li>
+        <li><strong>3 Short Tasks</strong> — Quick wins that keep you moving</li>
+        <li><strong>3 Maintenance Tasks</strong> — Essential activities to sustain your routine</li>
+    </ul>
+    <p class="mb-4 text-muted small">
+        When all tasks are completed, you'll earn a completion badge and boost your streak!
+    </p>
+
+    <div class="alert alert-warning">
+        <i class="fa-light fa-circle-exclamation me-1"></i>
+        <strong>Select a family</strong> using the dropdown above to begin tracking your plan.
+    </div>
+</div>

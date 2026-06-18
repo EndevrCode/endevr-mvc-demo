@@ -1,0 +1,190 @@
+﻿@{
+    Layout = "_LandingLayout";
+    ViewData["Title"] = "Home";
+
+    var preferredName = ViewData["PreferredName"]?.ToString() ?? "there";
+    var firstFamilyId = (Guid)(ViewData["FirstFamilyId"] ?? Guid.Empty);
+    var isInFamily = ViewData["IsInFamily"] as bool? ?? false;
+}
+
+<section class="cards-wrapper">
+    <h2 class="greeting">Hello @preferredName!</h2>
+
+    <div class="cards">
+        <!-- Rule of 3's -->
+        <a href="@((isInFamily) ? Url.Action("Index", "RuleOfThree", new { familyId = firstFamilyId }) : "#")"
+           class="card glass-card ruleOfThree @(isInFamily ? "" : "disabled-rule-card")"
+           onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
+            <div class="card-content">
+                <i class="fa-light fa-bullseye card-icon"></i>
+                <h3 class="theme-heading">Rule of 3’s</h3>
+                <p>Track your daily focus and stay on streak!</p>
+            </div>
+        </a>
+
+        <!-- Profile (always enabled) -->
+        <a class="card glass-card profile" asp-controller="Profile" asp-action="Details">
+            <div class="card-content">
+                <i class="fa-light fa-user card-icon"></i>
+                <h3 class="theme-heading">My Profile</h3>
+                <p>View and edit your personal details.</p>
+            </div>
+        </a>
+
+        <!-- Dashboard (always enabled) -->
+        <a class="card glass-card dashboard" asp-controller="Dashboard" asp-action="Index">
+            <div class="card-content">
+                <i class="fa-light fa-chart-line card-icon"></i>
+                <h3 class="theme-heading">Dashboard</h3>
+                <p>Birthdays, bills, chores &amp; family overview.</p>
+            </div>
+        </a>
+
+        <!-- Families (always enabled) -->
+        <a class="card glass-card families" asp-controller="Families" asp-action="Index">
+            <div class="card-content">
+                <i class="fa-light fa-users card-icon"></i>
+                <h3 class="theme-heading">Families</h3>
+                <p>Manage your families and members.</p>
+            </div>
+        </a>
+
+        <!-- Pets -->
+        <a href="@((isInFamily) ? Url.Action("Index", "Pets") : "#")"
+           class="card glass-card pets @(isInFamily ? "" : "disabled-rule-card")"
+           onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
+            <div class="card-content">
+                <i class="fa-light fa-paw card-icon"></i>
+                <h3 class="theme-heading">Pets</h3>
+                <p>View and manage your pets.</p>
+            </div>
+        </a>
+
+        <!-- Staff -->
+        <a href="@((isInFamily) ? Url.Action("Index", "StaffMembers") : "#")"
+           class="card glass-card staff @(isInFamily ? "" : "disabled-rule-card")"
+           onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
+            <div class="card-content">
+                <i class="fa-light fa-user-tie card-icon"></i>
+                <h3 class="theme-heading">Staff</h3>
+                <p>Manage your staff members.</p>
+            </div>
+        </a>
+
+        <!-- Utilities -->
+        <a href="@((isInFamily) ? Url.Action("Index", "Utilities", new { familyId = firstFamilyId }) : "#")"
+           class="card glass-card utilities @(isInFamily ? "" : "disabled-rule-card")"
+           onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
+            <div class="card-content">
+                <i class="fa-light fa-bolt card-icon"></i>
+                <h3 class="theme-heading">Utilities</h3>
+                <p>Log your gas &amp; electricity purchases.</p>
+            </div>
+        </a>
+
+        <!-- Service Contacts -->
+        <a href="@((isInFamily) ? Url.Action("Index", "ServiceContacts", new { familyId = firstFamilyId }) : "#")"
+           class="card glass-card serviceContacts @(isInFamily ? "" : "disabled-rule-card")"
+           onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
+            <div class="card-content">
+                <i class="fa-light fa-mobile card-icon"></i>
+                <h3 class="theme-heading">Service Contacts</h3>
+                <p>Manage your important Contacts.</p>
+            </div>
+        </a>
+
+        <!-- Emergency Contacts -->
+        <a href="@((isInFamily) ? Url.Action("Index", "EmergencyContacts", new { familyId = firstFamilyId }) : "#")"
+           class="card glass-card emergencyServices @(isInFamily ? "" : "disabled-rule-card")"
+           onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
+            <div class="card-content">
+                <i class="fa-light fa-wave-pulse card-icon"></i>
+                <h3 class="theme-heading">Emergency Contacts</h3>
+                <p>View Emergency personnel.</p>
+            </div>
+        </a>
+
+        <!-- Bills -->
+        <a href="@((isInFamily) ? Url.Action("Index", "Bills", new { familyId = firstFamilyId }) : "#")"
+           class="card glass-card @(isInFamily ? "" : "disabled-rule-card")"
+           onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
+            <div class="card-content">
+                <i class="fa-light fa-file-invoice-dollar card-icon"></i>
+                <h3 class="theme-heading">Bills</h3>
+                <p>Track and manage your household bills.</p>
+            </div>
+        </a>
+
+        <!-- Shopping -->
+        <a href="@((isInFamily) ? Url.Action("Index", "Shopping", new { familyId = firstFamilyId }) : "#")"
+           class="card glass-card @(isInFamily ? "" : "disabled-rule-card")"
+           onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
+            <div class="card-content">
+                <i class="fa-light fa-cart-shopping card-icon"></i>
+                <h3 class="theme-heading">Shopping</h3>
+                <p>Shared shopping lists for the whole family.</p>
+            </div>
+        </a>
+
+        <!-- Health -->
+        <a class="card glass-card" asp-controller="Health" asp-action="Index">
+            <div class="card-content">
+                <i class="fa-light fa-heart-pulse card-icon"></i>
+                <h3 class="theme-heading">Health</h3>
+                <p>Track medical info, allergies &amp; emergency contacts.</p>
+            </div>
+        </a>
+
+        <!-- Chores -->
+        <a href="@((isInFamily) ? Url.Action("Index", "Chores", new { familyId = firstFamilyId }) : "#")"
+           class="card glass-card @(isInFamily ? "" : "disabled-rule-card")"
+           onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
+            <div class="card-content">
+                <i class="fa-light fa-list-check card-icon"></i>
+                <h3 class="theme-heading">Chores</h3>
+                <p>Assign and track household chores for the family.</p>
+            </div>
+        </a>
+
+        <!-- Vault -->
+        <a class="card glass-card" asp-controller="Vault" asp-action="Index">
+            <div class="card-content">
+                <i class="fa-light fa-vault card-icon"></i>
+                <h3 class="theme-heading">Vault</h3>
+                <p>Securely store passwords, banking &amp; documents.</p>
+            </div>
+        </a>
+
+        <!-- Family Tracker -->
+        <a href="@((isInFamily) ? Url.Action("Index", "Location") : "#")"
+           class="card glass-card @(isInFamily ? "" : "disabled-rule-card")"
+           onclick="@(isInFamily ? "" : "showJoinFamilyAlert(); return false;")">
+            <div class="card-content">
+                <i class="fa-light fa-map-location-dot card-icon"></i>
+                <h3 class="theme-heading">Family Tracker</h3>
+                <p>See where your family is in real time.</p>
+            </div>
+        </a>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        function showJoinFamilyAlert() {
+            Swal.fire({
+                icon: 'info',
+                title: 'Join a Family First',
+                text: 'To access this section, please join or create a family.',
+                showCancelButton: true,
+                confirmButtonText: 'Go to Families',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#0d6efd',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/Families/Index';
+                }
+            });
+        }
+    </script>
+}

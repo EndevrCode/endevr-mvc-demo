@@ -1,0 +1,54 @@
+@model List<Nestled.Models.PasswordVaultEntry>
+@{
+    ViewData["Title"] = "Passwords";
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title"><i class="fa-solid fa-key" style="color:var(--primary);"></i> Passwords</h1>
+        <a href="/PasswordVault/Create" class="btn-primary-pill"><i class="fa-solid fa-plus"></i> Add</a>
+    </div>
+    <div style="margin-bottom:16px;">
+        <a href="/Vault" style="color:var(--text-muted);font-size:0.85rem;text-decoration:none;"><i class="fa-solid fa-arrow-left"></i> Back to Vault</a>
+    </div>
+    @if (Model.Any())
+    {
+        @foreach (var entry in Model)
+        {
+            <div class="glass-card mb-3">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;flex-shrink:0;">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:700;color:var(--text);">@entry.Title</div>
+                        @if (!string.IsNullOrEmpty(entry.Username))
+                        {
+                            <div style="color:var(--text-secondary);font-size:0.82rem;">@entry.Username</div>
+                        }
+                    </div>
+                    <div style="display:flex;gap:6px;">
+                        <form method="post" asp-action="Delete" asp-controller="PasswordVault">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@entry.Id" />
+                            <button type="submit" class="btn-ghost" style="padding:6px 10px;color:var(--danger);" onclick="return confirm('Delete entry?')">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(entry.Notes))
+                {
+                    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);color:var(--text-secondary);font-size:0.82rem;">@entry.Notes</div>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <div class="glass-card text-center" style="padding:48px 20px;">
+            <div style="font-size:3.5rem;margin-bottom:12px;">🔑</div>
+            <div style="font-weight:700;color:var(--text);margin-bottom:8px;">No passwords saved</div>
+            <a href="/PasswordVault/Create" class="btn-primary-pill"><i class="fa-solid fa-plus"></i> Add Password</a>
+        </div>
+    }
+</div>

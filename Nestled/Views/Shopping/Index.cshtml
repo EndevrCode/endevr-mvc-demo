@@ -1,0 +1,333 @@
+@model IEnumerable<Nestled.Data.Shopping.ShoppingList>
+
+@{
+    ViewData["Title"] = "Shopping";
+    var familyId = ViewData["FamilyId"] as Guid? ?? Guid.Empty;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0"><i class="fa-light fa-cart-shopping me-2"></i>Shopping</h2>
+</div>
+
+@* Create new list *@
+<div class="glass-card p-3 mb-4">
+    <form asp-action="CreateList" method="post" class="d-flex gap-2">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="familyId" value="@familyId" />
+        <input type="text" name="name" class="form-control" placeholder="New list name…" required />
+        <button type="submit" class="btn btn-primary text-nowrap rounded-pill px-3">
+            <i class="fa-light fa-plus me-1"></i> Add
+        </button>
+    </form>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="glass-card text-center py-5">
+        <i class="fa-light fa-cart-shopping fa-3x text-muted mb-3 d-block"></i>
+        <p class="text-muted mb-0">No shopping lists yet. Create your first list above.</p>
+    </div>
+}
+
+@foreach (var list in Model)
+{
+    var total    = list.Items.Count;
+    var checked_ = list.Items.Count(i => i.IsChecked);
+    var pct      = total > 0 ? (int)Math.Round(100.0 * checked_ / total) : 0;
+
+    <div class="glass-card p-3 mb-4 shopping-list-card" data-list-id="@list.Id">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0 fw-semibold">@list.Name</h5>
+            <div class="d-flex gap-1">
+                @if (checked_ > 0)
+                {
+                    <form asp-action="ClearChecked" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="listId" value="@list.Id" />
+                        <input type="hidden" name="familyId" value="@familyId" />
+                        <button type="submit" class="btn btn-outline-success btn-sm" title="Remove checked items">
+                            <i class="fa-light fa-check-double"></i>
+                        </button>
+                    </form>
+                }
+                <form asp-action="ArchiveList" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="listId" value="@list.Id" />
+                    <input type="hidden" name="familyId" value="@familyId" />
+                    <button type="submit" class="btn btn-outline-secondary btn-sm" title="Archive list">
+                        <i class="fa-light fa-box-archive"></i>
+                    </button>
+                </form>
+                <form id="deleteList-@list.Id" asp-action="DeleteList" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="listId" value="@list.Id" />
+                    <input type="hidden" name="familyId" value="@familyId" />
+                    <button type="button" class="btn btn-outline-danger btn-sm" title="Delete list"
+                            onclick="confirmDeleteList('@list.Id')">
+                        <i class="fa-light fa-trash"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        @* Progress *@
+        @if (total > 0)
+        {
+            <div class="progress mb-2" style="height:5px;">
+                <div class="progress-bar bg-success list-progress-bar" data-list="@list.Id"
+                     style="width:@pct%; transition: width .3s ease;"></div>
+            </div>
+            <p class="small text-muted mb-2 list-progress-text" data-list="@list.Id">
+                @checked_ of @total items
+            </p>
+        }
+        else
+        {
+            <div class="progress mb-2" style="height:5px; display:none;" data-progress-wrap="@list.Id">
+                <div class="progress-bar bg-success list-progress-bar" data-list="@list.Id" style="width:0%;"></div>
+            </div>
+            <p class="small text-muted mb-2 list-progress-text" data-list="@list.Id" style="display:none;"></p>
+        }
+
+        @* Item list *@
+        <ul class="list-group list-group-flush mb-3 shopping-item-list" data-list="@list.Id"
+            id="items-@list.Id">
+            @foreach (var item in list.Items.OrderBy(i => i.IsChecked).ThenBy(i => i.SortOrder))
+            {
+                <li class="list-group-item bg-transparent border-0 px-0 py-1 shopping-item"
+                    data-item-id="@item.Id" data-checked="@item.IsChecked.ToString().ToLower()">
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button"
+                                class="btn btn-link p-0 border-0 toggle-btn"
+                                onclick="toggleItem(@item.Id, '@familyId', this)"
+                                style="line-height:1; flex-shrink:0;">
+                            <i class="@(item.IsChecked ? "fa-solid fa-circle-check text-success" : "fa-light fa-circle") fs-5"></i>
+                        </button>
+                        <span class="item-text @(item.IsChecked ? "text-decoration-line-through text-muted" : "")">
+                            @item.Name
+                            @if (!string.IsNullOrWhiteSpace(item.Quantity))
+                            {
+                                <small class="text-muted ms-1">(@item.Quantity)</small>
+                            }
+                        </span>
+                        <button type="button"
+                                class="btn btn-link text-danger p-0 border-0 ms-auto"
+                                onclick="deleteItem(@item.Id, '@familyId', this)"
+                                style="line-height:1; opacity:.6;">
+                            <i class="fa-light fa-xmark fs-6"></i>
+                        </button>
+                    </div>
+                </li>
+            }
+        </ul>
+
+        @* Add item *@
+        <form class="add-item-form d-flex gap-2" data-list="@list.Id" data-family="@familyId"
+              onsubmit="addItem(event, this)">
+            @Html.AntiForgeryToken()
+            <input type="text" name="name" class="form-control form-control-sm"
+                   placeholder="Add an item…" required autocomplete="off" />
+            <input type="text" name="quantity" class="form-control form-control-sm"
+                   placeholder="Qty" style="max-width:70px;" autocomplete="off" />
+            <button type="submit" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                <i class="fa-light fa-plus"></i>
+            </button>
+        </form>
+    </div>
+}
+
+@* Hidden CSRF for AJAX calls *@
+<form id="csrfForm" class="d-none">@Html.AntiForgeryToken()</form>
+
+@section Scripts {
+<script>
+const FAMILY_ID   = '@familyId';
+const csrf = () => document.querySelector('#csrfForm input[name="__RequestVerificationToken"]')?.value;
+
+// ── Toggle item checked ────────────────────────────────────────────────────────
+async function toggleItem(itemId, familyId, btn) {
+    const li = btn.closest('.shopping-item');
+    const icon = btn.querySelector('i');
+    const text = li.querySelector('.item-text');
+
+    // Optimistic UI
+    const wasChecked = li.dataset.checked === 'true';
+    const nowChecked = !wasChecked;
+    li.dataset.checked = nowChecked;
+
+    if (nowChecked) {
+        icon.className = 'fa-solid fa-circle-check text-success fs-5';
+        text.classList.add('text-decoration-line-through', 'text-muted');
+    } else {
+        icon.className = 'fa-light fa-circle fs-5';
+        text.classList.remove('text-decoration-line-through', 'text-muted');
+    }
+
+    const listId = btn.closest('.shopping-list-card').dataset.listId;
+    reorderItems(listId);
+    updateProgress(listId);
+
+    try {
+        const res = await fetch('@Url.Action("ToggleItem","Shopping")', {
+            method: 'POST',
+            headers: { 'RequestVerificationToken': csrf() },
+            body: new URLSearchParams({ itemId, familyId, __RequestVerificationToken: csrf() })
+        });
+        const data = await res.json();
+        if (!data.success) {
+            // Revert
+            li.dataset.checked = wasChecked;
+            if (wasChecked) {
+                icon.className = 'fa-solid fa-circle-check text-success fs-5';
+                text.classList.add('text-decoration-line-through', 'text-muted');
+            } else {
+                icon.className = 'fa-light fa-circle fs-5';
+                text.classList.remove('text-decoration-line-through', 'text-muted');
+            }
+            reorderItems(listId);
+            updateProgress(listId);
+        }
+    } catch {}
+}
+
+// ── Delete item ────────────────────────────────────────────────────────────────
+async function deleteItem(itemId, familyId, btn) {
+    const li = btn.closest('.shopping-item');
+    const listId = btn.closest('.shopping-list-card').dataset.listId;
+
+    li.style.transition = 'opacity .2s, max-height .2s';
+    li.style.opacity = '0';
+    li.style.maxHeight = '0';
+    li.style.overflow = 'hidden';
+
+    try {
+        const res = await fetch('@Url.Action("DeleteItem","Shopping")', {
+            method: 'POST',
+            headers: { 'RequestVerificationToken': csrf() },
+            body: new URLSearchParams({ itemId, familyId, __RequestVerificationToken: csrf() })
+        });
+        const data = await res.json();
+        if (data.success) {
+            setTimeout(() => { li.remove(); updateProgress(listId); }, 220);
+        } else {
+            li.style.opacity = '1'; li.style.maxHeight = '';
+        }
+    } catch {
+        li.style.opacity = '1'; li.style.maxHeight = '';
+    }
+}
+
+// ── Add item ──────────────────────────────────────────────────────────────────
+async function addItem(e, form) {
+    e.preventDefault();
+    const listId   = form.dataset.list;
+    const familyId = form.dataset.family;
+    const nameInput = form.querySelector('[name="name"]');
+    const qtyInput  = form.querySelector('[name="quantity"]');
+    const name     = nameInput.value.trim();
+    const quantity = qtyInput.value.trim();
+    if (!name) return;
+
+    const submitBtn = form.querySelector('[type="submit"]');
+    submitBtn.disabled = true;
+
+    try {
+        const res = await fetch('@Url.Action("AddItem","Shopping")', {
+            method: 'POST',
+            headers: { 'RequestVerificationToken': csrf() },
+            body: new URLSearchParams({
+                listId, familyId, name, quantity,
+                __RequestVerificationToken: csrf()
+            })
+        });
+        const data = await res.json();
+        if (data.success) {
+            appendItem(listId, data.id, data.name, data.quantity);
+            nameInput.value = '';
+            qtyInput.value  = '';
+            updateProgress(listId);
+            nameInput.focus();
+        }
+    } finally {
+        submitBtn.disabled = false;
+    }
+}
+
+function appendItem(listId, id, name, quantity) {
+    const ul = document.getElementById(`items-${listId}`);
+    const li = document.createElement('li');
+    li.className = 'list-group-item bg-transparent border-0 px-0 py-1 shopping-item';
+    li.dataset.itemId  = id;
+    li.dataset.checked = 'false';
+    li.innerHTML = `
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-link p-0 border-0 toggle-btn"
+                    onclick="toggleItem(${id}, '${FAMILY_ID}', this)"
+                    style="line-height:1; flex-shrink:0;">
+                <i class="fa-light fa-circle fs-5"></i>
+            </button>
+            <span class="item-text">
+                ${escHtml(name)}${quantity ? ` <small class="text-muted ms-1">(${escHtml(quantity)})</small>` : ''}
+            </span>
+            <button type="button" class="btn btn-link text-danger p-0 border-0 ms-auto"
+                    onclick="deleteItem(${id}, '${FAMILY_ID}', this)"
+                    style="line-height:1; opacity:.6;">
+                <i class="fa-light fa-xmark fs-6"></i>
+            </button>
+        </div>`;
+    // Insert before checked items (unchecked items go at top)
+    const firstChecked = [...ul.querySelectorAll('.shopping-item')].find(el => el.dataset.checked === 'true');
+    if (firstChecked) ul.insertBefore(li, firstChecked);
+    else ul.appendChild(li);
+}
+
+// ── Progress update ───────────────────────────────────────────────────────────
+function updateProgress(listId) {
+    const ul    = document.getElementById(`items-${listId}`);
+    if (!ul) return;
+    const items   = [...ul.querySelectorAll('.shopping-item')];
+    const total   = items.length;
+    const checked = items.filter(i => i.dataset.checked === 'true').length;
+    const pct     = total > 0 ? Math.round(100 * checked / total) : 0;
+
+    const bar  = document.querySelector(`.list-progress-bar[data-list="${listId}"]`);
+    const txt  = document.querySelector(`.list-progress-text[data-list="${listId}"]`);
+    if (bar) { bar.style.width = pct + '%'; bar.closest('.progress').style.display = total > 0 ? '' : 'none'; }
+    if (txt) { txt.textContent = `${checked} of ${total} items`; txt.style.display = total > 0 ? '' : 'none'; }
+
+    // Done celebration
+    if (total > 0 && checked === total) {
+        Swal.fire({ titleText: '🎉 All done!', text: `${ul.closest('.shopping-list-card').querySelector('h5').textContent.trim()} is complete!`,
+            icon: 'success', timer: 1800, showConfirmButton: false, toast: true, position: 'top-end' });
+    }
+}
+
+// ── Reorder items (checked → bottom) ─────────────────────────────────────────
+function reorderItems(listId) {
+    const ul = document.getElementById(`items-${listId}`);
+    if (!ul) return;
+    const items = [...ul.querySelectorAll('.shopping-item')];
+    const unchecked = items.filter(i => i.dataset.checked === 'false');
+    const checked   = items.filter(i => i.dataset.checked === 'true');
+    [...unchecked, ...checked].forEach(li => ul.appendChild(li));
+}
+
+// ── Delete list ───────────────────────────────────────────────────────────────
+function confirmDeleteList(id) {
+    Swal.fire({
+        titleText: 'Delete this list?',
+        text: 'All items will be permanently removed.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Delete',
+        confirmButtonColor: '#dc3545',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
+    }).then(r => { if (r.isConfirmed) document.getElementById('deleteList-' + id).submit(); });
+}
+
+function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+}

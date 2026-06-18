@@ -1,0 +1,120 @@
+﻿@model Nestled.Data.Utility
+
+@{
+    ViewData["Title"] = "Add Utility";
+    var familyId = ViewData["FamilyId"] as Guid? ?? Model.FamilyId;
+}
+
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <h2 class="mb-0"><i class="fa-light fa-screwdriver-wrench me-2"></i>Add Utility</h2>
+</div>
+
+<div class="glass-card p-4">
+    <form id="utilityForm"
+          asp-controller="Utilities"
+          asp-action="Create"
+          asp-route-familyId="@familyId"
+          method="post"
+          novalidate>
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="FamilyId" />
+
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="Type" class="form-label fw-semibold"></label>
+            <select asp-for="Type" class="form-select" id="utilityTypeSelect">
+                <option value="">-- Select Type --</option>
+                <option value="Gas">Gas</option>
+                <option value="Electricity">Electricity</option>
+            </select>
+            <span asp-validation-for="Type" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="AmountPaid" class="form-label fw-semibold"></label>
+            <input asp-for="AmountPaid" class="form-control" />
+            <span asp-validation-for="AmountPaid" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="PurchasedFrom" class="form-label fw-semibold"></label>
+            <input asp-for="PurchasedFrom" class="form-control" />
+            <span asp-validation-for="PurchasedFrom" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="AccountUsed" class="form-label fw-semibold"></label>
+            <input asp-for="AccountUsed" class="form-control" />
+            <span asp-validation-for="AccountUsed" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="PurchaseDate" class="form-label fw-semibold"></label>
+            <input asp-for="PurchaseDate" type="date" class="form-control" />
+            <span asp-validation-for="PurchaseDate" class="text-danger"></span>
+        </div>
+
+        <div id="electricityFields" style="display:none;">
+            <div class="mb-3">
+                <label asp-for="TokenNumber" class="form-label fw-semibold"></label>
+                <input asp-for="TokenNumber" class="form-control" />
+                <span asp-validation-for="TokenNumber" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="TotalUnits" class="form-label fw-semibold">Total Units (kWh)</label>
+                <input asp-for="TotalUnits" class="form-control" />
+                <span asp-validation-for="TotalUnits" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div id="gasFields" style="display:none;">
+            <div class="mb-3">
+                <label asp-for="TotalUnits" class="form-label fw-semibold">Liters Received</label>
+                <input asp-for="TotalUnits" class="form-control" />
+                <span asp-validation-for="TotalUnits" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+            <a asp-action="Index"
+               asp-controller="Utilities"
+               asp-route-familyId="@familyId"
+               class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="fa-light fa-arrow-left me-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-success rounded-pill px-4">
+                <i class="fa-light fa-floppy-disk me-1"></i> Save
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        const select = document.getElementById('utilityTypeSelect');
+        const elec   = document.getElementById('electricityFields');
+        const gas    = document.getElementById('gasFields');
+
+        function toggleExtras() {
+            const isElec = select.value === 'Electricity';
+            const isGas  = select.value === 'Gas';
+            elec.style.display = isElec ? 'block' : 'none';
+            gas.style.display  = isGas  ? 'block' : 'none';
+            if (isElec) { enableSection(elec);  disableSection(gas); }
+            else if (isGas) { enableSection(gas); disableSection(elec); }
+            else { disableSection(elec); disableSection(gas); }
+        }
+
+        function disableSection(section) {
+            section.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+        }
+        function enableSection(section) {
+            section.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+        }
+
+        select.addEventListener('change', toggleExtras);
+        toggleExtras();
+    </script>
+}

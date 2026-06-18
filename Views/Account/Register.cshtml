@@ -1,0 +1,81 @@
+@{
+    ViewData["Title"] = "Create Account";
+    ViewData["HideNav"] = true;
+    Layout = "_Layout";
+}
+
+<div class="auth-card glass-card" style="width:100%; max-width:400px;">
+    <div class="text-center mb-4">
+        <div class="auth-logo"><i class="fa-solid fa-house-heart" style="font-size:2.5rem; color:var(--primary);"></i></div>
+        <h1 class="auth-title">Join Nestled</h1>
+        <p class="auth-subtitle">Create your family hub</p>
+    </div>
+
+    @if (ViewData.ModelState.ErrorCount > 0)
+    {
+        <div class="alert-glass danger mb-3">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div><i class="fa-solid fa-circle-xmark"></i> @error.ErrorMessage</div>
+            }
+        </div>
+    }
+
+    <form method="post" asp-action="Register" asp-controller="Account">
+        @Html.AntiForgeryToken()
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="form-group">
+                <label class="form-label-glass">First Name</label>
+                <input type="text" name="firstName" class="form-control-glass" placeholder="Jane" required />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Last Name</label>
+                <input type="text" name="lastName" class="form-control-glass" placeholder="Smith" required />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label-glass"><i class="fa-solid fa-envelope"></i> Email</label>
+            <input type="email" name="email" class="form-control-glass" placeholder="you@example.com" required autocomplete="email" />
+        </div>
+        <div class="form-group">
+            <label class="form-label-glass"><i class="fa-solid fa-lock"></i> Password</label>
+            <div class="input-icon-wrapper">
+                <input type="password" name="password" id="passwordInput" class="form-control-glass" placeholder="Min 8 characters" required autocomplete="new-password" />
+                <button type="button" class="input-icon-btn" data-password-toggle="passwordInput">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label-glass"><i class="fa-solid fa-lock"></i> Confirm Password</label>
+            <div class="input-icon-wrapper">
+                <input type="password" name="confirmPassword" id="confirmPasswordInput" class="form-control-glass" placeholder="Repeat password" required autocomplete="new-password" />
+                <button type="button" class="input-icon-btn" data-password-toggle="confirmPasswordInput">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+            </div>
+        </div>
+        <button type="submit" class="btn-primary-pill w-100 justify-content-center mt-2">
+            <i class="fa-solid fa-user-plus"></i> Create Account
+        </button>
+    </form>
+
+    <div class="text-center mt-4">
+        <span style="color:var(--text-secondary); font-size:0.9rem;">Already have an account?</span>
+        <a href="/Account/Login" class="auth-link"> Sign in</a>
+    </div>
+</div>
+
+<style>
+.auth-card { padding: 32px 28px; }
+.auth-logo { margin-bottom: 12px; }
+.auth-title { font-size: 1.8rem; font-weight: 800; color: var(--text); margin: 0; }
+.auth-subtitle { color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px; }
+.auth-link { color: var(--primary); font-weight: 600; text-decoration: none; }
+.auth-link:hover { text-decoration: underline; }
+.input-icon-wrapper { position: relative; }
+.input-icon-wrapper .form-control-glass { padding-right: 48px; }
+.input-icon-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); border: none; background: transparent; color: var(--text-muted); cursor: pointer; padding: 8px; }
+.alert-glass.danger { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; padding: 12px 16px; color: #ef4444; font-size: 0.85rem; }
+.w-100 { width: 100% !important; }
+</style>

@@ -1,0 +1,173 @@
+@model Nestled.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Dashboard";
+    var families = ViewBag.Families as List<Nestled.Models.Family> ?? new();
+    var birthdays = ViewBag.UpcomingBirthdays as List<Nestled.Models.ApplicationUser> ?? new();
+    var invites = ViewBag.PendingInvites as List<Nestled.Models.FamilyInvitation> ?? new();
+    var bills = ViewBag.UnpaidBills as List<Nestled.Models.Bill> ?? new();
+    var petReminders = ViewBag.PetCareReminders as List<Nestled.Models.PetCareRecord> ?? new();
+    var today = DateOnly.FromDateTime(DateTime.Today);
+}
+
+<div class="page-section">
+
+    <!-- Welcome -->
+    <div style="margin-bottom:20px;">
+        <h2 style="font-size:1.6rem; font-weight:800; color:var(--text); margin:0;">
+            Hi, @(Model?.DisplayName ?? "there") 👋
+        </h2>
+        <p style="color:var(--text-secondary); margin-top:4px; font-size:0.9rem;">
+            @DateTime.Now.ToString("dddd, MMMM d")
+        </p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:20px;">
+        <div class="stat-card">
+            <div class="stat-value">@families.Count</div>
+            <div class="stat-label">Families</div>
+        </div>
+        <div class="stat-card" style="border-color:@(bills.Any(b => b.IsOverdue) ? "rgba(239,68,68,0.3)" : "var(--border)")">
+            <div class="stat-value" style="color:@(bills.Any(b => b.IsOverdue) ? "var(--danger)" : "var(--primary)")">@bills.Count</div>
+            <div class="stat-label">Unpaid Bills</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color:var(--warning);">@birthdays.Count</div>
+            <div class="stat-label">Birthdays</div>
+        </div>
+    </div>
+
+    @if (invites.Any())
+    {
+        <div class="glass-card mb-4" style="border-color:rgba(108,99,255,0.3);">
+            <div class="section-title"><i class="fa-solid fa-envelope text-primary"></i> Pending Invitations</div>
+            @foreach (var invite in invites.Take(3))
+            {
+                <div class="list-item">
+                    <div class="list-item-icon" style="background:rgba(108,99,255,0.1); color:var(--primary);">
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                    <div class="list-item-content">
+                        <div class="list-item-title">@invite.InvitedEmail</div>
+                        <div class="list-item-subtitle">@invite.Family?.Name — Sent @invite.SentAt.ToString("MMM d")</div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    @if (birthdays.Any())
+    {
+        <div class="glass-card mb-4">
+            <div class="section-title"><i class="fa-solid fa-cake-candles text-warning"></i> Upcoming Birthdays</div>
+            @foreach (var person in birthdays)
+            {
+                var bday = person.BirthDate!.Value;
+                var thisYear = new DateOnly(today.Year, bday.Month, bday.Day);
+                if (thisYear < today) thisYear = thisYear.AddYears(1);
+                var daysAway = (thisYear.ToDateTime(TimeOnly.MinValue) - today.ToDateTime(TimeOnly.MinValue)).Days;
+                <div class="list-item">
+                    <div class="list-item-icon" style="background:rgba(245,158,11,0.1); color:var(--warning);">
+                        <i class="fa-solid fa-birthday-cake"></i>
+                    </div>
+                    <div class="list-item-content">
+                        <div class="list-item-title">@person.FullName</div>
+                        <div class="list-item-subtitle">@thisYear.ToString("MMMM d") — @(daysAway == 0 ? "Today!" : $"In {daysAway} days")</div>
+                    </div>
+                    @if (daysAway == 0)
+                    {
+                        <span class="badge-pill badge-warning">Today!</span>
+                    }
+                </div>
+            }
+        </div>
+    }
+
+    @if (bills.Any())
+    {
+        <div class="glass-card mb-4">
+            <div class="section-title"><i class="fa-solid fa-file-invoice-dollar"></i> Unpaid Bills</div>
+            @foreach (var bill in bills.Take(5))
+            {
+                <div class="list-item">
+                    <div class="list-item-icon" style="background:@(bill.IsOverdue ? "rgba(239,68,68,0.1)" : "rgba(245,158,11,0.1)"); color:@(bill.IsOverdue ? "var(--danger)" : "var(--warning)");">
+                        <i class="fa-solid fa-file-invoice"></i>
+                    </div>
+                    <div class="list-item-content">
+                        <div class="list-item-title">@bill.Name</div>
+                        <div class="list-item-subtitle">Due @bill.DueDate.ToString("MMM d") · @bill.Family?.Name</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-weight:700; color:var(--text);">R@bill.Amount.ToString("N2")</div>
+                        @if (bill.IsOverdue)
+                        {
+                            <span class="badge-pill badge-danger">Overdue</span>
+                        }
+                        else if (bill.IsDueSoon)
+                        {
+                            <span class="badge-pill badge-warning">Due soon</span>
+                        }
+                    </div>
+                </div>
+            }
+            <a href="/Bills" class="btn-ghost mt-3 d-block text-center text-decoration-none">View all bills</a>
+        </div>
+    }
+
+    @if (petReminders.Any())
+    {
+        <div class="glass-card mb-4">
+            <div class="section-title"><i class="fa-solid fa-paw" style="color:#f59e0b;"></i> Pet Care Due</div>
+            @foreach (var record in petReminders)
+            {
+                <div class="list-item">
+                    <div class="list-item-icon" style="background:rgba(245,158,11,0.1); color:var(--warning);">
+                        <i class="fa-solid fa-stethoscope"></i>
+                    </div>
+                    <div class="list-item-content">
+                        <div class="list-item-title">@record.Pet?.Name — @record.CareType</div>
+                        <div class="list-item-subtitle">Due @record.NextDueDate?.ToString("MMM d")</div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Family Cards -->
+    @if (families.Any())
+    {
+        <div class="section-title"><i class="fa-solid fa-people-roof text-primary"></i> My Families</div>
+        @foreach (var family in families)
+        {
+            var myRole = family.Members.FirstOrDefault(m => m.UserId == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)?.Role;
+            <a href="/Family/Details/@family.Id" class="glass-card d-block text-decoration-none mb-3">
+                <div style="display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                        <div style="font-weight:700; color:var(--text); font-size:1rem;">@family.Name</div>
+                        <div style="color:var(--text-secondary); font-size:0.8rem; margin-top:4px;">
+                            <i class="fa-solid fa-users"></i> @family.Members.Count member@(family.Members.Count != 1 ? "s" : "")
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        @if (myRole == Nestled.Models.FamilyRole.Admin)
+                        {
+                            <span class="badge-pill badge-primary">Admin</span>
+                        }
+                        <i class="fa-solid fa-chevron-right" style="color:var(--text-muted);"></i>
+                    </div>
+                </div>
+            </a>
+        }
+    }
+    else
+    {
+        <div class="glass-card text-center" style="padding:40px 20px;">
+            <i class="fa-solid fa-people-roof" style="font-size:3rem; color:var(--text-muted); margin-bottom:16px;"></i>
+            <div style="font-weight:700; color:var(--text); margin-bottom:8px;">No families yet</div>
+            <p style="color:var(--text-secondary); font-size:0.9rem; margin-bottom:20px;">Create or join a family to get started</p>
+            <a href="/Family/Create" class="btn-primary-pill">
+                <i class="fa-solid fa-plus"></i> Create Family
+            </a>
+        </div>
+    }
+</div>

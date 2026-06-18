@@ -1,0 +1,1901 @@
+﻿/*-----------------------------
+  Global & Base
+------------------------------*/
+
+/* Responsive base font size */
+html {
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+body {
+    margin-bottom: 60px; /* for footer */
+}
+
+
+/* Focus outlines for accessibility */
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+/*-----------------------------
+  Form‑Floating
+------------------------------*/
+
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
+    color: var(--bs-secondary-color);
+    text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
+    text-align: start;
+}
+
+/*-----------------------------
+  Pet Cards
+------------------------------*/
+
+.pet-card {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: auto;
+    cursor: pointer;
+    transition: transform .15s;
+}
+
+    .pet-card:hover {
+        transform: scale(1.05);
+    }
+
+.deceased-card {
+    border: 3px solid #f8d7da;
+}
+
+.pet-photo-lg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/*-----------------------------
+  Landing Page Cards (Neumorphic Soft Style)
+------------------------------*/
+
+/* Grid: 1 col on mobile, 3 cols on desktop */
+.cards {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+    .cards {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Neumorphic soft cards */
+.card {
+    background: #ecf0f3;
+    border-radius: 16px;
+    box-shadow: 6px 6px 12px rgba(0,0,0,0.1), -6px -6px 12px rgba(255,255,255,0.7);
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: box-shadow 0.2s, transform 0.1s;
+}
+
+    .card:active {
+        box-shadow: inset 3px 3px 8px rgba(0,0,0,0.1), inset -3px -3px 8px rgba(255,255,255,0.7);
+        transform: translateY(1px);
+    }
+
+.card-content {
+    text-align: center;
+}
+
+    .card-content h3 {
+        margin: 0.5rem 0;
+        font-size: var(--font-size-card-title);
+        color: #333;
+    }
+
+    .card-content p {
+        margin: 0;
+        color: #666;
+        font-size: var(--font-size-card-text);
+    }
+
+/* Base icon style (size, spacing) */
+.card-icon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+}
+
+/* Per‑card icon colors */
+.card.profile .card-icon {
+    color: #007aff; /* blue */
+}
+
+.card.dashboard .card-icon {
+    color: #28a745; /* green */
+}
+
+.card.families .card-icon {
+    color: #17a2b8; /* teal */
+}
+
+.card.pets .card-icon {
+    color: #e83e8c; /* pink */
+}
+
+.card.utilities .card-icon {
+    color: #ffc107; /* yellow */
+}
+
+.card.serviceContacts .card-icon {
+    color: #ED6A5A; /* Bittersweet */
+}
+
+.card.emergencyServices .card-icon {
+    color: #F22B29; /* Red CMYK */
+}
+
+/* frosted‑glass card */
+.glass-card {
+    background: rgba(255, 255, 255, 0.1); /* more see‑through */
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.4); /* brighter border */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), /* soft drop shadow */
+    0 0 0 2px rgba(255, 255, 255, 0.3); /* subtle glow edge */
+}
+
+    /* rounded inputs */
+    .glass-card .form-control {
+        border-radius: 0.75rem;
+        background: rgba(255, 255, 255, 0.35); /* slightly more transparent */
+        border: none;
+    }
+
+/* password toggle icon inside input */
+.input-group .form-control:focus + .input-group-text,
+.input-group-text {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+/* social buttons stub */
+.social-btn {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 .25rem;
+    font-size: 1.25rem;
+    color: #333;
+    border: none;
+}
+
+/* Apply only when <body class="login-page"> is set */
+body.login-page {
+    background: url('/images/login-bg.png') no-repeat center center fixed;
+    background-size: cover;
+}
+
+/*-----------------------------
+  Mobile: make glass‑card more transparent for better background visibility
+------------------------------*/
+@media (max-width: 576px) {
+    .glass-card {
+        background: rgba(255, 255, 255, 0.1) !important; /* almost invisible */
+        backdrop-filter: blur(6px) !important; /* lighter blur */
+        -webkit-backdrop-filter: blur(6px) !important;
+    }
+}
+
+/*-----------------------------
+  Login Animations & Overlay
+------------------------------*/
+
+/* container and card initial states */
+#loginContainer {
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+#bgOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/images/login-bg.png') no-repeat center center fixed;
+    background-size: cover;
+    opacity: 0;
+    transition: opacity 0.8s ease 0.5s;
+    z-index: 1000;
+}
+
+/* when login succeeds */
+body.logged-in #loginContainer {
+    opacity: 0;
+}
+
+body.logged-in #bgOverlay {
+    opacity: 1;
+    animation: holdThenSlide 3s ease-in-out 1.3s forwards;
+}
+
+/* slide the overlay off to the left after holding */
+@keyframes holdThenSlide {
+    0%, 66.66% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-100vw);
+    }
+}
+
+/* Pull the login card above the overlay so inputs remain clickable */
+#loginContainer {
+    position: relative;
+    z-index: 2000; /* above the overlay’s 1000 */
+}
+
+#bgOverlay {
+    z-index: 1000; /* stays behind the card */
+}
+
+/* Hide the static body background when logged‐in (so only the sliding overlay remains) */
+body.logged-in.login-page {
+    background: none !important;
+}
+
+/* ------------------------
+   Small “H” logo — desktop
+   ------------------------ */
+.small-logo {
+    position: fixed;
+    top: 1rem; /* just under the navbar */
+    left: 1rem;
+    width: 140px;
+    height: 140px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    z-index: 3000; /* above everything */
+    pointer-events: none;
+}
+
+/* hide on login page (body.login-page) */
+body.login-page .small-logo {
+    opacity: 0 !important;
+}
+
+/* show on all other pages */
+body:not(.login-page) .small-logo {
+    opacity: 1 !important;
+}
+
+/* Keep the navbar at 56px tall but allow overflow */
+/* desktop: logo pinned top‑center */
+@media (min-width: 768px) {
+    /* make the navbar itself just a thin strip at the top */
+    .navbar {
+        height: 56px;
+        position: relative;
+    }
+
+    /* take the brand out of the flow and center it above the bar */
+    .navbar-brand {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        height: 56px; /* keeps navbar height intact */
+        display: flex;
+        align-items: flex-start; /* logo itself will overflow downward */
+        justify-content: center;
+        overflow: visible;
+    }
+
+        /* your 180px logo will now overflow down from the center */
+        .navbar-brand > img {
+            height: 180px;
+            width: auto;
+        }
+}
+
+/* mobile: leave everything in normal flow (logo to the left) */
+@media (max-width: 767.98px) {
+    .navbar {
+        /* restore default Bootstrap behavior */
+        height: auto;
+    }
+
+    .navbar-brand {
+        position: static;
+        transform: none;
+        height: auto;
+        align-items: center;
+    }
+
+        .navbar-brand > img {
+            height: 40px; /* or whatever you’d like on mobile */
+        }
+}
+
+
+/* Absolutely center the 180px‐tall logo inside the 56px bar */
+.navbar-brand > img {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 180px;
+    width: auto;
+    transform: translateY(-50%);
+}
+
+/*---------------------------------
+   Neon‑glow service‑type icons
+----------------------------------*/
+
+
+/* Reset the icon nudge on small screens */
+@media (max-width: 767.98px) {
+    .service-icon {
+        margin-left: 0 !important;
+        margin-right: 2rem;
+    }
+}
+
+/*---------------------------------
+   Pulse animation for service icons
+----------------------------------*/
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.15);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.service-icon {
+    display: block; /* allow margin auto centering */
+    margin-bottom: 2.5rem;
+    margin-left: -6rem;
+    font-size: 4rem; /* adjust size as needed */
+    color: var(--bs-info); /* or whatever color */
+    text-shadow: 0 0 5px rgba(13,202,240,0.6), 0 0 10px rgba(13,202,240,0.5), 0 0 20px rgba(13,202,240,0.4), 0 0 30px rgba(13,202,240,0.3);
+    animation: pulse 3s infinite ease-in-out;
+}
+
+/* ----------------------------------------
+   Emergency Button & Pop-Out Icons
+---------------------------------------- */
+
+/* Main emergency button styling (desktop) */
+#emergencyButton,
+#emergencyButton.glass-card,
+#emergencyMain.glass-card {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 60px;
+    height: 60px;
+    background: transparent;
+    border: 6px solid rgba(255, 0, 0, 0.2);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 0 0 8px rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    z-index: 2000;
+}
+
+    #emergencyButton i,
+    #emergencyMain i {
+        font-size: 1.75rem;
+        color: red;
+        filter: drop-shadow(0 0 12px rgba(255, 0, 0, 0.8));
+    }
+
+/* Emergency button hover & drag states */
+.emergency-btn {
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(255, 0, 0, 0.3);
+    transition: transform 0.2s ease;
+}
+
+    .emergency-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .emergency-btn:active {
+        cursor: grabbing;
+    }
+
+.emergency-center {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin-top: -50px;
+    z-index: 4000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: visible; /* ✅ ensure children can pop out */
+}
+
+    .emergency-center #mobileEmergencyBtn {
+        position: absolute;
+        width: 104px;
+        height: 104px;
+        border: 7px inset red;
+        background: #fff;
+        border-radius: 50%;
+        z-index: 4001;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 10px rgb(233, 14, 14, 1), 0 0 8px red;
+    }
+
+        .emergency-center #mobileEmergencyBtn i {
+            font-size: 2.6rem;
+            color: red;
+            filter: drop-shadow(0 0 6px #b300ff);
+        }
+
+#mobileEmergencyChildren {
+    position: absolute;
+    bottom: 120%; /* pop it up fully above the button */
+    display: flex;
+    gap: 30px;
+    flex-wrap: nowrap;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1.2s ease;
+    left: 0%;
+    transform: translateX(-50%);
+    z-index: 3999;
+    background: transparent;
+}
+
+    #mobileEmergencyChildren.open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    #mobileEmergencyChildren .arc-child {
+        position: absolute;
+        top: 50%;
+        left: 70%;
+        transform-origin: center;
+        width: 44px;
+        height: 44px;
+        background: #fff;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.4s ease;
+    }
+
+    #mobileEmergencyChildren a {
+        width: 44px;
+        height: 44px;
+        background: pink;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-decoration: none;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        opacity: 0.8;
+    }
+
+/* Pop-out child icons container */
+.emergency-children {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+/* Each emergency child icon */
+.emergency-child {
+    background: white;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Fade in the children when open */
+#emergencyContainer.open .emergency-child {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Fallback styling to hide the children initially */
+#emergencyChildren {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+#emergencyContainer.open #emergencyChildren {
+    opacity: 0.8;
+    pointer-events: auto;
+}
+
+
+/* Onboarding fade-in animation */
+.fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 2s ease forwards;
+}
+
+    .fade-in.delay-1 {
+        animation-delay: 0.3s;
+    }
+
+    .fade-in.delay-2 {
+        animation-delay: 0.6s;
+    }
+
+    .fade-in.delay-3 {
+        animation-delay: 1s;
+    }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px; /* Increased from 60px */
+    background: rgba(255, 255, 255, 0.8);
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 3000;
+    box-shadow: 0 -1px 6px rgba(0,0,0,0.05);
+}
+
+    .mobile-nav a {
+        color: #333;
+        text-decoration: none;
+        font-size: 0.85rem; /* Slightly larger text */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mobile-nav i {
+        font-size: 1.5rem; /* Increased from 1.2rem */
+        margin-bottom: 2px;
+    }
+
+body {
+    padding-bottom: 70px; /* Matches nav height */
+    font-size: var(--font-size-base);
+}
+
+.mobile-nav a.active {
+    color: #0078d4;
+    font-weight: 600;
+}
+
+    .mobile-nav a.active i {
+        color: #b300ff; /* Neon cyan, or choose your favorite glow color */
+        text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff, 0 0 15px #00ffff;
+    }
+
+    .mobile-nav a.active span {
+        color: #b300ff;
+        text-shadow: 0 0 4px #00ffff, 0 0 8px #00ffff;
+    }
+
+/* -------------------------------
+   Mobile-first spacing & fonts
+------------------------------- */
+body {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+/* Headings spacing */
+h1, h2, h3, h4 {
+    font-weight: 600;
+    margin-top: 1.2rem;
+    margin-bottom: 0.75rem;
+    text-align: center;
+}
+
+/* Responsive card padding */
+.card {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+
+/* Row spacing between children */
+.row > * {
+    margin-bottom: 1rem;
+}
+
+/* Form controls spacing and sizing */
+input, select, textarea, .form-control {
+    font-size: 1rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 0.6rem;
+}
+
+/* Button consistency */
+.btn {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.95rem;
+    border-radius: 0.6rem;
+}
+
+.btn-add {
+    background-color: #333 !important;
+    color: #fff !important;
+    border: none;
+}
+
+    .btn-add:hover {
+        background-color: #111 !important;
+        color: #fff !important;
+    }
+
+/* Smooth transitions */
+*, *::before, *::after {
+    transition: all 0.2s ease;
+}
+
+h1-header {
+    text-align: center;
+    padding-top: 20px;
+}
+
+h2 {
+    text-align: center;
+}
+
+p {
+    text-align: center;
+}
+
+
+#moreMenuChildren {
+    position: absolute;
+    bottom: 60px;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column; /* changed from row to column */
+    align-items: center; /* center each icon horizontally */
+    gap: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 4000;
+}
+
+    #moreMenuChildren.open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    #moreMenuChildren a {
+        width: 44px;
+        height: 44px;
+        background: #f1f1f1;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-decoration: none;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease;
+    }
+
+        #moreMenuChildren a:hover {
+            transform: scale(1.1);
+        }
+
+
+.more-center {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    margin-top: -5px;
+    z-index: 4000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#mobileMoreBtn {
+    width: 64px;
+    height: 64px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+}
+
+    #mobileMoreBtn.active {
+        box-shadow: 0 0 8px #b300ff, 0 0 16px #00ffff, 0 0 24px #00ffff;
+    }
+
+
+#moreChildren {
+    position: absolute;
+    bottom: 70px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+    transform: translateY(10px);
+}
+
+    #moreChildren.open {
+        opacity: 0.8;
+        pointer-events: auto;
+        transform: translateY(0);
+    }
+
+    #moreChildren a {
+        background: white;
+        border-radius: 12px;
+        padding: 8px 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        text-decoration: none;
+        color: #333;
+        font-size: 0.95rem;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    /* Animated appearance */
+    #moreChildren.open a {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+        #moreChildren.open a:nth-child(1) {
+            transition-delay: 0.7s;
+        }
+
+        #moreChildren.open a:nth-child(2) {
+            transition-delay: 0.6s;
+        }
+
+        #moreChildren.open a:nth-child(3) {
+            transition-delay: 0.5s;
+        }
+
+        #moreChildren.open a:nth-child(4) {
+            transition-delay: 0.4s;
+        }
+
+        #moreChildren.open a:nth-child(5) {
+            transition-delay: 0.3s;
+        }
+
+        #moreChildren.open a:nth-child(6) {
+            transition-delay: 0.2s;
+        }
+
+        #moreChildren.open a:nth-child(7) {
+            transition-delay: 0.1s;
+        }
+
+.more-children {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    z-index: 9999;
+}
+
+    .more-children.open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .more-children a {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 8px 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        font-size: 0.95rem;
+        text-decoration: none;
+        color: #333;
+        min-width: 140px; /* ⬅️ Reduced width */
+        height: 48px;
+        opacity: 0.2; /* ⬅️ Added opacity */
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+        .more-children a i {
+            font-size: 1.3rem;
+            color: #555;
+        }
+
+        .more-children a span {
+            flex-grow: 1;
+            font-size: 0.95rem;
+            color: #333;
+        }
+
+
+/* --- Family Selector Dropdown --- */
+form .form-select {
+    max-width: 100%;
+    padding: 0.5rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    border-radius: 50rem;
+    background-color: #f8f9fa; /* light */
+    transition: box-shadow 0.2s ease-in-out;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    border: 1px solid #ccc;
+    color: #333;
+    margin-bottom: 0.4rem; /* adds visual gap before dropdown opens */
+    overflow-anchor: none; /* prevent scroll jumps when dropdown opens */
+}
+
+    form .form-select:focus {
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+        border-color: #80bdff;
+    }
+
+@media (prefers-color-scheme: dark) {
+    form .form-select {
+        background-color: #333;
+        color: #eee;
+        border: 1px solid #444;
+    }
+
+        form .form-select:focus {
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.5);
+        }
+}
+
+/* Align form to center for all screen sizes */
+form.d-flex.justify-content-center {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Hide mobile nav (except emergency button) on login/register */
+body.login-page nav.mobile-nav {
+    display: none;
+}
+
+body.login-page .emergency-center {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+}
+
+/* Mobile Startup Animation */
+
+
+
+.startup-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background-color: #ffffff;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    animation: fadeOut 1s ease-in-out 3.5s forwards;
+}
+
+.startup-text,
+.startup-icon {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInUp 1.5s ease forwards;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Fleur+De+Leah&display=swap');
+
+.startup-text {
+    font-family: "Fleur De Leah", cursive;
+    font-size: 4.2rem;
+    font-weight: 400;
+    font-style: normal;
+    margin-bottom: 1.5rem;
+    color: #333;
+    animation-delay: 0.5s;
+}
+
+.startup-icon {
+    width: 180px;
+    height: 180px;
+    animation-delay: 1s;
+}
+
+/* Fade in & out */
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.login-fade {
+    animation-name: fadeIn;
+    animation-fill-mode: both;
+    animation-timing-function: ease-out;
+}
+
+/* Delays for staggered appearance */
+.fade-1 {
+    animation-delay: 0.2s;
+    animation-duration: 0.8s;
+}
+
+.fade-2 {
+    animation-delay: 0.6s;
+    animation-duration: 0.8s;
+}
+
+.fade-3 {
+    animation-delay: 1.0s;
+    animation-duration: 0.8s;
+}
+
+.fade-4 {
+    animation-delay: 1.4s;
+    animation-duration: 0.8s;
+}
+
+.fade-5 {
+    animation-delay: 1.8s;
+    animation-duration: 0.8s;
+}
+
+.fade-card {
+    opacity: 0;
+    animation: fadeIn 1.2s ease-out 0.1s forwards;
+}
+
+
+/* -----------------------------
+   Mobile Settings Button & Panel
+------------------------------ */
+
+.mobile-settings {
+    position: fixed;
+    top: 15px;
+    left: 20px;
+    z-index: 4000;
+}
+
+/* Settings button appearance */
+#mobileSettingsBtn {
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* Perfect circle */
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: box-shadow 0.3s ease;
+    text-decoration: none;
+}
+
+    /* Settings gear icon */
+    #mobileSettingsBtn i.settings-icon {
+        font-size: 1.3rem;
+        color: #333;
+        line-height: 1;
+        transition: color 0.2s ease, text-shadow 0.2s ease;
+    }
+
+    /* Active glow on the button background only (not icon) */
+    #mobileSettingsBtn.active {
+        box-shadow: 0 0 8px #00ffff, 0 0 15px #00ffff;
+    }
+
+        /* Active icon glow (optional, remove if undesired) */
+        #mobileSettingsBtn.active i {
+            color: #b300ff;
+        }
+
+    /* Hover effect (optional) */
+    #mobileSettingsBtn:hover {
+        box-shadow: 0 0 0 4px rgba(0, 255, 255, 0.1);
+    }
+
+/* -----------------------------
+   Settings Dropdown Menu
+------------------------------ */
+
+.settings-children {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    z-index: 3000;
+    gap: 10px;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+}
+
+    .settings-children a {
+        display: flex;
+        align-items: center;
+        padding: 0.6rem 1rem;
+        text-decoration: none;
+        font-size: 0.95rem;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(20px);
+        opacity: 0;
+        transition: transform 0.35s ease, opacity 0.35s ease;
+        color: #333 !important;
+    }
+
+        .settings-children a i {
+            margin-right: 0.5rem;
+            color: #333 !important;
+        }
+
+        .settings-children a:visited {
+            color: #333 !important;
+        }
+
+        .settings-children a:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+    .settings-children.open a {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .settings-children button {
+        display: flex;
+        align-items: center;
+        padding: 0.6rem 1rem;
+        font-size: 0.95rem;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 1rem;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        color: #c82333 !important;
+        transform: translateY(20px);
+        opacity: 0;
+        transition: transform 0.35s ease, opacity 0.35s ease;
+        width: 100%;
+        text-align: left;
+    }
+
+    .settings-children button i {
+        margin-right: 0.5rem;
+        color: #c82333 !important;
+    }
+
+    .settings-children button:hover {
+        background-color: rgba(255, 0, 0, 0.05);
+    }
+
+    .settings-children.open button {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+        /* Staggered transition delays */
+    .settings-children.open > *:nth-child(1) {
+        transition-delay: 0.1s;
+    }
+
+    .settings-children.open > *:nth-child(2) {
+        transition-delay: 0.3s;
+    }
+
+    .settings-children.open > *:nth-child(3) {
+        transition-delay: 0.5s;
+    }
+
+    .settings-children.open > *:nth-child(4) {
+        transition-delay: 0.7s;
+    }
+
+    .settings-children > div {
+        transform: translateY(20px);
+        opacity: 0;
+        transition: transform 0.35s ease, opacity 0.35s ease;
+    }
+
+    .settings-children.open > div {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+.settings-children {
+    pointer-events: none;
+    visibility: hidden;
+}
+
+    .settings-children.open {
+        pointer-events: auto;
+        visibility: visible;
+    }
+
+.checkmark {
+    width: 80px;
+    height: 80px;
+    stroke-width: 4;
+    stroke: #28a745;
+    stroke-miterlimit: 10;
+    box-shadow: inset 0px 0px 0px #28a745;
+    animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+}
+
+.checkmark-circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    stroke-width: 4;
+    stroke-miterlimit: 10;
+    stroke: #28a745;
+    fill: none;
+    animation: stroke .6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+    transform-origin: 50% 50%;
+    stroke-dasharray: 48;
+    stroke-dashoffset: 48;
+    animation: stroke .3s cubic-bezier(0.65, 0, 0.45, 1) .6s forwards;
+}
+
+@keyframes stroke {
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes scale {
+    0%, 100% {
+        transform: none;
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+@keyframes fill {
+    100% {
+        box-shadow: inset 0px 0px 0px 30px #28a745;
+    }
+}
+
+/*----------------------------------
+Rule color-profile Three's CSS
+----------------------------------*/
+
+.progress-ring svg {
+    transform: rotate(-90deg);
+}
+
+.progress-ring .bg {
+    fill: none;
+    stroke: #e6e6e6;
+    stroke-width: 10;
+}
+
+.progress-ring .progress {
+    fill: none;
+    stroke: #28a745;
+    stroke-width: 10;
+    transition: stroke-dashoffset 0.6s ease;
+}
+
+.progress-ring .progress-text {
+    font-size: 1.25rem;
+    fill: #333;
+    transform: rotate(90deg);
+}
+
+.daily-progress-wrapper {
+    width: 100%;
+}
+
+.daily-progress-bar {
+    height: 24px;
+    background-color: transparent;
+    border-radius: 8px;
+    border: 2px solid;
+    overflow: hidden;
+    transition: border-color 0.3s ease;
+}
+
+    .daily-progress-bar .progress-fill {
+        height: 100%;
+        width: var(--progress);
+        background-color: #0d6efd; /* Bootstrap blue */
+        color: white;
+        text-align: center;
+        line-height: 24px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: width 0.5s ease;
+    }
+
+    .daily-progress-bar[style*="--progress: 100%"] {
+        border-color: #198754; /* Green border */
+    }
+
+    .daily-progress-bar[style*="--progress: 0%"],
+    .daily-progress-bar[style*="--progress: 1%"],
+    .daily-progress-bar[style*="--progress: 2%"],
+    .daily-progress-bar[style*="--progress: 3%"],
+    .daily-progress-bar[style*="--progress: 4%"],
+    .daily-progress-bar[style*="--progress: 5%"],
+    .daily-progress-bar[style*="--progress: 6%"],
+    .daily-progress-bar[style*="--progress: 7%"],
+    .daily-progress-bar[style*="--progress: 8%"],
+    .daily-progress-bar[style*="--progress: 9%"],
+    .daily-progress-bar[style*="--progress: 10%"],
+    .daily-progress-bar[style*="--progress: 11%"],
+    .daily-progress-bar[style*="--progress: 12%"],
+    .daily-progress-bar[style*="--progress: 13%"],
+    .daily-progress-bar[style*="--progress: 14%"],
+    .daily-progress-bar[style*="--progress: 15%"],
+    .daily-progress-bar[style*="--progress: 16%"],
+    .daily-progress-bar[style*="--progress: 17%"],
+    .daily-progress-bar[style*="--progress: 18%"],
+    .daily-progress-bar[style*="--progress: 19%"],
+    .daily-progress-bar[style*="--progress: 20%"],
+    .daily-progress-bar[style*="--progress: 21%"],
+    .daily-progress-bar[style*="--progress: 22%"],
+    .daily-progress-bar[style*="--progress: 23%"],
+    .daily-progress-bar[style*="--progress: 24%"],
+    .daily-progress-bar[style*="--progress: 25%"],
+    .daily-progress-bar[style*="--progress: 26%"],
+    .daily-progress-bar[style*="--progress: 27%"],
+    .daily-progress-bar[style*="--progress: 28%"],
+    .daily-progress-bar[style*="--progress: 29%"],
+    .daily-progress-bar[style*="--progress: 30%"],
+    .daily-progress-bar[style*="--progress: 31%"],
+    .daily-progress-bar[style*="--progress: 32%"],
+    .daily-progress-bar[style*="--progress: 33%"],
+    .daily-progress-bar[style*="--progress: 34%"],
+    .daily-progress-bar[style*="--progress: 35%"],
+    .daily-progress-bar[style*="--progress: 36%"],
+    .daily-progress-bar[style*="--progress: 37%"],
+    .daily-progress-bar[style*="--progress: 38%"],
+    .daily-progress-bar[style*="--progress: 39%"],
+    .daily-progress-bar[style*="--progress: 40%"],
+    .daily-progress-bar[style*="--progress: 41%"],
+    .daily-progress-bar[style*="--progress: 42%"],
+    .daily-progress-bar[style*="--progress: 43%"],
+    .daily-progress-bar[style*="--progress: 44%"],
+    .daily-progress-bar[style*="--progress: 45%"],
+    .daily-progress-bar[style*="--progress: 46%"],
+    .daily-progress-bar[style*="--progress: 47%"],
+    .daily-progress-bar[style*="--progress: 48%"],
+    .daily-progress-bar[style*="--progress: 49%"] {
+        border-color: #e06666; /* Soft red */
+    }
+
+/* Default: Blue for 50–99% */
+.daily-progress-bar {
+    border-color: #0d6efd;
+}
+
+.daily-progress-bar {
+    width: 100%;
+    height: 24px;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #f1f1f1;
+    border: 2px solid #ccc;
+    display: flex;
+    align-items: center;
+}
+
+.progress-fill {
+    height: 100%;
+    width: var(--progress);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: white;
+    transition: width 0.5s ease, background-color 0.5s ease;
+}
+
+/* Border + fill color states */
+.daily-progress-bar.low {
+    border-color: #dc3545; /* red */
+}
+
+    .daily-progress-bar.low .progress-fill {
+        background-color: #dc3545;
+    }
+
+.daily-progress-bar.mid {
+    border-color: #0d6efd; /* blue */
+}
+
+    .daily-progress-bar.mid .progress-fill {
+        background-color: #0d6efd;
+    }
+
+.daily-progress-bar.high {
+    border-color: #198754; /* green */
+}
+
+    .daily-progress-bar.high .progress-fill {
+        background-color: #198754;
+    }
+
+.circular-chart {
+    display: inline-block;
+    margin: 1rem auto;
+    max-width: 120px;
+}
+
+.circle-bg {
+    fill: none;
+    stroke: #eee;
+}
+
+.circle {
+    fill: none;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    transition: stroke-dasharray 0.6s ease;
+}
+
+/* Rule of 3 Info Card Styles */
+.info-card-container {
+    max-width: 700px;
+    margin: 3rem auto;
+    padding: 1rem;
+}
+
+.info-card {
+    background: #fff;
+    border-radius: 1rem;
+    padding: 2rem;
+    border: 1px solid #e3e3e3;
+    font-size: 1.05rem;
+}
+
+    .info-card h2 {
+        font-weight: bold;
+    }
+
+    .info-card ul {
+        padding-left: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-card li {
+        margin-bottom: 0.5rem;
+    }
+
+    .info-card .alert {
+        font-size: 1rem;
+    }
+
+.modal-content.info-card {
+    padding: 1.5rem;
+}
+
+.info-button {
+    background-color: #f0f4ff;
+    border: 1px solid #c3d4ff;
+    border-radius: 50%;
+    padding: 6px 9px;
+    font-size: 1rem;
+    line-height: 1;
+    transition: all 0.2s ease-in-out;
+}
+
+    .info-button:hover {
+        background-color: #d6e4ff;
+        border-color: #a6c1ff;
+        box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.2);
+    }
+
+/* Fade-in animation for help modal */
+.modal.fade .modal-dialog {
+    transform: translateY(-10px);
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.modal.fade.show .modal-dialog {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.modal-content {
+    border-radius: 1rem;
+    border: none;
+}
+
+.modal-header .modal-title {
+    font-size: 1.25rem;
+}
+
+.modal-body ul li {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+
+/* -----------------------------
+   Logout Page Styles (Nestled)
+------------------------------ */
+body.logout-page {
+    background: linear-gradient(120deg, #e0f7fa, #fdfdfd);
+    background-size: 400% 400%;
+    animation: gradientFlow 15s ease infinite;
+}
+
+@keyframes gradientFlow {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+.logout-card {
+    max-width: 420px;
+    width: 100%;
+    padding: 2rem;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 1.5rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin: auto;
+}
+
+    .logout-card img.logo {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 1.5rem;
+    }
+
+    .logout-card h2 {
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+
+    .logout-card p {
+        margin-bottom: 1.5rem;
+        color: #666;
+    }
+
+.btn-nestled {
+    border-radius: 0.75rem;
+    padding: 0.6rem 1.2rem;
+    font-weight: 500;
+}
+
+.btn-nestled-primary {
+    background-color: #007bff;
+    color: white;
+    border: none;
+}
+
+.btn-nestled-secondary {
+    background-color: transparent;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.btn-nestled:hover {
+    opacity: 0.9;
+}
+
+/* Checkmark animation */
+.checkmark-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.checkmark {
+    width: 80px;
+    height: 80px;
+    stroke-width: 4;
+    stroke: #28a745;
+    stroke-miterlimit: 10;
+    fill: none;
+    animation: scale .3s ease-in-out .9s both;
+}
+
+.checkmark__circle {
+    stroke-dasharray: 166;
+    stroke-dashoffset: 166;
+    animation: stroke .6s ease-in-out forwards;
+}
+
+.checkmark__check {
+    stroke-dasharray: 36;
+    stroke-dashoffset: 36;
+    animation: stroke-check .4s ease-in-out .6s forwards;
+}
+
+@keyframes stroke {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes stroke-check {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes scale {
+    0%, 100% {
+        transform: none;
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.birthday-progress .progress-container {
+    width: 100%;
+    height: 10px;
+    background-color: #e0e0e0;
+    border-radius: 50px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.birthday-progress .progress-fill {
+    height: 100%;
+    background: linear-gradient(to right, #e53935, #fb8c00, #fdd835, #43a047);
+    border-radius: 50px;
+    transition: width 0.6s ease-in-out;
+}
+
+
+.pac-container {
+    z-index: 2000 !important;
+    position: absolute !important;
+    pointer-events: auto !important;
+}
+
+input#autocomplete {
+    position: relative;
+    z-index: 1052;
+}
+
+body.dark {
+    background-color: #121212 !important;
+    color: #eee !important;
+    --text-color: #f8f9fa !important;
+}
+
+    body.dark .card {
+        background-color: #1e1e1e !important;
+        color: #ccc !important;
+        --text-color: #f8f9fa !important;
+    }
+
+    body.dark .form-control,
+    body.dark .form-select {
+        background-color: #2b2b2b !important;
+        color: #fff !important;
+        border-color: #444 !important;
+    }
+
+    body.dark .form-check-label,
+    body.dark .form-label {
+        color: #e0e0e0 !important;
+    }
+
+/* Default icon styles (light mode) */
+.theme-icon {
+    color: #333;
+}
+
+/* Dark mode override */
+body.dark .theme-icon {
+    color: #eee !important;
+}
+
+/* You can also apply this to border/stroke if using SVGs */
+
+body.dark .mobile-nav {
+    background-color: #1b1b1d;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.mobile-nav a {
+    color: #555;
+}
+
+body.dark .mobile-nav a {
+    color: #eee;
+}
+
+.theme-heading {
+    color: #333;
+    transition: color 0.3s ease;
+}
+
+body.dark .theme-heading {
+    color: #eee !important;
+}
+
+.card-content p {
+    margin: 0;
+    color: #666;
+    font-size: 1rem;
+}
+
+body.dark .card-content p {
+    color: #bbb !important;
+}
+
+/* Font size themes */
+body.small {
+    --font-size-base: 0.85rem;
+    --font-size-heading: 1.1rem;
+    --font-size-card-title: 1.2rem;
+    --font-size-card-text: 0.85rem;
+}
+
+body.medium {
+    --font-size-base: 1rem;
+    --font-size-heading: 1.25rem;
+    --font-size-card-title: 1.4rem;
+    --font-size-card-text: 1rem;
+}
+
+body.large {
+    --font-size-base: 1.35rem;
+    --font-size-heading: 1.7rem;
+    --font-size-card-title: 1.8rem;
+    --font-size-card-text: 1.35rem;
+}
+
+body {
+    font-size: var(--font-size-base);
+}
+
+.circular-chart .percentage {
+    fill: #333; /* Dark text */
+    transition: fill 0.3s ease;
+}
+
+/* Dark mode override */
+body.dark .circular-chart .percentage {
+    fill: #eee; /* Light text */
+}
+
+body.dark .modal-content {
+    background-color: #1e1e1e !important;
+    color: #eee !important;
+}
+
+body.dark .modal-body p,
+body.dark .modal-body li {
+    color: #ccc !important;
+}
+
+body.dark .alert-info {
+    background-color: #0d3a52 !important;
+    border-color: #0d6efd !important;
+    color: #b8dfff !important;
+}
+
+.fc {
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+.fc-toolbar-title {
+    font-weight: 600;
+    font-size: 1.25rem;
+}
+
+.fc-button {
+    border-radius: 1rem !important;
+}
+
+.fc-event {
+    border-radius: 0.5rem !important;
+    padding: 2px 4px !important;
+    font-size: 0.85rem;
+}
+
+.fc-event-custom {
+    white-space: normal;
+    word-break: break-word;
+    padding: 2px 6px;
+    border-radius: 0.5rem;
+    background-color: #0d6efd;
+    color: white;
+    font-size: 0.8rem;
+}
+
+.fc-daygrid-day-number {
+    color: #ffffff !important;
+    font-weight: 500;
+}
+
+.fc-theme-standard .fc-scrollgrid {
+    border: none;
+}
+
+.fc td, .fc th {
+    border-color: rgba(255,255,255,0.1) !important;
+}
+
+.disabled-rule-card {
+    opacity: 0.6;
+    pointer-events: auto; /* Allow JS to intercept clicks */
+    cursor: not-allowed;
+}
+
+
+.coming-soon {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+    .coming-soon img {
+        width: 96px;
+        height: 96px;
+        margin-bottom: 1rem;
+    }
+
+.coming-soon-logo {
+    width: 96px;
+    height: 96px;
+    border-radius: 1.25rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    object-fit: cover;
+}

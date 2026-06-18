@@ -1,0 +1,126 @@
+@{
+    ViewData["Title"] = "Unlock Vault";
+}
+
+<div class="mt-5">
+    <div class="glass-card p-4 mx-auto" style="max-width: 400px;">
+        <h4 class="text-center mb-1"><i class="fa-light fa-vault me-2"></i>Unlock Vault</h4>
+        <p class="text-center text-muted small mb-4">Enter your PIN or use biometrics if registered on this device.</p>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger text-center small">@TempData["Error"]</div>
+        }
+
+        <form asp-action="ValidatePin" method="post">
+            @Html.AntiForgeryToken()
+            <div class="form-floating mb-3">
+                <input type="password" class="form-control" name="pin" id="pin"
+                       placeholder="PIN" maxlength="6" inputmode="numeric" required>
+                <label for="pin">Vault PIN</label>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 rounded-pill mb-3">
+                <i class="fa-light fa-unlock me-1"></i> Unlock with PIN
+            </button>
+        </form>
+
+        @if (ViewBag.HasBiometric == true)
+        {
+            <div class="text-center">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <hr class="flex-grow-1 m-0">
+                    <span class="text-muted small">or</span>
+                    <hr class="flex-grow-1 m-0">
+                </div>
+                <button type="button" class="btn btn-outline-primary w-100 rounded-pill" id="biometricBtn" onclick="unlockWithBiometrics()">
+                    <i class="fa-light fa-fingerprint me-2"></i>Use Face ID / Fingerprint
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+
+async function unlockWithBiometrics() {
+    const btn = document.getElementById('biometricBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-light fa-spinner-third fa-spin me-2"></i>Waiting for biometric…';
+
+    try {
+        // 1. Get challenge from server
+        const optRes = await fetch('/Vault/BiometricAuthOptions', { method: 'POST' });
+        if (!optRes.ok) throw new Error('Could not get auth options.');
+        const options = await optRes.json();
+
+        if (options.success === false) {
+            throw new Error(options.error ?? 'No biometric registered on this device.');
+        }
+
+        // 2. Prepare options for WebAuthn API
+        options.challenge = base64UrlDecode(options.challenge);
+        options.allowCredentials = (options.allowCredentials ?? []).map(c => ({
+            ...c,
+            id: base64UrlDecode(c.id)
+        }));
+
+        // 3. Browser prompts Face ID / fingerprint
+        const assertion = await navigator.credentials.get({ publicKey: options });
+
+        // 4. Serialize and send to server
+        const payload = {
+            id:    assertion.id,
+            rawId: base64UrlEncode(assertion.rawId),
+            type:  assertion.type,
+            response: {
+                authenticatorData: base64UrlEncode(assertion.response.authenticatorData),
+                clientDataJSON:    base64UrlEncode(assertion.response.clientDataJSON),
+                signature:         base64UrlEncode(assertion.response.signature),
+                userHandle:        assertion.response.userHandle ? base64UrlEncode(assertion.response.userHandle) : null
+            }
+        };
+
+        const completeRes = await fetch('/Vault/BiometricAuthComplete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const completeData = await completeRes.json();
+
+        if (completeData.success) {
+            window.location.href = '/Vault';
+        } else if (completeData.requirePin) {
+            Swal.fire({
+                titleText: 'PIN required',
+                text: 'Your session has expired. Please enter your PIN to unlock — biometrics will work for the rest of the session.',
+                icon: 'info',
+                confirmButtonText: 'OK'
+            });
+        } else {
+            throw new Error(completeData.error ?? 'Biometric verification failed.');
+        }
+
+    } catch (err) {
+        Swal.fire({ titleText: 'Biometric failed', text: err.message, icon: 'error', confirmButtonText: 'OK' });
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-light fa-fingerprint me-2"></i>Use Face ID / Fingerprint';
+    }
+}
+
+function base64UrlDecode(b64url) {
+    const b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
+    const bin = atob(b64);
+    return Uint8Array.from(bin, c => c.charCodeAt(0)).buffer;
+}
+
+function base64UrlEncode(buf) {
+    const arr  = new Uint8Array(buf);
+    let binary = '';
+    arr.forEach(b => binary += String.fromCharCode(b));
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+</script>
+}

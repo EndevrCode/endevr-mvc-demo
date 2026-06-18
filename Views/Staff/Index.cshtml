@@ -1,0 +1,47 @@
+@model List<Nestled.Models.Staff>
+@{
+    ViewData["Title"] = "Staff";
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">Staff</h1>
+        <a href="/Staff/Create" class="btn-primary-pill"><i class="fa-solid fa-plus"></i> Add</a>
+    </div>
+    @if (Model.Any())
+    {
+        @foreach (var staff in Model)
+        {
+            <a href="/Staff/Edit/@staff.Id" class="glass-card d-block text-decoration-none mb-3">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    @if (!string.IsNullOrEmpty(staff.PhotoPath))
+                    {
+                        <img src="@staff.PhotoPath" style="width:52px;height:52px;border-radius:50%;object-fit:cover;flex-shrink:0;" />
+                    }
+                    else
+                    {
+                        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#64748b,#334155);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:1.2rem;flex-shrink:0;">
+                            @staff.FirstName?.Substring(0,1)?.ToUpper()
+                        </div>
+                    }
+                    <div style="flex:1;">
+                        <div style="font-weight:700;color:var(--text);">@staff.FullName</div>
+                        @if (!string.IsNullOrEmpty(staff.PhoneNumber))
+                        {
+                            <div style="color:var(--text-secondary);font-size:0.82rem;"><i class="fa-solid fa-phone"></i> @staff.PhoneNumber</div>
+                        }
+                        <div style="color:var(--text-muted);font-size:0.8rem;margin-top:2px;">R@staff.DailyWage.ToString("N2")/day · @staff.Family?.Name</div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right" style="color:var(--text-muted);"></i>
+                </div>
+            </a>
+        }
+    }
+    else
+    {
+        <div class="glass-card text-center" style="padding:48px 20px;">
+            <div style="font-size:3.5rem;margin-bottom:12px;">👷</div>
+            <div style="font-weight:700;color:var(--text);margin-bottom:8px;">No staff yet</div>
+            <a href="/Staff/Create" class="btn-primary-pill"><i class="fa-solid fa-plus"></i> Add Staff</a>
+        </div>
+    }
+</div>

@@ -1,0 +1,48 @@
+@model List<Nestled.Models.BankAccount>
+@{
+    ViewData["Title"] = "Banking";
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title"><i class="fa-solid fa-credit-card" style="color:#10b981;"></i> Banking</h1>
+        <a href="/Banking/Create" class="btn-primary-pill"><i class="fa-solid fa-plus"></i> Add</a>
+    </div>
+    <div style="margin-bottom:16px;">
+        <a href="/Vault" style="color:var(--text-muted);font-size:0.85rem;text-decoration:none;"><i class="fa-solid fa-arrow-left"></i> Back to Vault</a>
+    </div>
+    @if (Model.Any())
+    {
+        @foreach (var acc in Model)
+        {
+            <div class="glass-card mb-4" style="border-color:rgba(16,185,129,0.2);">
+                <div style="background:linear-gradient(135deg,#10b981,#065f46);border-radius:16px;padding:20px;margin-bottom:16px;color:white;">
+                    <div style="font-size:0.8rem;opacity:0.8;margin-bottom:4px;">@acc.AccountType</div>
+                    <div style="font-size:1.1rem;font-weight:700;">@acc.BankName</div>
+                    <div style="font-size:0.9rem;opacity:0.8;margin-top:4px;">@acc.AccountHolder</div>
+                    <div style="font-size:1.4rem;font-weight:800;margin-top:12px;letter-spacing:2px;">
+                        ••••&nbsp;&nbsp;@acc.AccountNumber.Substring(Math.Max(0,acc.AccountNumber.Length-4))
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(acc.Notes))
+                {
+                    <div style="color:var(--text-secondary);font-size:0.85rem;">@acc.Notes</div>
+                }
+                <form method="post" asp-action="Delete" asp-controller="Banking" style="margin-top:12px;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@acc.Id" />
+                    <button type="submit" class="btn-ghost w-100 justify-content-center" style="color:var(--danger);" onclick="return confirm('Delete account?')">
+                        <i class="fa-solid fa-trash"></i> Remove
+                    </button>
+                </form>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="glass-card text-center" style="padding:48px 20px;">
+            <div style="font-size:3.5rem;margin-bottom:12px;">💳</div>
+            <div style="font-weight:700;color:var(--text);margin-bottom:8px;">No bank accounts</div>
+            <a href="/Banking/Create" class="btn-primary-pill"><i class="fa-solid fa-plus"></i> Add Account</a>
+        </div>
+    }
+</div>

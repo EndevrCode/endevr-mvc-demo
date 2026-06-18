@@ -1,0 +1,70 @@
+@{
+    ViewData["Title"] = "Invite Generated";
+
+    var scheme = Context.Request.Scheme;
+    var host = Context.Request.Host.Value;
+    var token = (Guid)ViewData["InviteToken"];
+    var expires = (DateTime)ViewData["InviteExpires"];
+    var acceptUrl = Url.Action(
+        "Accept",
+        "Families",
+        new { token },
+        scheme,
+        host
+    );
+}
+
+<div class="mb-4">
+    <h2 class="mb-0"><i class="fa-light fa-envelope me-2"></i>@ViewData["Title"]</h2>
+</div>
+
+<div class="glass-card p-3 mb-3">
+    <div class="row gy-2">
+        <div class="col-12">
+            <div class="text-muted small">Invite Email</div>
+            <div class="fw-semibold">@ViewData["InviteEmail"]</div>
+        </div>
+        <div class="col-md-6">
+            <div class="text-muted small">Expires</div>
+            <div>@expires.ToLocalTime().ToString("dd MMM yyyy HH:mm")</div>
+        </div>
+        <div class="col-md-6">
+            <div class="text-muted small">Token</div>
+            <div class="font-monospace small text-muted">@token</div>
+        </div>
+    </div>
+</div>
+
+<div class="mb-4">
+    <p class="text-muted">Share this link with your family member:</p>
+    <div class="input-group">
+        <input type="text"
+               class="form-control"
+               id="inviteLink"
+               readonly
+               value="@acceptUrl" />
+        <button class="btn btn-outline-secondary"
+                type="button"
+                id="btnCopyInvite">
+            <i class="fa-light fa-clipboard me-1"></i> Copy
+        </button>
+    </div>
+</div>
+
+<a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+    <i class="fa-light fa-arrow-left me-1"></i> Back to Families
+</a>
+
+@section Scripts {
+    <script>
+        document.getElementById('btnCopyInvite').addEventListener('click', async () => {
+            const link = document.getElementById('inviteLink').value;
+            try {
+                await navigator.clipboard.writeText(link);
+                Swal.fire({ titleText: 'Copied!', text: 'Invite link copied to clipboard.', icon: 'success', timer: 1500, showConfirmButton: false });
+            } catch {
+                Swal.fire({ titleText: 'Could not copy', text: 'Please select and copy the link manually.', icon: 'warning' });
+            }
+        });
+    </script>
+}

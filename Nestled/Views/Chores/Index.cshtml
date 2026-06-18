@@ -1,0 +1,343 @@
+@model IEnumerable<Nestled.Data.FamilyChore>
+@using Nestled.Data
+@{
+    ViewData["Title"] = "Chores";
+    var hasFamilyId = ViewData["FamilyId"] is Guid fid && fid != Guid.Empty;
+    Guid familyId = hasFamilyId ? (Guid)ViewData["FamilyId"]! : Guid.Empty;
+    var family = ViewBag.Family as Family;
+    var profiles = ViewBag.Profiles as List<UserProfile> ?? new List<UserProfile>();
+    var memberProfiles = ViewBag.MemberProfiles as List<UserProfile> ?? new List<UserProfile>();
+    var currentUserId = ViewBag.CurrentUserId as string ?? "";
+
+    var outstanding = Model.Where(c => !c.IsDone).ToList();
+    var done = Model.Where(c => c.IsDone).ToList();
+}
+
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <h2 class="mb-0"><i class="fa-light fa-list-check me-2"></i>Chores</h2>
+    @if (family != null)
+    {
+        <span class="badge bg-secondary">@family.Name</span>
+    }
+</div>
+
+@await Component.InvokeAsync("FamilySelector", new { selectedFamilyId = hasFamilyId ? (Guid?)familyId : null })
+
+@if (!hasFamilyId) { return; }
+
+<!-- Add Chore -->
+<div class="glass-card p-3 mb-4">
+    <form id="addChoreForm" class="d-flex flex-column gap-2">
+        @Html.AntiForgeryToken()
+        <div class="input-group">
+            <input type="text" id="choreTitle" class="form-control" placeholder="New chore…" maxlength="200" required />
+            <button type="submit" class="btn btn-primary rounded-end-pill px-3">
+                <i class="fa-light fa-plus me-1"></i> Add
+            </button>
+        </div>
+        <div class="row g-2">
+            <div class="col">
+                <input type="date" id="choreDueDate" class="form-control form-control-sm" title="Due date (optional)" />
+            </div>
+            <div class="col">
+                <select id="choreAssignee" class="form-select form-select-sm">
+                    <option value="">— Unassigned —</option>
+                    @foreach (var mp in memberProfiles)
+                    {
+                        <option value="@mp.UserId">@(mp.PreferredName ?? $"{mp.FirstName} {mp.LastName}".Trim())</option>
+                    }
+                </select>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Outstanding Chores -->
+@if (!outstanding.Any())
+{
+    <div class="glass-card text-center py-5 mb-4" id="emptyState">
+        <i class="fa-light fa-list-check fa-3x text-muted mb-3 d-block"></i>
+        <p class="text-muted mb-0">No chores to do. Nice!</p>
+    </div>
+}
+
+<div id="choresList">
+    @foreach (var chore in outstanding)
+    {
+        var profile = profiles.FirstOrDefault(p => p.UserId == chore.AssignedToUserId);
+        var assigneeName = profile != null ? (profile.PreferredName ?? $"{profile.FirstName} {profile.LastName}".Trim()) : null;
+        var isOverdue = chore.DueDate.HasValue && chore.DueDate.Value.Date < DateTime.Today;
+
+        <div class="glass-card p-3 mb-2 chore-card" data-id="@chore.Id" data-done="false">
+            <div class="d-flex align-items-start gap-3">
+                <button class="btn btn-outline-secondary btn-sm rounded-circle toggle-done-btn flex-shrink-0"
+                        style="width:36px;height:36px;"
+                        onclick="toggleDone('@chore.Id', this)"
+                        title="Mark done">
+                    <i class="fa-light fa-check"></i>
+                </button>
+                <div class="flex-grow-1 min-width-0">
+                    <div class="fw-semibold">@chore.Title</div>
+                    @if (!string.IsNullOrWhiteSpace(chore.Description))
+                    {
+                        <div class="text-muted small">@chore.Description</div>
+                    }
+                    <div class="d-flex flex-wrap gap-2 mt-1">
+                        @if (chore.DueDate.HasValue)
+                        {
+                            <span class="badge @(isOverdue ? "bg-danger" : "bg-secondary")">
+                                <i class="fa-light fa-calendar me-1"></i>@chore.DueDate.Value.ToString("dd MMM")
+                            </span>
+                        }
+                        @if (assigneeName != null)
+                        {
+                            <span class="badge bg-primary">
+                                <i class="fa-light fa-user me-1"></i>@assigneeName
+                            </span>
+                        }
+                    </div>
+                </div>
+                <div class="d-flex gap-1 flex-shrink-0">
+                    <button class="btn btn-sm btn-outline-secondary"
+                            onclick="openAssignModal('@chore.Id')"
+                            title="Assign">
+                        <i class="fa-light fa-user-plus"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger"
+                            onclick="deleteChore('@chore.Id', this)"
+                            title="Delete">
+                        <i class="fa-light fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Completed Chores -->
+@if (done.Any())
+{
+    <details class="mt-4" id="completedSection">
+        <summary class="text-muted small mb-2" style="cursor:pointer;">
+            <i class="fa-light fa-circle-check me-1"></i>
+            @done.Count completed chore@(done.Count == 1 ? "" : "s")
+        </summary>
+        <div class="d-flex flex-column gap-2 mt-2" id="completedList">
+            @foreach (var chore in done)
+            {
+                <div class="glass-card p-3 opacity-60 chore-card" data-id="@chore.Id" data-done="true">
+                    <div class="d-flex align-items-center gap-3">
+                        <button class="btn btn-success btn-sm rounded-circle toggle-done-btn flex-shrink-0"
+                                style="width:36px;height:36px;"
+                                onclick="toggleDone('@chore.Id', this)"
+                                title="Mark undone">
+                            <i class="fa-light fa-check"></i>
+                        </button>
+                        <div class="flex-grow-1 text-decoration-line-through text-muted">@chore.Title</div>
+                        <button class="btn btn-sm btn-outline-danger flex-shrink-0"
+                                onclick="deleteChore('@chore.Id', this)"
+                                title="Delete">
+                            <i class="fa-light fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </details>
+}
+
+<!-- Assign Modal -->
+<div class="modal fade" id="assignModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content glass-card">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold mx-auto">Assign Chore</h5>
+                <button type="button" class="btn-close position-absolute end-0 me-3" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <select id="assignModalSelect" class="form-select">
+                    <option value="">— Unassigned —</option>
+                    @foreach (var mp in memberProfiles)
+                    {
+                        <option value="@mp.UserId">@(mp.PreferredName ?? $"{mp.FirstName} {mp.LastName}".Trim())</option>
+                    }
+                </select>
+            </div>
+            <div class="modal-footer border-0 d-flex gap-2">
+                <button type="button" class="btn btn-outline-secondary rounded-pill flex-grow-1" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary rounded-pill flex-grow-1" onclick="submitAssign()">
+                    <i class="fa-light fa-user-check me-1"></i> Assign
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const _csrf = document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+        let _assignChoreId = null;
+
+        // ── Add chore ─────────────────────────────────────────────────────────
+        document.getElementById('addChoreForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const title = document.getElementById('choreTitle').value.trim();
+            const dueDate = document.getElementById('choreDueDate').value;
+            const assignee = document.getElementById('choreAssignee').value;
+            if (!title) return;
+
+            const body = new URLSearchParams({
+                familyId: '@familyId',
+                title,
+                dueDate,
+                assignedToUserId: assignee,
+                __RequestVerificationToken: _csrf
+            });
+
+            try {
+                const res = await fetch('/Chores/Create', { method: 'POST', body });
+                const data = await res.json();
+                if (data.success) {
+                    prependChoreCard(data.chore);
+                    document.getElementById('choreTitle').value = '';
+                    document.getElementById('choreDueDate').value = '';
+                    document.getElementById('choreAssignee').value = '';
+                    document.getElementById('emptyState')?.remove();
+                } else {
+                    Swal.fire({ icon: 'error', titleText: data.message ?? 'Error', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+                }
+            } catch {
+                Swal.fire({ icon: 'error', titleText: 'Network error', toast: true, position: 'top-end', timer: 2000, showConfirmButton: false });
+            }
+        });
+
+        // ── Toggle done ───────────────────────────────────────────────────────
+        async function toggleDone(id, btn) {
+            const card = btn.closest('.chore-card');
+            const body = new URLSearchParams({ id, __RequestVerificationToken: _csrf });
+
+            try {
+                const res = await fetch('/Chores/ToggleDone', { method: 'POST', body });
+                const data = await res.json();
+                if (data.success) {
+                    if (data.isDone) {
+                        // Move to completed list
+                        card.classList.add('opacity-60');
+                        card.dataset.done = 'true';
+                        const title = card.querySelector('.fw-semibold') || card.querySelector('.flex-grow-1');
+                        if (title) title.classList.add('text-decoration-line-through', 'text-muted');
+                        btn.className = 'btn btn-success btn-sm rounded-circle toggle-done-btn flex-shrink-0';
+                        btn.style.width = '36px'; btn.style.height = '36px';
+
+                        let completedList = document.getElementById('completedList');
+                        if (!completedList) {
+                            const section = document.createElement('details');
+                            section.id = 'completedSection';
+                            section.className = 'mt-4';
+                            section.innerHTML = '<summary class="text-muted small mb-2" style="cursor:pointer;"><i class="fa-light fa-circle-check me-1"></i>1 completed chore</summary><div class="d-flex flex-column gap-2 mt-2" id="completedList"></div>';
+                            document.querySelector('.chore-card')?.parentElement?.after(section);
+                            completedList = document.getElementById('completedList');
+                        }
+                        completedList?.prepend(card);
+                    } else {
+                        // Move back to outstanding
+                        card.classList.remove('opacity-60');
+                        card.dataset.done = 'false';
+                        const title = card.querySelector('.text-decoration-line-through');
+                        if (title) { title.classList.remove('text-decoration-line-through', 'text-muted'); title.classList.add('fw-semibold'); }
+                        btn.className = 'btn btn-outline-secondary btn-sm rounded-circle toggle-done-btn flex-shrink-0';
+                        btn.style.width = '36px'; btn.style.height = '36px';
+                        document.getElementById('choresList')?.prepend(card);
+                    }
+                }
+            } catch {}
+        }
+
+        // ── Delete chore ──────────────────────────────────────────────────────
+        async function deleteChore(id, btn) {
+            const confirmed = await Swal.fire({
+                titleText: 'Delete chore?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Delete',
+                confirmButtonColor: '#dc3545',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            });
+            if (!confirmed.isConfirmed) return;
+
+            const body = new URLSearchParams({ id, __RequestVerificationToken: _csrf });
+            try {
+                const res = await fetch('/Chores/Delete/' + id, { method: 'POST', body });
+                const data = await res.json();
+                if (data.success) {
+                    btn.closest('.chore-card').remove();
+                }
+            } catch {}
+        }
+
+        // ── Assign modal ──────────────────────────────────────────────────────
+        function openAssignModal(id) {
+            _assignChoreId = id;
+            new bootstrap.Modal(document.getElementById('assignModal')).show();
+        }
+
+        async function submitAssign() {
+            const assignedToUserId = document.getElementById('assignModalSelect').value;
+            const body = new URLSearchParams({ id: _assignChoreId, assignedToUserId, __RequestVerificationToken: _csrf });
+
+            try {
+                const res = await fetch('/Chores/Assign', { method: 'POST', body });
+                const data = await res.json();
+                if (data.success) {
+                    bootstrap.Modal.getInstance(document.getElementById('assignModal')).hide();
+                    Swal.fire({ icon: 'success', titleText: data.assigneeName ? `Assigned to ${data.assigneeName}` : 'Unassigned', toast: true, position: 'top-end', timer: 1800, showConfirmButton: false });
+                }
+            } catch {}
+        }
+
+        // ── Build chore card HTML ─────────────────────────────────────────────
+        function prependChoreCard(chore) {
+            const el = document.createElement('div');
+            el.className = 'glass-card p-3 mb-2 chore-card';
+            el.dataset.id = chore.id;
+            el.dataset.done = 'false';
+
+            const due = chore.dueDateDisplay
+                ? `<span class="badge bg-secondary"><i class="fa-light fa-calendar me-1"></i>${chore.dueDateDisplay}</span>`
+                : '';
+            const assignee = chore.assigneeName
+                ? `<span class="badge bg-primary"><i class="fa-light fa-user me-1"></i>${escHtml(chore.assigneeName)}</span>`
+                : '';
+
+            el.innerHTML = `
+                <div class="d-flex align-items-start gap-3">
+                    <button class="btn btn-outline-secondary btn-sm rounded-circle toggle-done-btn flex-shrink-0"
+                            style="width:36px;height:36px;"
+                            onclick="toggleDone('${chore.id}', this)" title="Mark done">
+                        <i class="fa-light fa-check"></i>
+                    </button>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold">${escHtml(chore.title)}</div>
+                        ${chore.description ? `<div class="text-muted small">${escHtml(chore.description)}</div>` : ''}
+                        <div class="d-flex flex-wrap gap-2 mt-1">${due}${assignee}</div>
+                    </div>
+                    <div class="d-flex gap-1 flex-shrink-0">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="openAssignModal('${chore.id}')" title="Assign">
+                            <i class="fa-light fa-user-plus"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteChore('${chore.id}', this)" title="Delete">
+                            <i class="fa-light fa-trash"></i>
+                        </button>
+                    </div>
+                </div>`;
+
+            document.getElementById('choresList').prepend(el);
+        }
+
+        function escHtml(str) {
+            if (!str) return '';
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+    </script>
+}

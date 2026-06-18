@@ -1,0 +1,46 @@
+﻿@using Microsoft.AspNetCore.Mvc.Rendering
+@model Nestled.Models.FamilySelectorViewModel
+
+@{
+    var currentController = (string)ViewContext.RouteData.Values["controller"]!;
+    var currentAction = (string)ViewContext.RouteData.Values["action"]!;
+    var families = Model.Families.ToList();
+}
+
+@if (families.Count == 1
+    && currentAction == "Index"
+    && !Model.SelectedFamilyId.HasValue)
+{
+    <script>
+        (function () {
+            var fid = '@families[0].Id';
+            var currentParams = new URLSearchParams(window.location.search);
+            if (currentParams.get("familyId") !== fid) {
+                window.location.href = window.location.pathname + '?familyId=' + fid;
+            }
+        })();
+    </script>
+}
+else if (families.Count > 1)
+{
+    <form asp-controller="@currentController"
+          asp-action="@currentAction"
+          method="get"
+          class="mb-3 d-flex justify-content-center">
+
+        <div class="dropdown shadow-sm" style="min-width: 250px;">
+            <select name="familyId"
+                    class="form-select rounded-pill text-center border-secondary"
+                    onchange="this.form.submit()"
+                    style="font-weight: 500;">
+                <option disabled selected hidden>Select a family</option>
+                @foreach (var f in families)
+                {
+                    <option value="@f.Id" selected="@(f.Id == Model.SelectedFamilyId ? "selected" : null)">
+                        @f.Name
+                    </option>
+                }
+            </select>
+        </div>
+    </form>
+}

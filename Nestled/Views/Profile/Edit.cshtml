@@ -1,0 +1,137 @@
+﻿@model Nestled.Data.UserProfile
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <h2 class="mb-0"><i class="fa-light fa-user-pen me-2"></i>Edit Profile</h2>
+</div>
+
+<div class="glass-card p-4">
+    <form asp-controller="Profile"
+          asp-action="Edit"
+          method="post"
+          enctype="multipart/form-data"
+          class="needs-validation" novalidate>
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="UserId" />
+
+        @* Photo Upload *@
+        <div class="mb-4 text-center">
+            <label class="form-label fw-semibold d-block">Profile Photo</label>
+
+            @if (!string.IsNullOrEmpty(Model.PhotoPath))
+            {
+                <img src="~@Model.PhotoPath"
+                     alt="Profile photo"
+                     class="rounded-circle shadow-sm mb-2"
+                     style="width: 120px; height: 120px; object-fit: cover;" />
+
+                <div class="badge bg-success mb-2">Photo on file</div>
+            }
+            else
+            {
+                <div class="text-muted small mb-2">No photo currently set</div>
+            }
+
+            <input type="file"
+                   name="photo"
+                   class="form-control"
+                   accept="image/*" />
+
+            <span class="text-danger small d-block mt-1">
+                @if (!string.IsNullOrEmpty(ViewData.ModelState["photo"]?.Errors.FirstOrDefault()?.ErrorMessage))
+                {
+                    @ViewData.ModelState["photo"].Errors.First().ErrorMessage
+                }
+            </span>
+        </div>
+
+
+        @* Profile Inputs *@
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="FirstName" class="form-label fw-semibold"></label>
+                <input asp-for="FirstName" class="form-control rounded" />
+                <span asp-validation-for="FirstName" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="LastName" class="form-label fw-semibold"></label>
+                <input asp-for="LastName" class="form-control rounded" />
+                <span asp-validation-for="LastName" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="PreferredName" class="form-label"></label>
+                <input asp-for="PreferredName" class="form-control rounded" />
+                <span asp-validation-for="PreferredName" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="BirthDate" class="form-label"></label>
+                <input asp-for="BirthDate" type="date" class="form-control rounded" />
+                <span asp-validation-for="BirthDate" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="IdNumber" class="form-label"></label>
+                <input asp-for="IdNumber" class="form-control rounded" />
+                <span asp-validation-for="IdNumber" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="PhoneNumber" class="form-label"></label>
+                <input asp-for="PhoneNumber" class="form-control rounded" />
+                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="Address" class="form-label"></label>
+
+                <!-- Autocomplete Wrapper -->
+                <gmpx-placeautocomplete input-id="autocomplete" country="ZA">
+                    <input type="text"
+                           id="autocomplete"
+                           name="Address"
+                           asp-for="Address"
+                           placeholder="Start typing address..."
+                           class="form-control rounded" />
+                </gmpx-placeautocomplete>
+
+                <span asp-validation-for="Address" class="text-danger small"></span>
+            </div>
+
+        </div>
+
+        @* Buttons *@
+        <div class="mt-4 d-flex justify-content-between">
+            <a asp-controller="Profile" asp-action="Details"
+               class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="fa-light fa-arrow-left me-1"></i> Cancel
+            </a>
+            <button type="submit" class="btn btn-primary rounded-pill px-4">
+                <i class="fa-light fa-floppy-disk me-1"></i> Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+    // Fix clicks being blocked on Google Places dropdown
+    document.addEventListener('mousedown', function (e) {
+        const container = document.querySelector('.pac-container');
+        if (container && container.contains(e.target)) {
+            e.stopPropagation();
+        }
+    }, true);
+</script>
+
+    <script async defer src="https://maps.googleapis.com/maps/api/place/js/PlacesAutocompleteElement.js?key=@Configuration["GoogleMaps:ApiKey"]"></script>
+    <script async defer src="https://unpkg.com/@@googlemaps/places-autocomplete-element/dist/index.min.js"></script>
+}

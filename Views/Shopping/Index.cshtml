@@ -1,0 +1,115 @@
+@model List<Nestled.Models.ShoppingList>
+@{
+    ViewData["Title"] = "Shopping";
+    var families = ViewBag.Families as List<Nestled.Models.Family> ?? new();
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">Shopping</h1>
+        <button class="btn-primary-pill" onclick="document.getElementById('newListModal').style.display='flex'">
+            <i class="fa-solid fa-plus"></i> List
+        </button>
+    </div>
+
+    @if (Model.Any())
+    {
+        @foreach (var list in Model)
+        {
+            <div class="glass-card mb-4">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                    <div>
+                        <div style="font-weight:700;font-size:1rem;color:var(--text);">@list.Name</div>
+                        <div style="color:var(--text-secondary);font-size:0.8rem;">@list.CheckedItems / @list.TotalItems items</div>
+                    </div>
+                    <form method="post" asp-action="DeleteList" asp-controller="Shopping">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@list.Id" />
+                        <button type="submit" class="btn-ghost" style="padding:6px 10px;color:var(--danger);" onclick="return confirm('Delete list?')">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+                <!-- Items -->
+                @foreach (var item in list.Items.OrderBy(i => i.IsChecked))
+                {
+                    <div class="check-item" data-item-id="@item.Id" onclick="toggleShoppingItem(@item.Id, '@Html.AntiForgeryToken()')">
+                        <div class="check-circle @(item.IsChecked ? "checked" : "")">
+                            @if (item.IsChecked) { <i class="fa-solid fa-check" style="font-size:0.7rem;"></i> }
+                        </div>
+                        <div class="check-text @(item.IsChecked ? "checked-text" : "")">
+                            @item.Name
+                            @if (item.Quantity != 1 || !string.IsNullOrEmpty(item.Unit))
+                            {
+                                <span style="color:var(--text-muted); font-size:0.8rem;"> × @item.Quantity @item.Unit</span>
+                            }
+                        </div>
+                    </div>
+                }
+                <!-- Add item inline -->
+                <form method="post" asp-action="AddItem" asp-controller="Shopping" style="display:flex;gap:8px;margin-top:12px;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="listId" value="@list.Id" />
+                    <input type="hidden" name="quantity" value="1" />
+                    <input type="text" name="name" class="form-control-glass" style="flex:1;" placeholder="Add item..." required />
+                    <button type="submit" class="btn-primary-pill" style="padding:10px 14px;"><i class="fa-solid fa-plus"></i></button>
+                </form>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="glass-card text-center" style="padding:48px 20px;">
+            <div style="font-size:3.5rem;margin-bottom:12px;">🛒</div>
+            <div style="font-weight:700;color:var(--text);margin-bottom:8px;">No shopping lists</div>
+            <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:20px;">Create a list to start adding items</p>
+        </div>
+    }
+</div>
+
+<!-- New List Modal -->
+<div id="newListModal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
+    <div class="glass-card" style="width:100%;max-width:480px;border-radius:24px 24px 0 0;padding:24px;">
+        <div style="font-weight:700;font-size:1.1rem;color:var(--text);margin-bottom:16px;">New Shopping List</div>
+        <form method="post" asp-action="CreateList" asp-controller="Shopping">
+            @Html.AntiForgeryToken()
+            <div class="form-group">
+                <label class="form-label-glass">List Name</label>
+                <input type="text" name="name" class="form-control-glass" placeholder="e.g. Weekly Groceries" required />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Family</label>
+                <select name="familyId" class="form-control-glass" required>
+                    @foreach (var f in families)
+                    {
+                        <option value="@f.Id">@f.Name</option>
+                    }
+                </select>
+            </div>
+            <div style="display:flex;gap:12px;">
+                <button type="button" class="btn-ghost flex-1" onclick="document.getElementById('newListModal').style.display='none'">Cancel</button>
+                <button type="submit" class="btn-primary-pill flex-1 justify-content-center"><i class="fa-solid fa-plus"></i> Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+function toggleShoppingItem(id, tokenHtml) {
+    // Extract token value from the hidden input
+    var temp = document.createElement('div');
+    temp.innerHTML = tokenHtml;
+    var token = temp.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+    fetch('/Shopping/ToggleItem', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'id=' + id + '&__RequestVerificationToken=' + encodeURIComponent(token)
+    }).then(() => {
+        var circle = document.querySelector('[data-item-id="' + id + '"] .check-circle');
+        var text = document.querySelector('[data-item-id="' + id + '"] .check-text');
+        if (circle) circle.classList.toggle('checked');
+        if (text) text.classList.toggle('checked-text');
+    });
+}
+</script>
+}

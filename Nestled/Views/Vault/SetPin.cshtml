@@ -1,0 +1,80 @@
+﻿@{
+    ViewData["Title"] = "Set or Change Vault PIN";
+    var _pinSuccess = TempData["Success"] as string;
+    var _pinError   = TempData["Error"]   as string;
+}
+
+<div class="mt-5">
+    <div class="glass-card p-4 mx-auto" style="max-width: 400px;">
+        <h4 class="text-center mb-3"><i class="fa-light fa-key me-2"></i>Set or Change Vault PIN</h4>
+
+        <p class="text-center mb-3">
+            Your Vault PIN must be <strong>4 to 6 numeric digits</strong>. Please keep it safe – if lost, you will need to contact support and provide identifying documentation.
+        </p>
+
+        <form asp-action="SetPin" method="post" novalidate onsubmit="return validatePinForm();">
+            @if (ViewBag.HasExistingPin == true)
+            {
+                <div class="form-floating mb-3">
+                    <input type="password" name="oldPin" class="form-control" id="oldPin" maxlength="6">
+                    <label for="oldPin">Current PIN</label>
+                </div>
+            }
+
+            <div class="form-floating mb-3">
+                <input type="password" name="newPin" class="form-control" id="newPin" maxlength="6">
+                <label for="newPin">New PIN</label>
+            </div>
+
+            <div class="form-floating mb-3">
+                <input type="password" name="confirmPin" class="form-control" id="confirmPin" maxlength="6">
+                <label for="confirmPin">Confirm New PIN</label>
+            </div>
+
+            <div id="pinError" class="text-danger text-center mb-3" style="display:none;"></div>
+
+            <button type="submit" class="btn btn-primary rounded-pill w-100">
+                <i class="fa-light fa-floppy-disk me-1"></i> Save PIN
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            @if (!string.IsNullOrEmpty(_pinSuccess))
+            {
+                <text>Swal.fire({ titleText: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_pinSuccess)), icon: 'success', toast: true, position: 'top-end', timer: 2500, showConfirmButton: false });</text>
+            }
+            @if (!string.IsNullOrEmpty(_pinError))
+            {
+                <text>Swal.fire({ titleText: 'Error', text: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(_pinError)), icon: 'error', confirmButtonText: 'OK' });</text>
+            }
+        });
+
+        function validatePinForm() {
+            const newPin = document.getElementById('newPin').value.trim();
+            const confirmPin = document.getElementById('confirmPin').value.trim();
+            const errorDiv = document.getElementById('pinError');
+
+            errorDiv.style.display = 'none';
+            errorDiv.innerText = '';
+
+            const pinRegex = /^\d{4,6}$/;
+            if (!pinRegex.test(newPin)) {
+                errorDiv.innerText = "New PIN must be 4 to 6 digits only.";
+                errorDiv.style.display = 'block';
+                return false;
+            }
+
+            if (newPin !== confirmPin) {
+                errorDiv.innerText = "New PIN and Confirm PIN do not match.";
+                errorDiv.style.display = 'block';
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+}

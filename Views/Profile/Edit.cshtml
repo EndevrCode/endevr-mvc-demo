@@ -1,0 +1,96 @@
+@model Nestled.Models.ApplicationUser
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">Edit Profile</h1>
+        <a href="/Profile" class="btn-ghost"><i class="fa-solid fa-xmark"></i></a>
+    </div>
+
+    <form method="post" asp-action="Edit" asp-controller="Profile" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+
+        <div class="glass-card mb-4 text-center" style="padding:24px;">
+            <div class="photo-upload-wrapper" onclick="document.getElementById('photoInput').click()">
+                @if (!string.IsNullOrEmpty(Model?.PhotoPath))
+                {
+                    <img id="photoPreview" src="@Model.PhotoPath" class="photo-upload-preview" alt="Profile photo" />
+                }
+                else
+                {
+                    <img id="photoPreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ccircle cx='60' cy='60' r='60' fill='%236C63FF'/%3E%3Ctext x='60' y='80' font-size='60' text-anchor='middle' fill='white'%3E@(Model?.FirstName?.Substring(0,1)?.ToUpper() ?? "H")%3C/text%3E%3C/svg%3E" class="photo-upload-preview" alt="Profile photo" />
+                }
+                <div class="photo-upload-overlay"><i class="fa-solid fa-camera"></i></div>
+            </div>
+            <input type="file" id="photoInput" name="photo" accept="image/*" class="d-none" data-preview="photoPreview" />
+            <div style="margin-top:12px; color:var(--text-secondary); font-size:0.85rem;">Tap to change photo</div>
+        </div>
+
+        <div class="glass-card mb-4">
+            <div class="section-title">Personal Info</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div class="form-group">
+                    <label class="form-label-glass">First Name</label>
+                    <input type="text" name="firstName" class="form-control-glass" value="@Model?.FirstName" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label-glass">Last Name</label>
+                    <input type="text" name="lastName" class="form-control-glass" value="@Model?.LastName" required />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Preferred Name (optional)</label>
+                <input type="text" name="preferredName" class="form-control-glass" value="@Model?.PreferredName" placeholder="What should we call you?" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Date of Birth</label>
+                <input type="date" name="birthDate" class="form-control-glass" value="@Model?.BirthDate?.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">ID Number</label>
+                <input type="text" name="idNumber" class="form-control-glass" value="@Model?.IdNumber" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Phone Number</label>
+                <input type="tel" name="phoneNumber" class="form-control-glass" value="@Model?.PhoneNumber" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Address</label>
+                <textarea name="address" class="form-control-glass" rows="3" placeholder="Your home address">@Model?.Address</textarea>
+            </div>
+        </div>
+
+        <div class="glass-card mb-4">
+            <div class="section-title">Appearance</div>
+            <div class="form-group">
+                <label class="form-label-glass">Theme</label>
+                <div class="theme-switcher">
+                    <button type="button" class="theme-btn @(Model?.ThemeMode == Nestled.Models.ThemeMode.System ? "active" : "")" onclick="setTheme('system'); document.querySelector('[name=themeMode]').value='0';">
+                        <i class="fa-solid fa-circle-half-stroke"></i> System
+                    </button>
+                    <button type="button" class="theme-btn @(Model?.ThemeMode == Nestled.Models.ThemeMode.Light ? "active" : "")" onclick="setTheme('light'); document.querySelector('[name=themeMode]').value='1';">
+                        <i class="fa-solid fa-sun"></i> Light
+                    </button>
+                    <button type="button" class="theme-btn @(Model?.ThemeMode == Nestled.Models.ThemeMode.Dark ? "active" : "")" onclick="setTheme('dark'); document.querySelector('[name=themeMode]').value='2';">
+                        <i class="fa-solid fa-moon"></i> Dark
+                    </button>
+                </div>
+                <input type="hidden" name="themeMode" value="@((int)(Model?.ThemeMode ?? Nestled.Models.ThemeMode.System))" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Text Size</label>
+                <div class="d-flex gap-2">
+                    <button type="button" class="font-btn @(Model?.FontSize == Nestled.Models.FontSize.Small ? "active" : "")" onclick="setFontSize('small'); document.querySelector('[name=fontSize]').value='0';">A-</button>
+                    <button type="button" class="font-btn @(Model?.FontSize == Nestled.Models.FontSize.Medium || Model?.FontSize == null ? "active" : "")" onclick="setFontSize('medium'); document.querySelector('[name=fontSize]').value='1';">A</button>
+                    <button type="button" class="font-btn @(Model?.FontSize == Nestled.Models.FontSize.Large ? "active" : "")" onclick="setFontSize('large'); document.querySelector('[name=fontSize]').value='2';">A+</button>
+                </div>
+                <input type="hidden" name="fontSize" value="@((int)(Model?.FontSize ?? Nestled.Models.FontSize.Medium))" />
+            </div>
+        </div>
+
+        <button type="submit" class="btn-primary-pill w-100 justify-content-center">
+            <i class="fa-solid fa-floppy-disk"></i> Save Changes
+        </button>
+    </form>
+</div>

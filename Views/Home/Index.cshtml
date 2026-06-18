@@ -1,0 +1,99 @@
+@{
+    ViewData["Title"] = "Welcome";
+    ViewData["HideNav"] = true;
+    Layout = "_Layout";
+}
+
+<div style="width:100%; max-width:480px; padding:20px 16px;">
+    <div class="text-center" style="margin-bottom:48px; padding-top:32px;">
+        <div style="font-size:5rem; margin-bottom:16px;">🏠</div>
+        <h1 style="font-size:2.5rem; font-weight:900; color:white; margin:0; letter-spacing:-1px;">
+            Nestled
+        </h1>
+        <p style="color:rgba(255,255,255,0.7); font-size:1.1rem; margin-top:8px; line-height:1.5;">
+            Your family, all in one place
+        </p>
+    </div>
+
+    <div style="display:grid; gap:16px; margin-bottom:48px;">
+        <div class="feature-pill">
+            <div class="feature-icon" style="background:linear-gradient(135deg,#6C63FF,#4c46b3);">
+                <i class="fa-solid fa-people-roof"></i>
+            </div>
+            <div>
+                <div class="feature-title">Family Hub</div>
+                <div class="feature-desc">Manage multiple families, members &amp; invites</div>
+            </div>
+        </div>
+        <div class="feature-pill">
+            <div class="feature-icon" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+                <i class="fa-solid fa-paw"></i>
+            </div>
+            <div>
+                <div class="feature-title">Pets &amp; Care</div>
+                <div class="feature-desc">Track health records, vaccinations &amp; reminders</div>
+            </div>
+        </div>
+        <div class="feature-pill">
+            <div class="feature-icon" style="background:linear-gradient(135deg,#8b5cf6,#5b21b6);">
+                <i class="fa-solid fa-vault"></i>
+            </div>
+            <div>
+                <div class="feature-title">Secure Vault</div>
+                <div class="feature-desc">Passwords, banking &amp; documents in one safe place</div>
+            </div>
+        </div>
+        <div class="feature-pill">
+            <div class="feature-icon" style="background:linear-gradient(135deg,#FF6B6B,#dc2626);">
+                <i class="fa-solid fa-sos"></i>
+            </div>
+            <div>
+                <div class="feature-title">Emergency Ready</div>
+                <div class="feature-desc">One tap to call Police, Fire, Ambulance &amp; more</div>
+            </div>
+        </div>
+    </div>
+
+    <div style="display:grid; gap:12px;">
+        <a href="/Account/Register" class="btn-primary-pill justify-content-center" style="font-size:1.05rem; padding:16px;">
+            <i class="fa-solid fa-house-heart"></i> Get Started — It's Free
+        </a>
+        <a href="/Account/Login" class="btn-ghost justify-content-center" style="color:rgba(255,255,255,0.8); border-color:rgba(255,255,255,0.2);">
+            <i class="fa-solid fa-right-to-bracket"></i> Sign In
+        </a>
+    </div>
+
+    <p style="text-align:center; color:rgba(255,255,255,0.4); font-size:0.75rem; margin-top:32px;">
+        Install as an app on your phone for the best experience
+    </p>
+    <button id="installBtn" onclick="installPWA()" class="btn-ghost justify-content-center w-100" style="display:none; color:rgba(255,255,255,0.7); border-color:rgba(255,255,255,0.2); margin-top:8px;">
+        <i class="fa-solid fa-download"></i> Install App
+    </button>
+</div>
+
+<style>
+.feature-pill {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 16px;
+    backdrop-filter: blur(10px);
+}
+.feature-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+.feature-title { color: white; font-weight: 700; font-size: 0.95rem; }
+.feature-desc { color: rgba(255,255,255,0.6); font-size: 0.8rem; margin-top: 2px; }
+.w-100 { width: 100% !important; }
+</style>

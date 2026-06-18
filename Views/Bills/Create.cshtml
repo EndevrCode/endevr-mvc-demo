@@ -1,0 +1,50 @@
+@{
+    ViewData["Title"] = "Add Bill";
+    var families = ViewBag.Families as List<Nestled.Models.Family> ?? new();
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">Add Bill</h1>
+        <a href="/Bills" class="btn-ghost"><i class="fa-solid fa-xmark"></i></a>
+    </div>
+    <form method="post" asp-action="Create" asp-controller="Bills">
+        @Html.AntiForgeryToken()
+        <div class="glass-card mb-4">
+            <div class="form-group">
+                <label class="form-label-glass">Family *</label>
+                <select name="FamilyId" class="form-control-glass" required>
+                    @foreach (var f in families) { <option value="@f.Id">@f.Name</option> }
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Bill Name *</label>
+                <input type="text" name="Name" class="form-control-glass" placeholder="e.g. Electricity" required />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Category</label>
+                <input type="text" name="Category" class="form-control-glass" placeholder="e.g. Utilities, Rent, Insurance" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Amount (R) *</label>
+                <input type="number" name="Amount" class="form-control-glass" step="0.01" min="0" required />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Due Date *</label>
+                <input type="date" name="DueDate" class="form-control-glass" required />
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;color:var(--text);">
+                    <input type="checkbox" name="RecurringMonthly" value="true" class="check-input" />
+                    Recurring monthly
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Notes</label>
+                <textarea name="Notes" class="form-control-glass" rows="2"></textarea>
+            </div>
+        </div>
+        <button type="submit" class="btn-primary-pill w-100 justify-content-center">
+            <i class="fa-solid fa-plus"></i> Add Bill
+        </button>
+    </form>
+</div>

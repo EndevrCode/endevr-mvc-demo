@@ -1,0 +1,62 @@
+@model Nestled.Data.UserProfile
+
+@{
+    ViewData["Title"] = "View Profile";
+}
+
+<div class="mb-4">
+    <h2 class="mb-0"><i class="fa-light fa-user me-2"></i>Profile</h2>
+</div>
+
+<div class="glass-card p-4 mb-4">
+    <div class="d-flex flex-column flex-md-row align-items-center gap-4 mb-4">
+        <div class="text-center flex-shrink-0">
+            @if (!string.IsNullOrEmpty(Model.PhotoPath))
+            {
+                <img src="@Model.PhotoPath"
+                     alt="Profile photo"
+                     class="rounded-circle"
+                     style="width:100px;height:100px;object-fit:cover;border:2.5px solid rgba(255,255,255,.15);" />
+            }
+            else
+            {
+                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                     style="width:100px;height:100px;background:rgba(255,255,255,.08);">
+                    <i class="fa-light fa-user fa-2x text-muted"></i>
+                </div>
+            }
+        </div>
+        <div>
+            <h4 class="mb-1">@(Model.PreferredName ?? $"{Model.FirstName} {Model.LastName}".Trim())</h4>
+            <div class="text-muted small">@($"{Model.FirstName} {Model.LastName}".Trim())</div>
+        </div>
+    </div>
+
+    <div class="row gy-3">
+        @if (!string.IsNullOrWhiteSpace(Model.PhoneNumber))
+        {
+            <div class="col-md-6">
+                <div class="text-muted small">Phone Number</div>
+                <div><i class="fa-light fa-phone me-1 text-muted"></i>@Model.PhoneNumber</div>
+            </div>
+        }
+        @if (Model.BirthDate.HasValue)
+        {
+            <div class="col-md-6">
+                <div class="text-muted small">Birth Date</div>
+                <div>@Model.BirthDate.Value.ToString("dd MMMM yyyy")</div>
+            </div>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Address))
+        {
+            <div class="col-12">
+                <div class="text-muted small">Address</div>
+                <div>@Model.Address</div>
+            </div>
+        }
+    </div>
+</div>
+
+<button type="button" class="btn btn-outline-secondary rounded-pill px-4" onclick="history.back();">
+    <i class="fa-light fa-arrow-left me-1"></i> Back
+</button>

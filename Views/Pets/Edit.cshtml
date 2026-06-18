@@ -1,0 +1,72 @@
+@model Nestled.Models.Pet
+@{
+    ViewData["Title"] = "Edit Pet";
+    var families = ViewBag.Families as List<Nestled.Models.Family> ?? new();
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">Edit @Model.Name</h1>
+        <a href="/Pets/Details/@Model.Id" class="btn-ghost"><i class="fa-solid fa-xmark"></i></a>
+    </div>
+    <form method="post" asp-action="Edit" asp-controller="Pets" asp-route-id="@Model.Id" enctype="multipart/form-data">
+        @Html.AntiForgeryToken()
+        <div class="glass-card mb-4">
+            <div class="form-group">
+                <label class="form-label-glass">Pet Name *</label>
+                <input type="text" name="Name" class="form-control-glass" value="@Model.Name" required />
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group">
+                    <label class="form-label-glass">Species *</label>
+                    <input type="text" name="Species" class="form-control-glass" value="@Model.Species" required />
+                </div>
+                <div class="form-group">
+                    <label class="form-label-glass">Breed</label>
+                    <input type="text" name="Breed" class="form-control-glass" value="@Model.Breed" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Date of Birth</label>
+                <input type="date" name="BirthDate" class="form-control-glass" value="@Model.BirthDate?.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Microchip Number</label>
+                <input type="text" name="MicrochipNumber" class="form-control-glass" value="@Model.MicrochipNumber" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Insurance Provider</label>
+                <input type="text" name="InsuranceProvider" class="form-control-glass" value="@Model.InsuranceProvider" />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Photo</label>
+                <input type="file" name="photo" class="form-control-glass" accept="image/*" />
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;color:var(--text);">
+                    <input type="checkbox" name="IsDeceased" value="true" @(Model.IsDeceased ? "checked" : "") class="check-input" onchange="toggleDeceasedFields(this.checked)" />
+                    Mark as Passed Away
+                </label>
+            </div>
+            <div id="deceasedFields" style="display:@(Model.IsDeceased ? "block" : "none")">
+                <div class="form-group">
+                    <label class="form-label-glass">Date Passed</label>
+                    <input type="date" name="DeceasedDate" class="form-control-glass" value="@Model.DeceasedDate?.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label-glass">Notes</label>
+                    <textarea name="DeceasedNotes" class="form-control-glass" rows="2">@Model.DeceasedNotes</textarea>
+                </div>
+            </div>
+        </div>
+        <button type="submit" class="btn-primary-pill w-100 justify-content-center">
+            <i class="fa-solid fa-floppy-disk"></i> Save Changes
+        </button>
+    </form>
+</div>
+@section Scripts {
+<script>
+function toggleDeceasedFields(show) {
+    document.getElementById('deceasedFields').style.display = show ? 'block' : 'none';
+}
+</script>
+}

@@ -1,0 +1,108 @@
+@model List<Nestled.Models.UtilityAccount>
+@{
+    ViewData["Title"] = "Utilities";
+    var families = ViewBag.Families as List<Nestled.Models.Family> ?? new();
+}
+<div class="page-section">
+    <div class="page-header">
+        <h1 class="page-title">Utilities</h1>
+        <button class="btn-primary-pill" onclick="document.getElementById('addAccountModal').style.display='flex'">
+            <i class="fa-solid fa-plus"></i> Account
+        </button>
+    </div>
+    @if (Model.Any())
+    {
+        @foreach (var account in Model)
+        {
+            var icon = account.UtilityType switch {
+                Nestled.Models.UtilityType.Electricity => "fa-bolt",
+                Nestled.Models.UtilityType.Gas => "fa-fire-flame-curved",
+                Nestled.Models.UtilityType.Water => "fa-droplet",
+                Nestled.Models.UtilityType.Internet => "fa-wifi",
+                _ => "fa-plug"
+            };
+            var color = account.UtilityType switch {
+                Nestled.Models.UtilityType.Electricity => "#eab308",
+                Nestled.Models.UtilityType.Gas => "#f97316",
+                Nestled.Models.UtilityType.Water => "#06b6d4",
+                Nestled.Models.UtilityType.Internet => "#6C63FF",
+                _ => "#64748b"
+            };
+            <div class="glass-card mb-4">
+                <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+                    <div style="width:52px;height:52px;border-radius:16px;background:@(color)22;display:flex;align-items:center;justify-content:center;color:@color;font-size:1.4rem;">
+                        <i class="fa-solid @icon"></i>
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-weight:700;color:var(--text);">@account.Provider</div>
+                        <div style="color:var(--text-secondary);font-size:0.82rem;">@account.UtilityType · @account.AccountNumber</div>
+                    </div>
+                </div>
+                @if (account.Purchases.Any())
+                {
+                    <div class="section-title">Recent Purchases</div>
+                    @foreach (var purchase in account.Purchases.Take(3))
+                    {
+                        <div class="list-item">
+                            <div class="list-item-content">
+                                <div class="list-item-title">R@purchase.Amount.ToString("N2") @(purchase.Units.HasValue ? $"· {purchase.Units} units" : "")</div>
+                                <div class="list-item-subtitle">@purchase.PurchaseDate.ToString("MMM d, yyyy") @(!string.IsNullOrEmpty(purchase.Token) ? $"· Token: {purchase.Token}" : "")</div>
+                            </div>
+                        </div>
+                    }
+                }
+                <form method="post" asp-action="AddPurchase" asp-controller="Utilities" style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="UtilityAccountId" value="@account.Id" />
+                    <input type="number" name="Amount" class="form-control-glass" style="flex:1;min-width:100px;" placeholder="Amount (R)" step="0.01" min="0" required />
+                    <input type="text" name="Token" class="form-control-glass" style="flex:1;min-width:100px;" placeholder="Token (opt)" />
+                    <button type="submit" class="btn-primary-pill" style="padding:10px 14px;"><i class="fa-solid fa-plus"></i> Add</button>
+                </form>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="glass-card text-center" style="padding:48px 20px;">
+            <div style="font-size:3.5rem;margin-bottom:12px;">⚡</div>
+            <div style="font-weight:700;color:var(--text);margin-bottom:8px;">No utility accounts</div>
+            <p style="color:var(--text-secondary);font-size:0.9rem;margin-bottom:20px;">Add your electricity, gas, water accounts</p>
+        </div>
+    }
+</div>
+
+<div id="addAccountModal" style="display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);align-items:flex-end;justify-content:center;">
+    <div class="glass-card" style="width:100%;max-width:480px;border-radius:24px 24px 0 0;padding:24px;">
+        <div style="font-weight:700;font-size:1.1rem;color:var(--text);margin-bottom:16px;">Add Utility Account</div>
+        <form method="post" asp-action="CreateAccount" asp-controller="Utilities">
+            @Html.AntiForgeryToken()
+            <div class="form-group">
+                <label class="form-label-glass">Family</label>
+                <select name="FamilyId" class="form-control-glass" required>
+                    @foreach (var f in families) { <option value="@f.Id">@f.Name</option> }
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Type</label>
+                <select name="UtilityType" class="form-control-glass" required>
+                    @foreach (var t in Enum.GetValues<Nestled.Models.UtilityType>())
+                    {
+                        <option value="@((int)t)">@t</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Provider</label>
+                <input type="text" name="Provider" class="form-control-glass" placeholder="e.g. Eskom, City Power" required />
+            </div>
+            <div class="form-group">
+                <label class="form-label-glass">Account Number</label>
+                <input type="text" name="AccountNumber" class="form-control-glass" required />
+            </div>
+            <div style="display:flex;gap:12px;">
+                <button type="button" class="btn-ghost flex-1" onclick="document.getElementById('addAccountModal').style.display='none'">Cancel</button>
+                <button type="submit" class="btn-primary-pill flex-1 justify-content-center"><i class="fa-solid fa-plus"></i> Add</button>
+            </div>
+        </form>
+    </div>
+</div>
