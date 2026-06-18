@@ -122,6 +122,13 @@ namespace Hearthly.Controllers
                 return RedirectToAction(nameof(Create));
             }
 
+            const long maxFileSize = 20 * 1024 * 1024; // 20 MB
+            if (file.Length > maxFileSize)
+            {
+                TempData["Error"] = "File is too large. Maximum upload size is 20 MB.";
+                return RedirectToAction(nameof(Create));
+            }
+
             var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "vault");
             if (!Directory.Exists(uploadsFolder))
                 Directory.CreateDirectory(uploadsFolder);
